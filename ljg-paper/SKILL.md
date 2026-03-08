@@ -1,13 +1,13 @@
 ---
 name: ljg-paper
-description: "Paper reader. Takes an academic paper (URL, PDF, or file), runs the atom pipeline (split→squeeze→plain→feynman→博导审稿), and synthesizes a fluent analysis. Focus: what gap does it fill, and would a seasoned advisor take it seriously? Use when user shares an arxiv link, paper URL, PDF, or asks to analyze a research paper. Trigger words: '读论文', '分析论文', 'paper', or when user shares an academic paper."
+description: "Paper reader for non-academics. Takes a paper (URL, PDF, or file) and extracts its ideas through a 4-step pipeline: 定位(find the itch) → 翻译(Feynman explain with analogies) → 提纯(distill one insight) → 接线(connect to your world). Focuses on understanding ideas and discoveries, not academic critique. Use when user shares an arxiv link, paper URL, PDF, or asks to analyze a research paper. Trigger words: '读论文', '分析论文', 'paper', or when user shares an academic paper."
 user_invocable: true
-version: "2.0.1"
+version: "3.0.0"
 ---
 
 # ljg-paper: 读论文
 
-论文 = 一个增量。已有研究走到了某个边界，这篇论文声称往前推了一步。你的任务：这一步踩在哪儿，踩得稳不稳。
+读论文不是做学术，是猎取思想。目标：把别人的发现拆解成自己能用的认知。
 
 ## 约束
 
@@ -52,32 +52,29 @@ version: "2.0.1"
 
 确保拿到：标题、作者、摘要、引言、方法、实验/结果、结论。
 
-### 2. 拆
+### 2. 定位：它在挠什么痒？
 
-论文有固定骨架，但骨架下面藏着真正的结构：
+论文解决的不是什么 "research gap"，是一个真实的困境——某件事做不到、某个现象解释不通、某条路走不下去。
 
-- *缺口*：已有研究做到了哪里？哪里还没做到？这篇论文填的是哪条缝？路径用人话讲，不带数学符号——符号留给核心机制。
-- *假设*：显式和隐式的假设。
-- *方法*：用什么方法填缝？抓住动词结构——它在做什么操作？
-- *证据*：用什么数据/实验证明方法站得住？主要结果。
-- *贡献声明*：作者自己说贡献了什么。
+- 找到那个困境，用一个*好问题*框住它
+- 好问题的标准：让一个不懂这个领域的聪明人也想知道答案
+- 用一段话讲清来龙去脉：从什么问题出发，之前的人试了什么，卡在了哪里
 
-### 3. 榨增量
+比如读一篇 RAG 论文，问题不是"本文提出了一种新的检索增强生成框架"，而是"大模型明明很聪明，为什么一问具体事实就开始胡说？"
 
-Before this paper vs after this paper，世界多了什么？
+### 3. 翻译：费曼讲解
 
-- *一句话*：这篇论文让我们知道了什么以前不知道的？不带公式，外行读完知道方向。
-- *核心机制*：先类比建脚手架，再 ASCII 图精确化。顺序不能反——读者要先懂了再看符号。
+核心规则：*如果需要用原文术语才能解释，说明还没懂。*
 
-### 4. 白话方法
+#### 核心机制
 
-核心机制的叙述顺序：
+按这个顺序，不能反：
 
-1. *一句话动词结构*：什么作用于什么？什么流向什么？
-2. *日常类比*：在日常经验中找结构一样的东西。类比必须承重——方法的每个关键组件都能映射。沿着类比把方法从头到尾走一遍。
-3. *ASCII 图*：画出内部结构。读者已有类比脚手架，符号在这里出现是安全的。
+1. *一句话动词结构*：什么作用于什么？什么流向什么？输出什么？
+2. *日常类比*：在日常经验中找一个结构匹配的东西。类比必须承重——方法的每个关键组件都能映射到类比中的一个部分。沿着类比把方法从头到尾走一遍，让读者先建立概念脚手架。
+3. *ASCII 图*：读者有了脚手架之后，画出内部结构。符号在这里出现才是安全的。
 
-### 5. 关键概念
+#### 关键概念
 
 论文中 1-3 个理解全文的钥匙概念。用费曼技巧讲：
 
@@ -85,33 +82,28 @@ Before this paper vs after this paper，世界多了什么？
 - 每个概念给一个具体例子
 - 讲完读者能用自己的话复述
 
-### 6. 餐巾纸速写
+#### 餐巾纸速写
 
 在咖啡馆拿起餐巾纸给朋友画：「以前大家这么想，这篇论文说应该这么想。」
 
-- 识别主流框架和本文框架
 - 用 ASCII 图并排或上下放，标注关键结构差异
 - 图下一句话点出：从 X 到 Y，核心变化是什么
 
-画结构对比，越简洁越好。
+### 4. 提纯：一个洞见
 
-### 7. 博导审稿
+整篇论文可能有很多技术细节，但真正改变认知的往往只有一个点。把它找出来，用一句话说清楚：
 
-换身份：这个方向上带了二十年研究生的博导。学生拿着论文来找你，你在判断这篇东西值不值得认真对待。论文验的是体系——选题眼光、方法成熟度、实验诚意、写作功力。
+> "哦，原来……"
 
-用白话说，像在办公室跟学生聊：
+这句话就是从这篇论文里带走的东西。说不出来，值得重读第三步。
 
-- *选题眼光*：问题值不值得做？真缺口还是人造缺口？
-- *方法成熟度*：巧劲还是蛮力？有没有更自然的做法被忽略了？
-- *实验诚意*：baseline 公不公道？消融到位没有？数字经不经得起追问？
-- *写作功力*：最该说清楚的地方有没有偷懒？
-- *判决*：strong accept / weak accept / borderline / weak reject / strong reject，一句话理由。
+追问两个子问题帮助提纯：
+- 这个洞见为什么不显然？之前的人为什么没想到？
+- 它改变了你对这个问题的哪个认知？
 
-好的地方说好，差的地方说差在哪儿。
+### 5. 接线：和我的世界连上
 
-### 8. 启发
-
-论文读完，问：对我有什么用？三种方式试探：
+一个孤立的洞见很快会被遗忘。问三个问题试探连接：
 
 - *迁移*：论文的某个机制/视角，能直接移植升级我体系里的某个零件吗？
 - *混搭*：论文的某个组件和我已有的东西组合，能产生两者单独都没有的新东西吗？
@@ -119,9 +111,9 @@ Before this paper vs after this paper，世界多了什么？
 
 命中的标注类型并展开。没命中的跳过。三个都没命中，说「没有」。
 
-### 9. 缝合与卫生
+### 6. 缝合与卫生
 
-按 `references/template.org` 的结构，将以上结果编织成一篇连贯分析。
+按 `references/template.org` 的结构，将以上结果编织成一篇连贯的解读。
 
 写完扫一遍：
 1. 否定式排比全文不超过两处
@@ -130,13 +122,14 @@ Before this paper vs after this paper，世界多了什么？
 
 列修改清单确认后生成文件。
 
-### 10. 生成 Org 文件
+### 7. 生成 Org 文件
 
 按 Denote 规范获取时间戳，读 `references/template.org`，写入 `~/Documents/notes/`。
 
 ## 质量标准
 
-- *增量要锐*：一句话说出 before vs after。说不出就是没找到。
+- *问题要勾人*：定位环节的问题，让不懂的人也想知道答案。
+- *类比要承重*：不是点缀，是理解的脚手架。方法的关键组件都能映射上去。
+- *洞见要扎心*：一句"哦，原来……"，说不出就是没找到。
 - *速写要一眼*：不看正文也能大致理解变化方向。
-- *博导要像博导*：有判断力有分寸，最后一句判决。
-- *零割裂感*：读完像一个人在跟你说「我读了篇论文，它干了啥、好不好、对我有什么用」。
+- *零割裂感*：读完像一个人在跟你说「我读了篇论文，它发现了啥、对我有什么用」。
