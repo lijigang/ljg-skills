@@ -2,7 +2,7 @@
 
 ## 步骤 1：读取模板
 
-Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/poster_template.html`
+Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/poster_template.html`
 
 ## 步骤 1.5：色调感知
 
@@ -106,7 +106,7 @@ Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/poster_temp
 ## 步骤 7：截图
 
 ```bash
-node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_poster_{name}_{N}.html ~/Downloads/{name}_{N}.png 1080 1440
+node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_poster_{name}_{N}.html ~/Downloads/{name}_{N}.png 1080 1440
 ```
 
 多张卡片可并行截图。

@@ -15,7 +15,7 @@
 
 ## 步骤 1：读取模板
 
-Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/whiteboard_template.html`
+Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/whiteboard_template.html`
 
 模板提供：
 - 书写字体加载（Permanent Marker + Kalam）
@@ -395,5 +395,5 @@ Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/whiteboard_
 ## 步骤 6：截图
 
 ```bash
-node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_whiteboard_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
+node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_whiteboard_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
 ```
