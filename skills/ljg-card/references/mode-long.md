@@ -2,7 +2,7 @@
 
 ## 步骤 1：读取模板
 
-Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/long_template.html`
+Read `~/.openclaw/workspace/skills/skills/ljg-card/assets/long_template.html`
 
 ## 步骤 2：内容预处理
 
@@ -84,5 +84,5 @@ Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/
 ## 步骤 5：截图
 
 ```bash
-node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_long_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
+node ~/.openclaw/workspace/skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_long_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
 ```

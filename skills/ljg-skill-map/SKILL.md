@@ -7,7 +7,7 @@ version: "1.0.0"
 
 # ljg-skill-map: 技能地图
 
-扫描 `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-skills/skills/` 下所有已安装技能，生成一目了然的可视化地图。
+扫描 `~/.openclaw/workspace/skills/ljg-skills/skills/` 下所有已安装技能，生成一目了然的可视化地图。
 
 ## 执行
 
