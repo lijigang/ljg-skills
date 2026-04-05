@@ -2,7 +2,7 @@
 # Scan all installed skills, extract frontmatter metadata
 # Output: JSON array
 
-SKILLS_DIR="${HOME}/.claude/skills"
+SKILLS_DIR="${HOME}/.openclaw/workspace/skills/ljg-skills"
 first=1
 echo "["
 
