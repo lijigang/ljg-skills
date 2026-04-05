@@ -39,13 +39,13 @@ version: "1.7.0"
 ### 截图工具
 
 ```bash
-node ~/.claude/skills/ljg-card/assets/capture.js <html> <png> <width> <height> [fullpage]
+node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/capture.js <html> <png> <width> <height> [fullpage]
 ```
 
-依赖：`~/.claude/skills/ljg-card/node_modules/` 中的 playwright。如报错：
+依赖：`~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/node_modules/` 中的 playwright。如报错：
 
 ```bash
-cd ~/.claude/skills/ljg-card && npm install playwright && npx playwright install chromium
+cd ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card && npm install playwright && npx playwright install chromium
 ```
 
 ### Footer

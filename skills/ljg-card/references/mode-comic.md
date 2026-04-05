@@ -8,7 +8,7 @@
 
 ## 步骤 1：读取模板
 
-Read `~/.claude/skills/ljg-card/assets/comic_template.html`
+Read `~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/comic_template.html`
 
 模板提供：
 - 字体加载（Noto Serif SC + DM Sans）
@@ -337,5 +337,5 @@ Read `~/.claude/skills/ljg-card/assets/comic_template.html`
 ## 步骤 6：截图
 
 ```bash
-node ~/.claude/skills/ljg-card/assets/capture.js /tmp/ljg_cast_comic_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
+node ~/.openclaw/workspace/skills/ljg-skills/skills/ljg-card/assets/capture.js /tmp/ljg_cast_comic_{name}.html ~/Downloads/{name}.png 1080 800 fullpage
 ```

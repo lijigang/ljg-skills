@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a personal Claude Code skills repository. Each skill is a self-contained directory that can be installed to `~/.claude/skills/` to extend Claude Code's capabilities.
+This is a personal Claude Code skills repository. Each skill is a self-contained directory that can be installed to `~/.openclaw/workspace/skills/ljg-skills/skills/` to extend Claude Code's capabilities.
 
 ## Repository Structure
 
@@ -66,8 +66,8 @@ bash ljg-skill-map/scripts/scan.sh
 
 ```bash
 # Copy all skills to Claude Code
-mkdir -p ~/.claude/skills
-cp -r ljg-* ~/.claude/skills/
+mkdir -p ~/.openclaw/workspace/skills/ljg-skills/skills
+cp -r ljg-* ~/.openclaw/workspace/skills/ljg-skills/skills/
 ```
 
 ## Architecture Notes
@@ -116,6 +116,6 @@ The most complex skill with multiple rendering modes:
 ## Testing Changes
 
 After modifying a skill:
-1. Copy to `~/.claude/skills/`
+1. Copy to `~/.openclaw/workspace/skills/ljg-skills/skills/`
 2. Restart Claude Code to reload skills
 3. Test via natural language trigger or `/skill-name`
