@@ -422,13 +422,13 @@ A ---> B ---> C ---> D
 
 ## 输出
 
-1. 获取时间戳：`date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"`
-2. 写入 `~/Documents/notes/{时间戳}--{领域}的秩__rank.org`
-3. 报告文件路径给用户
+生成自包含单 HTML 文件。结构见下方"HTML 输出"章节。
 
-## HTML 输出模式（-h / --html）
+写入 `~/Downloads/{领域}--rank.html`，报告路径，完成。
 
-当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+## HTML 输出
+
+默认生成自包含单 HTML 文件。浏览器直接打开。
 
 ### 内嵌 CSS/JS 模式
 

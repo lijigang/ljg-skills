@@ -56,9 +56,9 @@ Running **Extract** in **ljg-qa**...
 
 ## 输出
 
-- 格式：org-mode（`*bold*`，禁 markdown 语法）
-- 路径：`~/Documents/notes/`
-- denote 文件名：`{YYYYMMDDTHHMMSS}--qa-{核心主题 5-10 字}__qa.org`
+生成自包含单 HTML 文件。结构见下方"HTML 输出"章节。
+
+写入 `~/Downloads/qa-{核心主题}.html`，报告路径，完成。
 
 ## Examples
 
@@ -68,7 +68,7 @@ Running **Extract** in **ljg-qa**...
 User: /ljg-qa https://example.com/article
 → WebFetch 获取
 → 找观点骨架 → 设计 Q 链 → 写 A 三段
-→ org-mode 输出到 ~/Downloads/
+→ HTML 输出到 ~/Downloads/
 ```
 
 *Example 2: 论文 PDF*
@@ -97,9 +97,9 @@ User: 把这段抽成 Q-A: [text]
 - *AI 默认会把 Q-A 理解成「问答游戏」* —— 不是。这里 Q 是凿子，A 是钉子。装饰性的轻问题禁止
 - *AI 默认会在 A 里堆术语保平安* —— 用术语不算回答。把术语翻译成具体动作和具体物件，否则 A 没承重
 
-## HTML 输出模式（-h / --html）
+## HTML 输出
 
-当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+默认生成自包含单 HTML 文件。浏览器直接打开。
 
 ### 内嵌 CSS/JS 模式
 

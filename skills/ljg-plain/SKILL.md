@@ -22,24 +22,9 @@ version: "5.0.0"
 
 所有图表用纯 ASCII 字符。允许：`+ - | / \ > < v ^ * = ~ . : # [ ] ( ) _ , ; ! ' "` 和空格。禁止 Unicode 绘图符号。
 
-### Denote 文件规范
+### 文件输出
 
-- 时间戳：`date +%Y%m%dT%H%M%S`
-- 可读时间：`date "+%Y-%m-%d %a %H:%M"`
-- 文件名：`{时间戳}--plain-{简短标题}__plain.org`
-- 输出目录：`~/Documents/notes/`
-
-### Org 文件头
-
-```
-#+title:      plain-{简短标题}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :plain:atom:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {URL 或来源描述}
-```
-
-文件写入后报告路径。
+写入 `~/Downloads/plain-{简短标题}.html`。
 
 ## 红线（每条必须过，顺序即优先级）
 
@@ -93,9 +78,11 @@ URL → WebFetch | 文本 → 直接用 | 文件路径 → Read | 概念 → 直
 
 扫完列修改清单（哪句触发什么，改前→改后）。清单不写入文件。
 
-### 4. 生成 Org 文件
+### 4. 生成 HTML 文件
 
-按 Denote 规范获取时间戳，写出文件头 + 正文，存入 `~/Documents/notes/`。
+生成自包含单 HTML 文件。结构见下方"HTML 输出"章节。
+
+写入 `~/Downloads/plain-{简短标题}.html`。
 
 ## 验收
 
@@ -104,9 +91,9 @@ URL → WebFetch | 文本 → 直接用 | 文件路径 → Read | 概念 → 直
 - *记得住*：读完脑子里留下了什么——一个画面、一个问题、一个转折，什么都行
 - *想读完*：从头到尾没有想跳过的段落
 
-## HTML 输出模式（-h / --html）
+## HTML 输出
 
-当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+默认生成自包含单 HTML 文件。浏览器直接打开。
 
 ### 内嵌 CSS/JS 模式
 

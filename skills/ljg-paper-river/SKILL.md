@@ -17,37 +17,14 @@ version: "1.0.0"
 
 ## 格式约束
 
-### Org-mode 语法
-
-- 加粗用 `*bold*`（单星号），禁止 `**bold**`
-- 标题层级从 `*` 开始，不跳级
-
 ### ASCII Art
 
 所有图表用纯 ASCII 字符。允许：`+ - | / \ > < v ^ * = ~ . : # [ ] ( ) _ , ; ! ' "` 和空格。禁止 Unicode 绘图符号。
 
-### 模板权威性
 
-输出结构依据 `references/template.org`。
+### 文件输出
 
-### Denote 文件规范
-
-- 时间戳：`date +%Y%m%dT%H%M%S`
-- 可读时间：`date "+%Y-%m-%d %a %H:%M"`
-- 文件名：`{时间戳}--paper-river-{简短标题}__paper_river.org`
-- 输出目录：`~/Documents/notes/`
-
-### Org 文件头
-
-```
-#+title:      paper-river-{简短标题}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :paper:river:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {URL 或来源描述}
-#+authors:    {目标论文作者}
-#+venue:      {发表场所/年份}
-```
+写入 `~/Downloads/paper-river-{简短标题}.html`。
 
 ## 红线
 
@@ -143,7 +120,7 @@ version: "1.0.0"
 - 因果链条是否连贯——把所有"它看到了什么问题"串起来读，逻辑通不通
 - 差异是否突出——每篇论文的重点是不是在讲"和前面有什么不同"
 
-读 `references/template.org`，按 Denote 规范写入 `~/Documents/notes/`。
+生成自包含单 HTML 文件，写入 `~/Downloads/paper-river-{简短标题}.html`，报告路径。
 
 ## 验收
 
@@ -154,9 +131,9 @@ version: "1.0.0"
 - *两张图能独立看*：不读正文，只看图也能抓住大意
 - *诚实标注*：哪些是确认的引用关系，哪些是推测的，标清楚
 
-## HTML 输出模式（-h / --html）
+## HTML 输出
 
-当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+默认生成自包含单 HTML 文件。浏览器直接打开。
 
 ### 内嵌 CSS/JS 模式
 
