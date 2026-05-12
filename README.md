@@ -8,22 +8,22 @@
 
 ```bash
 # 安装全部技能（全局，org-mode 格式）
-npx skills add lijigang/ljg-skills -g --all
+npx skills add Azhi-ss/ljg-skills -g --all
 
 # 安装全部技能（Markdown 格式，适用于 Obsidian / VSCode / Notion 等）
-npx skills add lijigang/ljg-skills#md -g --all
+npx skills add Azhi-ss/ljg-skills#md -g --all
 
 # 安装单个技能
-npx skills add lijigang/ljg-skills -g --skill ljg-card
+npx skills add Azhi-ss/ljg-skills -g --skill ljg-card
 
 # 安装单个技能（Markdown 格式）
-npx skills add lijigang/ljg-skills#md -g --skill ljg-card
+npx skills add Azhi-ss/ljg-skills#md -g --skill ljg-card
 
 # 安装多个指定技能
-npx skills add lijigang/ljg-skills -g --skill ljg-card --skill ljg-learn
+npx skills add Azhi-ss/ljg-skills -g --skill ljg-card --skill ljg-learn
 
 # 查看仓库中有哪些技能
-npx skills add lijigang/ljg-skills -l
+npx skills add Azhi-ss/ljg-skills -l
 ```
 
 **参数说明：**
@@ -48,10 +48,10 @@ cd ~/.claude/skills/ljg-card && npm install && npx playwright install chromium
 
 ```bash
 # org-mode 版本
-git clone https://github.com/lijigang/ljg-skills.git ~/.claude/plugins/ljg-skills
+git clone https://github.com/Azhi-ss/ljg-skills.git ~/.claude/plugins/ljg-skills
 
 # Markdown 版本
-git clone -b md https://github.com/lijigang/ljg-skills.git ~/.claude/plugins/ljg-skills
+git clone -b md https://github.com/Azhi-ss/ljg-skills.git ~/.claude/plugins/ljg-skills
 ```
 
 ## 技能
