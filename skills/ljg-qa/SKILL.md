@@ -101,9 +101,100 @@ User: 把这段抽成 Q-A: [text]
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取可折叠区块（Pattern 1）、内联 SVG（Pattern 6）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**可折叠区块**：
+
+```css
+.collapsible { border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; }
+.collapsible summary {
+  cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fafaf8; border-radius: 4px;
+}
+.collapsible summary::-webkit-details-marker { display: none; }
+.collapsible summary::after { content: '+'; font-size: 1.2em; color: #999; }
+.collapsible[open] summary::after { content: '\2212'; }
+.collapsible .content { padding: 16px; }
+```
+
+**A 四段式内部样式**：
+
+```css
+.a-conclusion { font-weight: 600; margin-bottom: 8px; }
+.a-formal { font-family: monospace; background: #f5f5f4; padding: 8px 12px; border-radius: 4px; font-size: 14px; margin-bottom: 8px; }
+.a-steps { margin-bottom: 8px; }
+.a-boundary { font-style: italic; color: #999; font-size: 13px; }
+```
+
+**Q 链依赖图（内联 SVG）**：
+
+```css
+.flow-svg { width: 100%; max-width: 800px; overflow-x: auto; margin: 24px auto; }
+.flow-svg svg { width: 100%; }
+.flow-node { cursor: pointer; }
+.flow-node:hover rect { fill: #f0f0f0; stroke: #2d2d2d; }
+.edge-highlight { stroke: #2d2d2d !important; stroke-width: 2 !important; }
+```
+
+SVG 箭头标记：
+
+```html
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#999" />
+  </marker>
+</defs>
+```
+
+展开联动 JS（打开一个 A 时高亮指向下一个 Q 的边）：
+
+```javascript
+document.querySelectorAll('.collapsible').forEach(details => {
+  details.addEventListener('toggle', () => {
+    if (details.open) {
+      const nextId = details.getAttribute('data-next');
+      if (nextId) {
+        const edge = document.getElementById('edge-' + nextId);
+        if (edge) edge.classList.add('edge-highlight');
+      }
+    }
+  });
+});
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText() {
+  const content = document.getElementById('export-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

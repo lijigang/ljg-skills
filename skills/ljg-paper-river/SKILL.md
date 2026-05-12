@@ -158,9 +158,103 @@ version: "1.0.0"
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取内联 SVG 流程图（Pattern 6）、垂直时间线（Pattern 8）、可折叠区块（Pattern 1）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**内联 SVG 流程图**：
+
+```css
+.flow-svg { width: 100%; max-width: 900px; overflow-x: auto; margin: 24px auto; }
+.flow-svg svg { width: 100%; }
+.flow-node { cursor: pointer; }
+.flow-node:hover rect { fill: #f0f0f0; stroke: #2d2d2d; }
+```
+
+SVG 箭头标记：
+
+```html
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#999" />
+  </marker>
+</defs>
+```
+
+节点点击滚动 JS：
+
+```javascript
+document.querySelectorAll('.flow-node').forEach(node => {
+  node.addEventListener('click', () => {
+    const id = node.getAttribute('data-target');
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+```
+
+**垂直时间线**：
+
+```css
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px; background: #e0e0e0;
+}
+.timeline-item { position: relative; margin-bottom: 24px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -28px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #2d2d2d; border: 2px solid #fff;
+}
+.timeline-item .year { font-size: 12px; color: #999; }
+.timeline-item .title { font-weight: 600; margin: 4px 0; cursor: pointer; }
+```
+
+**可折叠区块**：
+
+```css
+.collapsible { border-bottom: 1px solid #e0e0e0; margin-top: 8px; }
+.collapsible summary {
+  cursor: pointer; padding: 8px 0; font-weight: 600; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.collapsible summary::-webkit-details-marker { display: none; }
+.collapsible summary::after { content: '+'; font-size: 1.1em; color: #999; }
+.collapsible[open] summary::after { content: '\2212'; }
+.collapsible .content { padding: 8px 0 16px 0; }
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText() {
+  const content = document.getElementById('export-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

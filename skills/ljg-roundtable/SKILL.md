@@ -136,9 +136,94 @@ Assistant: [Launches roundtable discussion on free will]
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件。HTML 版本作为实时讨论面板使用，讨论结束后可导出为 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取多栏并排视图（Pattern 9）、可折叠区块（Pattern 1）、内联 SVG（Pattern 6）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**多栏并排视图**：
+
+```css
+.columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 16px 0; }
+.column {
+  padding: 16px; background: #fafaf8; border-top: 3px solid #2d2d2d; border-radius: 4px;
+}
+.column .speaker { font-weight: 600; margin-bottom: 4px; }
+.column .stance { font-size: 12px; color: #999; margin-bottom: 12px; }
+.column .mbti { font-size: 11px; color: #bbb; }
+```
+
+**可折叠区块**：
+
+```css
+.collapsible { border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; }
+.collapsible summary {
+  cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fafaf8; border-radius: 4px;
+}
+.collapsible summary::-webkit-details-marker { display: none; }
+.collapsible summary::after { content: '+'; font-size: 1.2em; color: #999; }
+.collapsible[open] summary::after { content: '\2212'; }
+.collapsible .content { padding: 16px; }
+```
+
+**发言标签**：
+
+```css
+.action-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 11px; font-weight: 600; margin-right: 8px;
+  background: #eee; color: #666;
+}
+.action-tag.反驳 { background: #fde8e8; color: #c53030; }
+.action-tag.质疑 { background: #fef3c7; color: #b7791f; }
+.action-tag.综合 { background: #e6f0fa; color: #2b6cb0; }
+.action-tag.补充 { background: #e8f5e9; color: #2e7d32; }
+```
+
+**ASCII 图容器**：
+
+```css
+pre.ascii { font-size: 11px; line-height: 1.3; color: #555; background: #fafaf8; padding: 16px; border-radius: 4px; overflow-x: auto; }
+```
+
+**内联 SVG**：
+
+```css
+.flow-svg { width: 100%; max-width: 800px; overflow-x: auto; margin: 16px 0; }
+.flow-svg svg { width: 100%; }
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText() {
+  const content = document.getElementById('export-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

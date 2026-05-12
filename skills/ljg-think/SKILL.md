@@ -70,9 +70,67 @@ user_invocable: true
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取可折叠区块（Pattern 1）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**可折叠区块** (`<details>` 样式)：
+
+```css
+.collapsible { border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; }
+.collapsible summary {
+  cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fafaf8; border-radius: 4px;
+}
+.collapsible summary::-webkit-details-marker { display: none; }
+.collapsible summary::after { content: '+'; font-size: 1.2em; color: #999; }
+.collapsible[open] summary::after { content: '\2212'; }
+.collapsible .content { padding: 16px; }
+```
+
+**底层高亮**（最底层 details 的样式）：
+
+```css
+.collapsible.root-layer { background: #f9f7f4; border-left: 3px solid #2d2d2d; padding-left: 16px; }
+```
+
+**层间裂缝标注**：
+
+```css
+.crack { font-style: italic; color: #999; margin-top: 8px; font-size: 14px; }
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText() {
+  const content = document.getElementById('export-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

@@ -82,9 +82,81 @@ Assistant: [对"熵"进行八维解剖，生成 org-mode 报告]
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取可折叠区块、导出按钮等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**可折叠区块** (`<details>` 样式)：
+
+```css
+.collapsible { border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; }
+.collapsible summary {
+  cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fafaf8; border-radius: 4px;
+}
+.collapsible summary::-webkit-details-marker { display: none; }
+.collapsible summary::after { content: '+'; font-size: 1.2em; color: #999; }
+.collapsible[open] summary::after { content: '\2212'; }
+.collapsible .content { padding: 16px; }
+```
+
+**左侧导航 + 右侧内容布局**：
+
+```css
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 180px; position: fixed; top: 0; left: 0; bottom: 0;
+  background: #fafaf8; border-right: 1px solid #e0e0e0;
+  padding: 24px 16px; overflow-y: auto;
+}
+.sidebar a { display: block; padding: 8px 0; color: #555; text-decoration: none; font-size: 14px; cursor: pointer; }
+.sidebar a:hover { color: #2d2d2d; }
+.main { margin-left: 180px; padding: 32px 40px; max-width: 720px; }
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText(mode) {
+  const content = document.getElementById('export-content').innerText;
+  let text = mode === 'org' ? content : content;
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+导航平滑滚动 JS：
+
+```javascript
+document.querySelectorAll('.sidebar a').forEach(a => {
+  a.addEventListener('click', () => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`（不用 `#000`）；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

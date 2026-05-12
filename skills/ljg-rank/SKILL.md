@@ -430,9 +430,113 @@ A ---> B ---> C ---> D
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取拖拽排序（Pattern 7）、内联 SVG（Pattern 6）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**拖拽排序卡片**：
+
+```css
+.card-list { list-style: none; padding: 0; max-width: 600px; }
+.card-item {
+  padding: 12px 16px; margin-bottom: 8px;
+  background: #fafaf8; border: 1px solid #e0e0e0; border-radius: 4px;
+  cursor: grab; user-select: none; display: flex; align-items: center; gap: 12px;
+}
+.card-item:active { cursor: grabbing; }
+.card-item.dragging { opacity: 0.5; }
+.card-item .drag-handle { color: #ccc; font-size: 16px; }
+.card-item .index { font-size: 12px; color: #999; min-width: 20px; }
+```
+
+拖拽排序 JS：
+
+```javascript
+const list = document.getElementById('cardList');
+let dragged = null;
+
+list.addEventListener('dragstart', e => {
+  dragged = e.target.closest('.card-item');
+  if (dragged) { dragged.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+});
+
+list.addEventListener('dragover', e => {
+  e.preventDefault();
+  const after = getDragAfter(list, e.clientY);
+  const cur = document.querySelector('.dragging');
+  if (!cur) return;
+  if (after) list.insertBefore(cur, after); else list.appendChild(cur);
+});
+
+list.addEventListener('dragend', () => {
+  if (dragged) dragged.classList.remove('dragging');
+  dragged = null;
+  updateIndices();
+});
+
+function getDragAfter(container, y) {
+  const items = [...container.querySelectorAll('.card-item:not(.dragging)')];
+  return items.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updateIndices() {
+  document.querySelectorAll('.card-item .index').forEach((el, i) => { el.textContent = i + 1; });
+}
+```
+
+**内联 SVG 流程图**：
+
+```css
+.flow-svg { width: 100%; max-width: 800px; overflow-x: auto; margin: 24px 0; }
+.flow-svg svg { width: 100%; }
+.flow-node { cursor: pointer; }
+.flow-node:hover rect { fill: #f0f0f0; }
+```
+
+SVG 箭头标记：
+
+```html
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+    <polygon points="0 0, 10 3.5, 0 7" fill="#999" />
+  </marker>
+</defs>
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText() {
+  const content = document.getElementById('export-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 

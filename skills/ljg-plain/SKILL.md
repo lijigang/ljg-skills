@@ -108,9 +108,98 @@ URL → WebFetch | 文本 → 直接用 | 文件路径 → Read | 概念 → 直
 
 当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
 
-### 读取参考
+### 内嵌 CSS/JS 模式
 
-先 Read `../references/html-patterns.md`，获取左右对照栏（Pattern 3）、标签页（Pattern 2）、导出按钮（Pattern 5）等交互模式的完整代码。
+以下代码直接嵌入生成的 HTML 文件的 `<style>` 和 `<script>` 中。
+
+**左右对照栏**：
+
+```css
+.split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 16px 0; }
+.split-view .panel { padding: 16px; background: #fafaf8; border-radius: 4px; }
+.split-view .panel h4 { margin-top: 0; color: #999; font-size: 12px; letter-spacing: 1px; }
+@media (max-width: 768px) { .split-view { grid-template-columns: 1fr; } }
+```
+
+**标签页**：
+
+```css
+.tabs { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+.tab-btn {
+  padding: 8px 20px; border: none; background: none; cursor: pointer;
+  font-size: 14px; color: #999; border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.tab-btn.active { color: #2d2d2d; border-bottom-color: #2d2d2d; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+```
+
+标签页切换 JS：
+
+```javascript
+function switchTab(i) {
+  document.querySelectorAll('.tab-btn,.tab-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[i].classList.add('active');
+  document.querySelectorAll('.tab-panel')[i].classList.add('active');
+}
+```
+
+**Margin Notes（旁注）**：
+
+```css
+.margin-note {
+  float: right; width: 180px; margin-right: -200px; font-size: 13px;
+  color: #888; padding: 8px; background: #f9f9f7; border-left: 2px solid #ddd;
+}
+@media (max-width: 900px) { .margin-note { float: none; width: auto; margin-right: 0; margin-bottom: 12px; } }
+```
+
+**改写策略标注**：
+
+```css
+.strategy-tag {
+  display: inline-block; padding: 1px 6px; border-radius: 2px;
+  font-size: 10px; background: #eee; color: #999; margin-left: 6px;
+}
+```
+
+**导出栏**：
+
+```css
+.export-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fafaf8; border-top: 1px solid #e0e0e0;
+  padding: 12px 24px; display: flex; gap: 12px; justify-content: center; z-index: 100;
+}
+.export-btn {
+  padding: 8px 20px; border: 1px solid #ccc; background: #fff;
+  border-radius: 4px; cursor: pointer; font-size: 14px;
+}
+.export-btn:hover { background: #f0f0f0; }
+.export-btn.primary { background: #2d2d2d; color: #fff; border-color: #2d2d2d; }
+```
+
+导出按钮 JS：
+
+```javascript
+function copyText(mode) {
+  let text = '';
+  if (mode === 'plain') {
+    text = document.querySelectorAll('#export-content .panel:last-child p').innerText || '';
+    [...document.querySelectorAll('#export-content .panel:last-child p')].forEach(p => text += p.innerText + '\n\n');
+  } else {
+    text = document.getElementById('export-content').innerText;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => toast.style.opacity = '0', 2000);
+  });
+}
+```
+
+**设计约束**：系统字体栈 `-apple-system, "Noto Serif SC", "PingFang SC", "Microsoft YaHei", sans-serif`；正文色 `#2d2d2d`；行高 ≥ 1.6；单 HTML 文件，零外部依赖。
 
 ### HTML 结构
 
