@@ -77,3 +77,33 @@ Assistant: [对"熵"进行八维解剖，生成 org-mode 报告]
 1. 运行 `date +%Y%m%dT%H%M%S` 获取时间戳。
 2. 写入 `~/Documents/notes/{timestamp}--概念解剖-{概念名}__concept.org`。
 3. 报告路径，完成。
+
+## HTML 输出模式（-h / --html）
+
+当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版"时，生成自包含单 HTML 文件替代 org-mode。
+
+### 读取参考
+
+先 Read `../references/html-patterns.md`，获取可折叠区块、导出按钮等交互模式的完整代码。
+
+### HTML 结构
+
+1. **基础外壳**：使用 `references/html-patterns.md` 中的基础 HTML 外壳
+2. **左侧导航**：固定侧边栏，八个维度垂直排列，点击平滑滚动到对应区域
+3. **右侧内容**：每个维度一个 `<details class="collapsible">` 块，使用 Pattern 1 可折叠区块样式。定锚和内观也各一个块
+4. **压缩区**：公式 + 一句话顿悟 + ASCII 结构图，始终展开（非折叠），放在内容区底部
+5. **导出栏**：使用 Pattern 5 的固定底部导出栏，提供"复制为 Org-mode"和"复制为 Markdown"按钮
+
+### 设计约束
+
+遵循 `references/html-patterns.md` 中的设计约束：
+
+- **系统字体栈**：`-apple-system, "Noto Serif SC", "Source Han Serif SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`
+- **禁纯黑**：正文用 `#2d2d2d`，不用 `#000`
+- **行高**：≥ 1.6，段间距充足
+- **零外部依赖**：单 HTML 文件，无 CDN CSS/JS/字体
+- **响应式**：窄屏下不炸
+
+### 文件输出
+
+写入 `~/Downloads/{概念名}--learn.html`。

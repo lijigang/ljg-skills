@@ -131,3 +131,28 @@ Assistant: [Launches roundtable discussion on free will]
 - 引用/化用其**经典著作或知名观点**
 - 发言有锋芒：质疑要见骨，补充要推进，不说正确的废话
 - 每段结尾 `**简言之**` 一句话压到极致
+
+## HTML 输出模式（-h / --html）
+
+当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件。HTML 版本作为实时讨论面板使用，讨论结束后可导出为 org-mode。
+
+### 读取参考
+
+先 Read `../references/html-patterns.md`，获取多栏并排视图（Pattern 9）、可折叠区块（Pattern 1）、内联 SVG（Pattern 6）、导出按钮（Pattern 5）等交互模式的完整代码。
+
+### HTML 结构
+
+1. **基础外壳**：使用 `references/html-patterns.md` 中的基础 HTML 外壳，标题为"圆桌：{议题}"
+2. **顶部——参会者卡片**：使用 Pattern 9 多栏并排视图，每位参会者一栏。卡片内容：姓名、MBTI、核心立场、选择理由
+3. **中部——讨论记录**：每轮讨论一个 `<details class="collapsible">` 块（Pattern 1），summary 显示"第 N 轮：{引导问题}"。展开后使用多栏布局并排显示各发言人的发言。每位发言人的发言带行动标签（陈述/质疑/补充/反驳等）和"简言之"总结
+4. **主持人综述区**：每轮结束后，主持人综述（核心争议点 + ASCII 框架图 + 下一层问题）放在该轮折叠块底部。ASCII 图用 `<pre>` 标签保留格式。另外如果适合，用 Pattern 6 内联 SVG 画一个交互版框架图
+5. **底部——知识网络**：全局 ASCII 知识网络图 + 内联 SVG 交互版。开放问题列表
+6. **导出栏**：使用 Pattern 5。在讨论进行中，按钮为"导出当前讨论为 Org-mode"
+
+### 文件输出
+
+写入 `~/Downloads/roundtable-{议题关键词}.html`。
+
+### 设计约束
+
+遵循 `references/html-patterns.md` 中的设计约束（系统字体栈、禁纯黑、行高≥1.6）。

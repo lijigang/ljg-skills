@@ -14,6 +14,10 @@
 !scripts/
 !scripts/**
 
+# 保留共享参考文件
+!references/
+!references/**
+
 # 保留技能目录
 !skills/
 !skills/**/

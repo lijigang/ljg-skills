@@ -65,3 +65,28 @@ user_invocable: true
 2. 写入 `~/Documents/notes/{时间戳}--追本-{主题}__think.org`
 3. org-mode 格式，禁止 markdown 语法
 4. 报告文件路径给用户
+
+## HTML 输出模式（-h / --html）
+
+当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+
+### 读取参考
+
+先 Read `../references/html-patterns.md`，获取可折叠区块（Pattern 1）、导出按钮（Pattern 5）等交互模式的完整代码。
+
+### HTML 结构
+
+1. **基础外壳**：使用 `references/html-patterns.md` 中的基础 HTML 外壳，标题为"追本：{主题}"
+2. **推理层**：每一层推理一个 `<details class="collapsible">` 块，使用 Pattern 1 可折叠区块样式。每层的 summary 显示层名（两三字的命名）
+3. **关键行为：默认收拢**——所有层默认折叠（`<details>` 不带 `open` 属性），只有第一层例外。读者必须点击展开才能看到更深层。这制造了"下坠"的阅读体验
+4. **底层高亮**：最底层（不可再分的本质）用特殊样式标注——背景色 `#f9f7f4`，左边框 `3px solid #2d2d2d`
+5. **层间裂缝标注**：每层内容末尾用斜体灰色字标注"通往下一层的裂缝：{问题}"，作为过渡提示
+6. **导出栏**：使用 Pattern 5 的固定底部导出栏
+
+### 文件输出
+
+写入 `~/Downloads/{主题}--think.html`。
+
+### 设计约束
+
+遵循 `references/html-patterns.md` 中的设计约束（系统字体栈、禁纯黑、行高≥1.6）。

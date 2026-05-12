@@ -103,3 +103,30 @@ URL → WebFetch | 文本 → 直接用 | 文件路径 → Read | 概念 → 直
 - *零术语*：12 岁孩子能跟上
 - *记得住*：读完脑子里留下了什么——一个画面、一个问题、一个转折，什么都行
 - *想读完*：从头到尾没有想跳过的段落
+
+## HTML 输出模式（-h / --html）
+
+当用户指定 `-h` 或 `--html` 参数，或说"做成网页""HTML 版""交互版"时，生成自包含单 HTML 文件替代 org-mode。
+
+### 读取参考
+
+先 Read `../references/html-patterns.md`，获取左右对照栏（Pattern 3）、标签页（Pattern 2）、导出按钮（Pattern 5）等交互模式的完整代码。
+
+### HTML 结构
+
+1. **基础外壳**：使用 `references/html-patterns.md` 中的基础 HTML 外壳，标题为"白话: {简短标题}"
+2. **模式切换标签**：顶部使用 Pattern 2 标签页，三个 tab：
+   - "对照"——默认，左右对照栏（Pattern 3），左侧原文，右侧白话。逐段对齐
+   - "白话"——仅显示白话版本，干净阅读
+   - "原文"——仅显示原文，供参考
+3. **原文/白话对照**：使用 Pattern 3 左右对照栏。每个段落一对 `<div class="split-view">`，原文和白话精确对齐。白话版本中替换掉的术语用 `<span class="margin-note">`（Pattern 4）标注原术语
+4. **层级标注**：在白话文本中，用 subtle 的颜色标注改写策略（类比/故事/问答/场景/裂缝），类似于 ljg-card 的 taste 标注
+5. **导出栏**：使用 Pattern 5，提供"复制白话版为 Org-mode"、"复制对照版为 Markdown"
+
+### 文件输出
+
+写入 `~/Downloads/plain-{简短标题}.html`。
+
+### 设计约束
+
+遵循 `references/html-patterns.md` 中的设计约束（系统字体栈、禁纯黑、行高≥1.6）。
