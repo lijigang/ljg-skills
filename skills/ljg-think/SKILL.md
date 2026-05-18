@@ -63,5 +63,5 @@ user_invocable: true
 
 1. 获取时间戳：`date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"`
 2. 写入 `~/Documents/notes/{时间戳}--追本-{主题}__think.md`
-3. markdown 格式，禁止 markdown 语法
+3. 纯文本，禁止 markdown 语法（# ** - 等格式符号）
 4. 报告文件路径给用户
