@@ -149,6 +149,16 @@ push_branch() {
   log "=== Branch: $branch ==="
   cd "$SKILLS_REPO"
   git checkout "$branch" 2>&1 | head -1 || true
+  # Verify checkout actually succeeded — `git checkout` exits non-zero when
+  # uncommitted changes block the switch, but `| head -1 || true` swallows it.
+  # Without this guard, subsequent reset/sync/commit/push run on the WRONG branch
+  # (the one we started on), silently corrupting both branches. Found 2026-05-18.
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$current_branch" != "$branch" ]; then
+    err "checkout $branch failed (still on $current_branch). Commit or stash uncommitted changes first, then retry."
+    exit 1
+  fi
   git pull --rebase --quiet || {
     warn "pull --rebase failed on $branch — trying reset --hard origin/$branch"
     git rebase --abort 2>/dev/null || true
