@@ -145,12 +145,14 @@ denote schema 文件名：`{YYYYMMDDTHHMMSS}--qa-{主题}__qa.md`
 ## 文件结构
 
 ```org
-#+title:      {一句精炼的核心观点——10-25 字}
-#+subtitle:   {原文标题}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :qa:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {URL 或来源}
+---
+title: {一句精炼的核心观点——10-25 字}
+subtitle: {原文标题}
+date: {YYYY-MM-DD Day HH:MM}
+tags: [qa]
+identifier: {YYYYMMDDTHHMMSS}
+source: {URL 或来源}
+---
 
 * 引子
 

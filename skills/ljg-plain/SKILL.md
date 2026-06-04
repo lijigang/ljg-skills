@@ -32,11 +32,13 @@ version: "5.0.0"
 ### Org 文件头
 
 ```
-#+title:      plain-{简短标题}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :plain:atom:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {URL 或来源描述}
+---
+title: plain-{简短标题}
+date: {YYYY-MM-DD Day HH:MM}
+tags: [plain, atom]
+identifier: {YYYYMMDDTHHMMSS}
+source: {URL 或来源描述}
+---
 ```
 
 文件写入后报告路径。

@@ -95,9 +95,11 @@ version: "1.0.0"
 **文档结构：**
 
 ```org
-#+title: {城市}旅行研究
-#+date: {当前日期}
-#+filetags: :travel:museum:architecture:
+---
+title: {城市}旅行研究
+date: {当前日期}
+tags: [travel, museum, architecture]
+---
 
 * 城市概览
   {城市}的文明坐标——为什么值得去，去了看什么。一段话勾勒这座城市在中国文明史中的位置。
@@ -152,7 +154,7 @@ version: "1.0.0"
 ```
 
 **文件命名**：使用 denote naming schema，保存到 `~/Documents/notes/` 目录：
-`{YYYYMMDDTHHMMSS}==z--{城市}旅行研究.org`
+`{YYYYMMDDTHHMMSS}==z--{城市}旅行研究.md`
 
 **写作要求**：
 - 每个推荐必须有「为什么看」和「看什么细节」，不许空泛
@@ -176,7 +178,7 @@ version: "1.0.0"
 ```
 ════ 旅行研究完成 ═══════════════════════
 🏛️ 城市: {城市名}
-📝 知识文档: {org 文件路径}
+📝 知识文档: {markdown 文件路径}
 🖼️ 文明概览卡: {PNG 文件路径}
 🖼️ 路线速查卡: {PNG 文件路径}
 📊 研究覆盖: {N}个博物馆 | {M}座古建 | {K}处考古遗址

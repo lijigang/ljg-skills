@@ -1,4 +1,0 @@
-#+title:      {领域}的秩
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :rank:
-#+identifier: {YYYYMMDDTHHMMSS}
