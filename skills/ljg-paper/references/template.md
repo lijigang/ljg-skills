@@ -1,11 +1,13 @@
-#+title:      {6-15 字思想骨句——故事内核句，凝练如警句/篇名，零中英混杂；详见 SKILL.md「title 这一句怎么写」}
-#+subtitle:   {论文原始标题，通常英文}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :paper:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {URL 或来源描述}
-#+authors:    {作者列表}
-#+venue:      {发表场所/年份}
+---
+title: {6-15 字思想骨句——故事内核句，凝练如警句/篇名，零中英混杂；详见 SKILL.md「title 这一句怎么写」}
+subtitle: {论文原始标题，通常英文}
+date: {YYYY-MM-DD Day HH:MM}
+tags: [paper]
+identifier: {YYYYMMDDTHHMMSS}
+source: {URL 或来源描述}
+authors: {作者列表}
+venue: {发表场所/年份}
+---
 
 * 问题
 
@@ -19,7 +21,9 @@
 
 * 翻译
 
-#+ATTR_ORG: :width 1200
+---
+attr_org: :width 1200
+---
 [[file:images/{identifier}--paper-{简短标题}-overview.png]]
 
 {推进。不重述问题。沿用「问题」里那个具象例子，在它上面一步步打开论文的方法。}

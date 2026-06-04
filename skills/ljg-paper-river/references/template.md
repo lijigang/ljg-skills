@@ -1,10 +1,12 @@
-#+title:      paper-river-{简短标题}
-#+date:       [{YYYY-MM-DD Day HH:MM}]
-#+filetags:   :paper:river:
-#+identifier: {YYYYMMDDTHHMMSS}
-#+source:     {用户提供的论文 URL 或来源}
-#+authors:    {目标论文作者}
-#+venue:      {发表场所/年份}
+---
+title: paper-river-{简短标题}
+date: {YYYY-MM-DD Day HH:MM}
+tags: [paper, river]
+identifier: {YYYYMMDDTHHMMSS}
+source: {用户提供的论文 URL 或来源}
+authors: {目标论文作者}
+venue: {发表场所/年份}
+---
 
 * 问题之河
 
