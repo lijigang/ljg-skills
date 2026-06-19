@@ -78,6 +78,7 @@ git clone -b md https://github.com/lijigang/ljg-skills.git ~/.claude/plugins/ljg
 | **ljg-skill-map** | 技能地图 — 扫描所有已安装技能，渲染可视化总览 |
 | **ljg-present** | 演讲铸造器 — 默认高桥流（一页一关键词、奶白底墨字）；`-s` 标语流（VACAT/BIG STUDIOS 风：黑红双色块、ultra-bold、完整断言句撑屏）|
 | **ljg-push** | 推送引擎 — 把本地 `~/.claude/skills/ljg-*` 一键同步到 github repo（master + md 双分支）|
+| **ljg-openharness** | OpenHarness 桥 — 0 依赖 Python 客户端包装 HKUDS/OpenHarness（14k stars）的 `oh` CLI，提供 dry-run / prompt / 元数据查询 / ohmo gateway 状态。前提：`~/.local/bin/oh` 符号链接指向 `~/.openharness-venv/bin/oh`（`openharness-ai` 包）。 | Python ≥3.10（uv 管理 venv）|
 
 
 ## 工作流
