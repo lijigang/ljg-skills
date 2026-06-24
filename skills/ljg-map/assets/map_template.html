@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Long+Cang&display=swap" rel="stylesheet">
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --txt:#1a1f2e;
+    --txt2:#5b6472;
+    --txt3:#8a93a1;
+    --accent:{{ACCENT}};
+    --accent-soft:color-mix(in srgb, {{ACCENT}} 9%, transparent);
+    --accent-line:color-mix(in srgb, {{ACCENT}} 28%, transparent);
+    --accent-glow:color-mix(in srgb, {{ACCENT}} 35%, transparent);
+    --ink:#2a2622;        /* cartographic 地图板墨色 */
+    --block:#c1392b;      /* 🔴 瓶颈语义色（固定） */
+    --gold:#b8860b;       /* 🟡 价值捕获语义色（固定） */
+    --sans:'Noto Sans SC',sans-serif;
+    --serif:'Noto Serif SC',serif;
+    --mono:'JetBrains Mono','Noto Sans SC',monospace;
+    --hand:'Long Cang',cursive;
+  }
+  body{ width:1080px; position:relative; padding:60px 0; font-family:var(--sans);
+    background:linear-gradient(155deg, #eef1f7 0%, #e6ebf3 50%, #e3e8f2 100%); }
+  .bg{ position:absolute; inset:0;
+    background:
+      radial-gradient(70% 30% at 50% 0%, rgba(255,255,255,0.7), transparent 60%),
+      radial-gradient(60% 32% at 86% 8%, color-mix(in srgb, {{ACCENT}} 5%, transparent), transparent 62%),
+      radial-gradient(64% 36% at 12% 100%, rgba(120,140,180,0.10), transparent 60%); }
+  .grain{ position:absolute; inset:0; opacity:0.025; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .card{ position:relative; width:948px; margin:0 auto;
+    background:rgba(255,255,255,0.55);
+    backdrop-filter:blur(40px) saturate(1.3); -webkit-backdrop-filter:blur(40px) saturate(1.3);
+    border:1px solid rgba(255,255,255,0.85); border-radius:32px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      0 8px 32px rgba(31,41,72,0.12),
+      0 40px 80px -32px rgba(31,41,72,0.18);
+    padding:50px 54px; display:flex; flex-direction:column; }
+
+  /* 身份区 */
+  .kicker{ font-family:var(--mono); font-size:14px; letter-spacing:0.34em; color:var(--accent); text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:12px; font-weight:500; }
+  .kicker::before{ content:''; width:26px; height:2px; background:var(--accent); }
+  .title{ font-family:var(--serif); font-size:62px; font-weight:700; color:var(--txt); line-height:1.02; letter-spacing:0.01em; }
+  .en{ font-family:var(--mono); font-size:18px; font-weight:500; color:var(--accent); letter-spacing:0.18em; margin-top:10px; text-transform:uppercase; }
+  .tags{ display:flex; gap:9px; margin-top:18px; flex-wrap:wrap; }
+  .tag{ font-family:var(--mono); font-size:13px; letter-spacing:0.05em; color:var(--accent); padding:5px 13px;
+    border:1px solid var(--accent-line); border-radius:20px; background:var(--accent-soft); }
+
+  .rule{ height:1px; background:linear-gradient(90deg, var(--accent-line), rgba(31,41,72,0.10) 38%, rgba(31,41,72,0.02)); margin:34px 0; }
+
+  .block-label{ font-family:var(--mono); font-size:14px; letter-spacing:0.32em; color:var(--accent); text-transform:uppercase; margin-bottom:20px; display:flex; align-items:center; gap:12px; font-weight:500; }
+  .block-label::before{ content:''; width:24px; height:2px; background:var(--accent); }
+
+  /* thesis 立框句 */
+  .thesis{ font-family:var(--serif); font-size:34px; line-height:1.46; color:var(--txt); font-weight:600; letter-spacing:0.004em;
+    text-align:justify; text-justify:inter-ideograph; text-align-last:left; }
+  .thesis .hl{ color:var(--accent); }
+
+  /* cartographic 地图板 */
+  .mapplate{ background:#fbfaf6; border:1px solid rgba(42,38,34,0.10); border-radius:16px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 22px -10px rgba(31,41,72,0.16);
+    background-image:linear-gradient(rgba(42,38,34,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(42,38,34,0.055) 1px, transparent 1px);
+    background-size:34px 34px;
+    padding:14px 18px; }
+  .mapplate svg{ display:block; width:100%; height:auto; }
+  .mapplate .hand{ font-family:var(--hand); }
+  .mapplate .mono{ font-family:var(--mono); }
+  .map-caption{ font-family:var(--serif); font-size:18px; color:var(--txt2); font-weight:500; margin-top:16px; line-height:1.6;
+    text-align:justify; text-justify:inter-ideograph; text-align-last:left; }
+  .map-caption .hl{ color:var(--accent); font-weight:600; }
+
+  /* 基准率 base rate：三栏 指标/数值/这意味着 */
+  .brates{ display:flex; gap:22px; }
+  .brate{ flex:1; display:flex; flex-direction:column; gap:8px; }
+  .brate + .brate{ border-left:1px solid rgba(31,41,72,0.10); padding-left:22px; }
+  .brate .blabel{ font-family:var(--mono); font-size:13px; letter-spacing:0.05em; color:var(--txt2); }
+  .brate .bval{ font-family:var(--mono); font-size:38px; font-weight:500; color:var(--accent); line-height:1.05; letter-spacing:0.01em; }
+  .brate .bmean{ font-family:var(--serif); font-size:15px; color:var(--txt2); line-height:1.5; }
+
+  /* 三个大问题 */
+  .q{ display:flex; gap:16px; margin-bottom:18px; align-items:baseline; }
+  .q:last-child{ margin-bottom:0; }
+  .q .num{ font-family:var(--serif); font-size:30px; font-weight:700; color:var(--accent); line-height:1; flex-shrink:0; width:40px; }
+  .q .qt{ font-family:var(--serif); font-size:22px; color:var(--txt); font-weight:500; line-height:1.5;
+    text-align:justify; text-justify:inter-ideograph; text-align-last:left; }
+  .q .qt .hl{ color:var(--accent); font-weight:600; }
+
+  .sign{ padding-top:26px; display:flex; align-items:center; gap:10px; }
+  .sign .chop{ display:inline-block; width:24px; height:24px; background:var(--accent); border-radius:5px; color:#fff; font-family:var(--serif); font-size:13px; line-height:24px; text-align:center; }
+  .sign span{ font-family:var(--serif); font-size:17px; color:var(--txt2); letter-spacing:0.04em; }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grain"></div>
+
+  <div class="card">
+    <div class="kicker">产业地图 &#xB7; Industry Map</div>
+    <div class="title">{{INDUSTRY}}</div>
+    <div class="en">{{EN}}</div>
+    <div class="tags">{{TAGS}}</div>
+
+    <div class="rule"></div>
+
+    <div class="block-label">参考系 &#xB7; The Frame</div>
+    <div class="thesis">{{THESIS}}</div>
+
+    <div class="rule"></div>
+
+    <div class="block-label">地图 &#xB7; The Map</div>
+    <div class="mapplate">{{MAP_SVG}}</div>
+    <div class="map-caption">{{MAP_CAPTION}}</div>
+
+    <div class="rule"></div>
+
+    <div class="block-label">基准率 &#xB7; Base Rates</div>
+    <div class="brates">{{BASE_RATES}}</div>
+
+    <div class="rule"></div>
+
+    <div class="block-label">三个大问题 &#xB7; Three Big Questions</div>
+    <div class="q"><div class="num">①</div><div class="qt">{{Q1}}</div></div>
+    <div class="q"><div class="num">②</div><div class="qt">{{Q2}}</div></div>
+    <div class="q"><div class="num">③</div><div class="qt">{{Q3}}</div></div>
+
+    <div class="rule" style="margin:34px 0 0;"></div>
+    <div class="sign"><span class="chop">印</span><span>李继刚</span></div>
+  </div>
+</body>
+</html>
