@@ -317,16 +317,18 @@ delta 分三档，标明是哪档：
 ## 输出
 
 1. 获取时间戳：`date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"`
-2. 写入 `~/Documents/notes/{时间戳}--拆书-{书名}__book.org`
-3. org-mode 格式（标题用 `*`，加粗用 `*bold*` 单星号，禁止 markdown 双星号）
+2. 写入 `~/Documents/notes/{时间戳}--拆书-{书名}__book.md`
+3. 标准 markdown 格式（标题用 `#`，加粗用 `**bold**` 双星号）
 4. 文件头：
 
 ```
-#+TITLE: 拆书：《{书名}》
-#+SUBTITLE: {作者} | {一句话核心观点}
-#+DATE: [{YYYY-MM-DD Day HH:MM}]
-#+FILETAGS: :book:{书的领域 e.g. philosophy/biology/economics}:
-#+IDENTIFIER: {YYYYMMDDTHHMMSS}
+---
+title: "拆书：《{书名}》"
+subtitle: "{作者} | {一句话核心观点}"
+date: {YYYY-MM-DD}
+tags: [book, {书的领域 e.g. philosophy/biology/economics}]
+id: {YYYYMMDDTHHMMSS}
+---
 ```
 
 5. 正文六段：1-5 抽骨架（散文，冷），第 6 段「认知地图」（ASCII 参考系图 + 走两步预测，热）。ASCII 图包在 `#+begin_example` / `#+end_example` 中。
