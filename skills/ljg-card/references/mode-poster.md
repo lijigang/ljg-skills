@@ -1,4 +1,4 @@
-# 模具：多卡（-c）
+# 模具：多卡（-m）
 
 ## 步骤 1：读取模板
 
@@ -6,7 +6,7 @@ Read `assets/poster_template.html`
 
 ## 步骤 1.5：色调感知
 
-与长图模具共享同一套色调系统。根据内容气质选择 `{{BG_COLOR}}` 和 `{{ACCENT_COLOR}}`：
+与长图模具共用一套色调系统。按内容气质选 `{{BG_COLOR}}` 和 `{{ACCENT_COLOR}}`：
 
 | 内容气质 | `{{BG_COLOR}}` | `{{ACCENT_COLOR}}` | 触发信号 |
 |----------|---------------|-------------------|----------|
@@ -21,7 +21,7 @@ Read `assets/poster_template.html`
 - 识别标题行（`#`/`##`/`###` 开头，或独立短行）
 - 识别引用块（`>` 开头）
 - 识别加粗（`**text**`）
-- **识别金句**：独立成段的短句（通常 < 25 字），承载核心洞察，用 `.highlight` 渲染
+- 识别金句：独立成段、通常 < 25 字、一句顶一段的短句，用 `.highlight` 渲染
 - 按空行分割为段落列表
 
 ## 步骤 3：计算视觉重量
@@ -39,35 +39,40 @@ Read `assets/poster_template.html`
 
 ## 步骤 4：贪心切分
 
-- 阈值：每卡约 **380** 字符等价视觉重量
-- 逐段累加，超过阈值时在当前段之前切分
-- **切分规则**：
+- 阈值：每卡约 380 字符等价视觉重量
+- 逐段累加，超过阈值时在当前段之前切
+- 切分规则：
   - 绝不在句子中间切
   - 优先在段落/条目/章节边界切
-  - 标题不落单（必须跟至少一个内容元素在同一卡）
+  - 标题不落单（必须跟至少一个内容元素同卡）
   - 超长单段在句号处强制切
   - 一个章节（h2 + 3 items）通常刚好一卡
 
-**特殊情况**：
+特殊情况：
+
 - 只有一张卡：不显示页码
 - 多张卡：显示 `1 / N` 格式页码
 
 ## 步骤 5：格式化为 HTML
 
-**基础元素：**
+基础元素：
+
 - 普通段落 → `<p>文本</p>`
 - 章节标题（##/### 级别） → `<h2>标题</h2>`
 - 引用 → `<blockquote><p>引用</p></blockquote>`
 - 加粗 → `<strong>文本</strong>`
 - 列表 → `<ul><li>...</li></ul>`
 
-**金句（独立成段的核心洞察短句，视觉突出）：**
+金句（独立成段的点题短句，要在视觉上跳出来）：
+
 ```html
 <p class="highlight">金句文本</p>
 ```
-判断标准：独立成段、< 25 字、承载关键洞察。用 `.highlight` 而非 `<p><strong>`。
 
-**条目组（有标题+正文的并列条目）：**
+判断标准：独立成段、< 25 字、一句顶一段。用 `.highlight`，不用 `<p><strong>`。
+
+条目组（有标题+正文的并列条目）：
+
 ```html
 <div class="item">
   <p class="label">条目标题</p>
@@ -75,12 +80,14 @@ Read `assets/poster_template.html`
 </div>
 ```
 
-**副标题标签：**
+副标题标签：
+
 ```html
 <p class="subtitle">标签文字</p>
 ```
 
-**分割线（章节之间）：**
+分割线（章节之间）：
+
 ```html
 <div class="divider"></div>
 ```
@@ -91,15 +98,15 @@ Read `assets/poster_template.html`
 
 | 变量 | 规则 |
 |------|------|
-| `{{BG_COLOR}}` | 步骤 1.5 确定的背景底色 |
-| `{{ACCENT_COLOR}}` | 步骤 1.5 确定的强调色 |
+| `{{BG_COLOR}}` | 步骤 1.5 定的背景底色 |
+| `{{ACCENT_COLOR}}` | 步骤 1.5 定的强调色 |
 | `{{HEADER_BLOCK}}` | 续页卡：`<div class="header"><span class="running-title">文章标题</span></div>`；首卡或单卡：空字符串 |
-| `{{TITLE_BLOCK}}` | 首卡有标题时：`<div class="title-area"><h1>标题</h1></div>`；续页卡或无标题时：空字符串 |
+| `{{TITLE_BLOCK}}` | 首卡有标题：`<div class="title-area"><h1>标题</h1></div>`；续页卡或无标题：空字符串 |
 | `{{BODY_HTML}}` | 步骤 5 生成的 HTML |
 | `{{SOURCE_LINE}}` | 内容来源（可选）：`<span class="info-source">来源文字</span>`，无来源时空字符串 |
 | `{{PAGE_INFO}}` | 多卡时 `1 / 3`，单卡时空字符串 |
 
-**结尾标记**：仅在最后一张卡的 `{{BODY_HTML}}` 末尾追加 `<p style="text-align:right;font-size:16px;color:#ACACB0;margin-top:40px;">∎</p>`。非末页不加。
+结尾标记：只在最后一张卡的 `{{BODY_HTML}}` 末尾追加 `<p style="text-align:right;font-size:16px;color:#ACACB0;margin-top:40px;">∎</p>`。非末页不加。
 
 写入：`/tmp/ljg_cast_poster_{name}_{N}.html`
 
