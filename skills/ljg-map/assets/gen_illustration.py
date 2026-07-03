@@ -5,7 +5,7 @@ ljg-map 生态地形图生成器：把一个行业画成「生态地形图」，
 
 用法：
   python3 gen_illustration.py --mold a --frame "<英文地形构图>" --out ~/Downloads/x_terrain.png
-  --mold  a = 动物森友会（默认） | c = pixel + cyber-hacker
+  --mold  a = 绘本地图·吉田诚治（默认，与 ljg-library 同源画风） | c = pixel + cyber-hacker（刻意出格）
   --frame 这个行业的地形构图（英文）：价值之河怎么流、哪里是收窄的瓶颈隘口（red 瓶颈牌）、
           哪里是利润沉淀的价值捕获点（gold 宝藏堆），各功能位是地形上的什么地貌，要哪几个中文地名标注。
           由 cast 按 deep research 出的「价值链 + 瓶颈 + 价值捕获」译成地形（见 references/research.md + visual.md）。
@@ -19,10 +19,14 @@ API = "https://api.marswave.ai/openapi/v1/images/generation"
 
 MOLDS = {
   "a": (
-    "Cozy illustration in the style of Nintendo's Animal Crossing: New Horizons. Soft rounded cartoon, warm and "
-    "friendly, gentle soft shadows, thick rounded outlines. Palette: cream/sand #f0ece2, teal water #19c8b9, "
-    "wood brown #725d42, sunny yellow #ffcc00, grass green #6fba2c, soft pink #f8a6b2. Leaf/wood/grass/water motifs; "
-    "cute wooden-sign hand-lettered Chinese labels."
+    "Warm painterly bird's-eye fantasy world-map in the style of Japanese background artist Yoshida Seiji (吉田誠治), "
+    "as in his art book ものがたりの家: a cozy hand-painted storybook map seen from above, soft digital painting with "
+    "rich environmental detail, solid believable terrain and accurate perspective, deep sense of place. Warm low-angle "
+    "sunlight rakes across the land, gentle glow and floating dust motes; honey / amber / wood-brown tones with muted "
+    "teal-green water and grass, soft cozy shadows. Painted mountains, valleys, rivers, harbors and little timbered "
+    "hamlets crammed with lived-in detail, real enough to live in; small neat hand-lettered Chinese labels that sit "
+    "naturally on the map. Painterly storybook illustration, NOT pixel art, NOT flat cartoon, NOT Animal-Crossing, "
+    "NOT a realistic photo."
   ),
   "c": (
     "16-bit PIXEL ART with a cyberpunk hacker aesthetic. Chunky pixels, dithering, dark near-black #0a0e14 ground "
@@ -33,7 +37,7 @@ MOLDS = {
 # 生态地形图专用：把行业画成俯瞰地形，价值之河 + 瓶颈隘口 + 价值捕获宝藏
 COMMON = (
   "Generate one standalone 16:9 horizontal bird's-eye ECOSYSTEM TERRAIN MAP illustration of an industry, like a "
-  "cozy game world map. {dna}\n"
+  "warm hand-painted storybook world map. {dna}\n"
   "Render the industry AS A LANDSCAPE/island terrain seen from above-ish: the flow of value is a RIVER or path "
   "winding across the terrain from upstream to downstream; each part of the industry is a piece of terrain "
   "(mountains, fields, harbors, forests, towns).\n"

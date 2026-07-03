@@ -1,6 +1,6 @@
 ---
 name: ljg-map
-description: "一个行业 → 一张生态地形图卡（PNG）。以《千脑智能》参考系理论为地基：把行业摊成一张可俯瞰的「生态地形」——价值像河一样流过地貌，再在地形上标出两处——「瓶颈」（流量/产能在此收窄的隘口/水坝）和「价值捕获点」（利润在此沉淀的宝藏堆）。地形让权力结构一眼可见：卡流量的地方常常不是钱沉淀的地方。配三个关键指标的 base rate（刻度）+ 三个「大问题」（前沿）。deep research 真联网，图用 AI 生图（默认 -a 动物森友会暖萌风，可选 -c pixel+cyber），继刚作小测量员立在地形上俯瞰。Use when user says '行业地图', '产业地图', '生态地形图', '画一下这个行业', 'industry map', 'map this industry', '行业版图', '产业链地图', '/ljg-map', or gives an industry/领域 name wanting its terrain mapped. 风格：默认 -a 动森，加 -c 走 cyber。NOT FOR 一个领域降秩找生成器（用 ljg-rank）、拆一本书（用 ljg-book）、单个项目投资分析（用 ljg-invest）、一个概念深钻（用 ljg-think）。"
+description: "一个行业 → 一张生态地形图卡（PNG）。以《千脑智能》参考系理论为地基：把行业摊成一张可俯瞰的「生态地形」——价值像河一样流过地貌，再在地形上标出两处——「瓶颈」（流量/产能在此收窄的隘口/水坝）和「价值捕获点」（利润在此沉淀的宝藏堆）。地形让权力结构一眼可见：卡流量的地方常常不是钱沉淀的地方。配三个关键指标的 base rate（刻度）+ 三个「大问题」（前沿）。deep research 真联网，图用 AI 生图（默认 -a 吉田诚治式绘本画风，与 ljg-library 同源；可选 -c pixel+cyber），继刚作小测量员立在地形上俯瞰。Use when user says '行业地图', '产业地图', '生态地形图', '画一下这个行业', 'industry map', 'map this industry', '行业版图', '产业链地图', '/ljg-map', or gives an industry/领域 name wanting its terrain mapped. 风格：默认 -a 绘本（同 ljg-library），加 -c 走 cyber。NOT FOR 一个领域降秩找生成器（用 ljg-rank）、拆一本书（用 ljg-book）、单个项目投资分析（用 ljg-invest）、一个概念深钻（用 ljg-think）。"
 user_invocable: true
 version: "2.1.0"
 ---
@@ -63,10 +63,10 @@ caption 一句话点破这张地形的权力结构（如「双头抽租：两处
 
 | mold | 参数 | 风格 |
 |------|------|------|
-| **动物森友会** | `-a`（默认） | 暖萌治愈、奶油/青/木/黄、圆角软卡通、小岛地形、木牌字 |
-| **pixel + cyber-hacker** | `-c` | 暗黑霓虹、16-bit 像素地形、CRT/glitch、终端字 |
+| **吉田诚治绘本地图（默认）** | `-a` | 与 ljg-library 同源画风：暖调手绘绘本油画、蜜糖/琥珀/木棕、低角度阳光斜射、俯瞰地形有质感、手写木牌字；非卡通非像素 |
+| **pixel + cyber-hacker** | `-c` | 刻意出格：暗黑霓虹、16-bit 像素地形、CRT/glitch、终端字 |
 
-两种都由 `assets/gen_illustration.py --mold a|c` 生成；继刚固定作小测量员立在地形高处俯瞰（从墨像参考生成，认得出他）。
+默认 `-a` 与 ljg-library 是一家人（同一套吉田诚治绘本 DNA），只是构图换成俯瞰地形图；`-c` 是刻意跳出 house style 的赛博变体。两种都由 `assets/gen_illustration.py --mold a|c` 生成；继刚固定作小测量员立在地形高处俯瞰（从墨像参考生成，认得出他）。
 
 ## 流程
 
@@ -79,7 +79,7 @@ caption 一句话点破这张地形的权力结构（如「双头抽租：两处
 4. 生图：python3 assets/gen_illustration.py --mold a --frame "<...>" --out /tmp/ljg_map_{slug}_terrain.png
 5. 提炼三个 base rate（指标 + 数值 + 这意味着）
 6. 提炼三个大问题
-7. 选 accent 色（动森挑暖色/草绿，见 visual.md）
+7. 选 accent 色（绘本 mold 挑蜜糖琥珀木棕暖色，见 visual.md）
 8. 填 assets/map_template.html 占位变量（{{MAP_IMG}} = file://生成图）
 9. 渲染（capture.js，fullpage）
 10. Read 成品 PNG 亲眼验（对照 visual.md 出厂自检），不行调 frame 重生 → 交付
@@ -94,7 +94,7 @@ caption 一句话点破这张地形的权力结构（如「双头抽租：两处
 
 | 变量 | 内容 |
 |------|------|
-| `{{ACCENT}}` | 卡身强调色 hex（动森挑暖色/草绿，如 `#5a9e1e`；cyber 挑霓虹色） |
+| `{{ACCENT}}` | 卡身强调色 hex（绘本 mold 挑蜜糖琥珀木棕暖色，如 `#c47a1a` / `#b8860b` / `#725d42`；cyber 挑霓虹色） |
 | `{{INDUSTRY}}` `{{EN}}` | 行业中文名 / 英文名 |
 | `{{TAGS}}` | 3-4 个核心环节/概念标签，每个 `<span class="tag">…</span>` |
 | `{{THESIS}}` | 参考系 thesis 句（摊成地形才看得见两处、二者常错位），关键词 `<span class="hl">` |
@@ -138,7 +138,7 @@ node ~/.claude/skills/ljg-card/assets/capture.js \
 - **图里堆精确细节**：生图画不好多标签和长数字。地名 3-6 个、每个 2-5 字（长地名容易糊）；数字和问题全走 HTML 文字块。
 - **frame 里地名用分号或顿号分隔**：` / ` 分隔中文标注会被安全钩子误判 BLOCK，不用斜杠。
 - **生图必看图**：同一个 frame 每次出的图都不一样，会糊中文地名、两处没标清、继刚不像。生成后必 Read 亲验，不行调 frame 重生；重生前把当前这张先存到别的路径。
-- **accent 是卡身色**：从 mold 调色板挑（动森暖色/草绿，cyber 霓虹）；地形图配色是生成图自带，两边不串。
+- **accent 是卡身色**：从 mold 调色板挑（绘本蜜糖琥珀木棕暖色，cyber 霓虹）；地形图配色是生成图自带，两边不串。
 - **/tmp 文件名带行业 slug**：并行铸卡时临时 HTML 和生成图都用唯一名，共享固定名会串图。
 - **批量管线**：`gen_illustration.py` 直调 marswave，不走 listenhub 交互门控，可进批量；每张都要联网、花 API 额度、亲眼验一回图，排任务留余地。
 - **研究扇出**：并发研究 agent 必须同步返回，禁挂 Monitor 后台漂着；批量错峰；关键数字落盘前抽样独立复核。
