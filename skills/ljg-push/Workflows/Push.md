@@ -62,7 +62,8 @@ bash ~/.codex/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
    - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，引用全局改写）
    - bump patch version
    - `git add` + `git commit` + `git push origin md`
-5. *Report*：列出推送结果 + 仍需手工 review 的差异清单
+5. *收尾*：切回 `master`，让本地工作 repo 留在源分支
+6. *Report*：列出推送结果 + 仍需手工 review 的差异清单
 
 ## Step 3: 报告
 
@@ -97,5 +98,6 @@ md     @ v1.0.8   → pushed
 
 - 两个分支都有新 commit（除非检测到无变更）
 - 远端 origin/master 和 origin/md 都更新
+- 本地 `$HOME/code/ljg-skills` 最后停在 `master`
 - 报告里列出版本号和推送的 skills
 - 任何 markdown 化未覆盖的差异都列在 review checklist 里

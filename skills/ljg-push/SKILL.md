@@ -27,6 +27,8 @@ REPO_URL="git@github.com:lijigang/ljg-skills.git"
 
 `~/.codex/skills/` 里的 skill 是 *master 风格*（源版本）。md 分支的差异由脚本自动转换 + 必要时手工补。
 
+脚本推完 `md` 后会自动切回 `master`。本地 `$HOME/code/ljg-skills` 应该始终停在源分支，方便下次查看和安装。
+
 ## 工作流
 
 按 `Workflows/Push.md` 步骤执行 → 调用 `Tools/Push.sh`。
@@ -86,6 +88,7 @@ User: /ljg-push
 → 检测 ~/.codex/skills/ljg-* 中跟 repo 有差异的 skills
 → master: rsync + bump version + commit + push
 → md: rsync + mdize + bump version + commit + push
+→ 切回 master
 → 报告：哪些 skills 推了，新版本号，剩余手工差异
 ```
 

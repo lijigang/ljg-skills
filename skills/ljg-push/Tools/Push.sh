@@ -321,6 +321,21 @@ check_readme() {
   exit 1
 }
 
+# Keep the working repo on the source branch after every successful push.
+return_to_master() {
+  cd "$SKILLS_REPO" || return 0
+  local current_branch
+  current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if [ "$current_branch" = "master" ]; then
+    return 0
+  fi
+  if git checkout master >/dev/null 2>&1; then
+    ok "repo left on master"
+  else
+    warn "could not switch back to master; check uncommitted changes in $SKILLS_REPO"
+  fi
+}
+
 # === Main ===
 
 setup_repo
@@ -354,6 +369,7 @@ fi
 # (mdize transformations create per-branch divergence from the org-style local).
 push_branch master 0 "feat"
 push_branch md     1 "feat(md)"
+return_to_master
 
 log ""
 log "Done."
