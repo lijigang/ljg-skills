@@ -128,5 +128,5 @@ node ~/.claude/skills/ljg-card/assets/capture.js \
 - **主角风格化，不追同一张脸**：从墨像参考生成，认得出即可。不做真墨像贴脸合成。
 - **两套色不串**：卡身强调色从封面提取；图解板背景是生成图自带的。
 - **/tmp 文件名带 slug**：并行铸卡时生成图、封面、头像都用唯一路径（带书 slug），共享固定名会串图。
-- **批量管线**：`gen_illustration.py` 直调 marswave gemini-3-pro，不走 listenhub 的交互门控，所以 ljg-paper-flow 批量铸卡能用。每张都要联网、花 API 额度、亲眼验一回图，比纯模板慢，批量排任务时留余地。
+- **生图成本**：`gen_illustration.py` 直调 marswave gemini-3-pro，不走 listenhub 的交互门控。每张都要联网、花 API 额度、亲眼验一回图，比纯模板慢，批量排任务时留余地。
 - **{{FRAME}} 写的是看法怎么被改动，不是内容摘要**：句式是「原来不是 X，其实是 Y」，不写「本书讲了什么」。检验：删掉书名和作者，这句话还能独立站住，才算提炼到位。

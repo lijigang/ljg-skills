@@ -40,9 +40,7 @@ version: "x.x.x"
 |-------|---------|----------------------|
 | `ljg-card` | Content → PNG visuals (long cards, infographs, posters) | Node.js + Playwright |
 | `ljg-paper` | Academic paper analysis pipeline | None |
-| `ljg-paper-flow` | Paper workflow (paper + card combined) | None |
 | `ljg-plain` | Plain language rewriter | None |
-| `ljg-skill-map` | Visual overview of installed skills | Bash |
 | `ljg-word` | English word deep-dive | None |
 | `ljg-writes` | Writing engine for thinking through ideas | None |
 
@@ -54,12 +52,6 @@ version: "x.x.x"
 
 ```bash
 cd ljg-card && npm install && npx playwright install chromium
-```
-
-### Test ljg-skill-map Scanner
-
-```bash
-bash ljg-skill-map/scripts/scan.sh
 ```
 
 ### Install Skills (for users)
