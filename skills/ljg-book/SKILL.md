@@ -1,6 +1,6 @@
 ---
 name: ljg-book
-description: "Book reader for one durable takeaway. Turns a book into one book-grounded change in what the reader notices, asks, does, or refrains from doing. USE WHEN the user gives a book title, PDF, excerpt, or asks 拆书, 分析这本书, 这本书在讲什么, 压缩一本书, or book. Defaults to a saved org note. NOT FOR chapter summaries, papers, single-idea deep dives, or field ranking."
+description: "Book reader for one durable takeaway. Turns a book into one book-grounded change in what the reader notices, asks, does, or refrains from doing. USE WHEN the user gives a book title, PDF, excerpt, or asks 拆书, 分析这本书, 这本书在讲什么, 压缩一本书, or book. Defaults to a saved Markdown note. NOT FOR chapter summaries, papers, single-idea deep dives, or field ranking."
 user_invocable: true
 ---
 
@@ -16,22 +16,22 @@ user_invocable: true
 
 | 输入 | 必读 | 输出 |
 |---|---|---|
-| 书名 | 查到可靠材料后读 `ReadingGuide.md` | 保存 org 笔记 |
-| PDF、正文、样章、旧笔记 | 先读材料，再读 `ReadingGuide.md` | 保存 org 笔记 |
+| 书名 | 查到可靠材料后读 `ReadingGuide.md` | 保存 Markdown 笔记 |
+| PDF、正文、样章、旧笔记 | 先读材料，再读 `ReadingGuide.md` | 保存 Markdown 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一路径讲 |
 
-写 org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
+写 Markdown 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
 
-文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.org`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
+文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
 ## Completion Target
 
 每份笔记最后只落下一种变化：
 
-- *看见*：以前忽略什么，以后会注意什么。
-- *提问*：以前先问什么，以后换成什么问题。
-- *行动*：以前先做什么，以后换一个小动作。
-- *克制*：以前会自动做什么，以后先停一下。
+- **看见**：以前忽略什么，以后会注意什么。
+- **提问**：以前先问什么，以后换成什么问题。
+- **行动**：以前先做什么，以后换一个小动作。
+- **克制**：以前会自动做什么，以后先停一下。
 
 用一句「变化句」检验：
 
@@ -41,14 +41,14 @@ user_invocable: true
 
 ## Gotchas
 
-- *全书中心可能太大。* 不必带走最宏大的命题；优先选择最可能改变下一个具体时刻的小东西。
-- *一个框架仍可能装得太多。* 如果结果要求记住四步、四问或整张清单，继续缩，直到只剩一个触发和一个新反应。
-- *可执行不等于有影响。* 文学、传记和回忆录常改变注意力或判断，不要改写成效率工具。
-- *术语不是记忆锚。* 必须找到一个场景、实验、人物片段、区分或比喻，让收获有具体载体。
-- *不要伪造「对我」。* 上下文有读者的真实问题就接上；没有就写可观察的普通情境，不编生活故事。
-- *边界不要另起炉灶。* 只在变化容易误用时，紧接着补一句「别在什么情况下用」。
-- *材料薄就少说。* 只有目录、访谈或书评时标为「初拆」；证据更薄时标为「假设版」。
-- *允许没有宏大收获。* 一处更准确的注意、一个少犯的错误，也比硬造人生启示有价值。
+- **全书中心可能太大。** 不必带走最宏大的命题；优先选择最可能改变下一个具体时刻的小东西。
+- **一个框架仍可能装得太多。** 如果结果要求记住四步、四问或整张清单，继续缩，直到只剩一个触发和一个新反应。
+- **可执行不等于有影响。** 文学、传记和回忆录常改变注意力或判断，不要改写成效率工具。
+- **术语不是记忆锚。** 必须找到一个场景、实验、人物片段、区分或比喻，让收获有具体载体。
+- **不要伪造「对我」。** 上下文有读者的真实问题就接上；没有就写可观察的普通情境，不编生活故事。
+- **边界不要另起炉灶。** 只在变化容易误用时，紧接着补一句「别在什么情况下用」。
+- **材料薄就少说。** 只有目录、访谈或书评时标为「初拆」；证据更薄时标为「假设版」。
+- **允许没有宏大收获。** 一处更准确的注意、一个少犯的错误，也比硬造人生启示有价值。
 
 ## Quick Reference
 
@@ -60,16 +60,16 @@ user_invocable: true
 
 开头固定三行：
 
-1. `- *问题*：...`
-2. `- *洞见*：...`
-3. `- *变化*：下次当 X 出现，我先 Z，而不是 Y。`
+1. `- **问题**：...`
+2. `- **洞见**：...`
+3. `- **变化**：下次当 X 出现，我先 Z，而不是 Y。`
 
 顶层章节固定为：
 
-1. `* 它在解决什么`
-2. `* 它让我看见什么`
-3. `* 下一次，哪里会不同`
-4. `* 资料校准`
+1. `# 它在解决什么`
+2. `# 它让我看见什么`
+3. `# 下一次，哪里会不同`
+4. `# 资料校准`
 
 ## Examples
 
