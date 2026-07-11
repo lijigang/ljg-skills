@@ -1,18 +1,18 @@
 ---
 name: ljg-push
-description: 把 ~/.codex/skills/ljg-* 里所有更新过的 skills 同步到 github repo (ljg-skills)，先推 master 分支（markdown 输出风格），再切 md 分支（markdown 输出风格）做基础 markdown 化后推。Use when user says '/ljg-push', 'push skills', '推送 skills', '同步 skills', 'sync ljg', or whenever ljg-* skills get updated and need shipping. NOT FOR pushing non-ljg skills or arbitrary git repos.
+description: 把 ~/.agents/skills/ljg-* 里所有更新过的 skills 同步到 github repo (ljg-skills)，先推 master 分支（markdown 输出风格），再切 md 分支（markdown 输出风格）做基础 markdown 化后推。Use when user says '/ljg-push', 'push skills', '推送 skills', '同步 skills', 'sync ljg', or whenever ljg-* skills get updated and need shipping. NOT FOR pushing non-ljg skills or arbitrary git repos.
 user_invocable: true
 ---
 
 # ljg-push: 推送 ljg-* skills
 
-把本地 `~/.codex/skills/ljg-*` 里改过的 skills，一键同步到 github repo，覆盖 master 和 md 两个分支。
+把本地 `~/.agents/skills/ljg-*` 里改过的 skills，一键同步到 github repo，覆盖 master 和 md 两个分支。
 
 ## 仓库路径（硬编码）
 
 ```
 SKILLS_REPO="$HOME/code/ljg-skills"     # 本地工作 repo
-SKILLS_LOCAL="$HOME/.codex/skills"      # 本地 skill 源
+SKILLS_LOCAL="$HOME/.agents/skills"      # 本地 skill 源
 REPO_URL="git@github.com:lijigang/ljg-skills.git"
 ```
 
@@ -25,7 +25,7 @@ REPO_URL="git@github.com:lijigang/ljg-skills.git"
 | `master`（默认） | markdown | `.org` | `*bold*` | `#+title:` 等 |
 | `md` | markdown | `.md` | `**bold**` | YAML frontmatter |
 
-`~/.codex/skills/` 里的 skill 是 *master 风格*（源版本）。md 分支的差异由脚本自动转换 + 必要时手工补。
+`~/.agents/skills/` 里的 skill 是 *master 风格*（源版本）。md 分支的差异由脚本自动转换 + 必要时手工补。
 
 脚本推完 `md` 后会自动切回 `master`。本地 `$HOME/code/ljg-skills` 应该始终停在源分支，方便下次查看和安装。
 
@@ -37,7 +37,7 @@ REPO_URL="git@github.com:lijigang/ljg-skills.git"
 
 每次 push 前，脚本强制做一件事：*把 README 跟 local skills 对一遍*。
 
-- 列出 `~/.codex/skills/ljg-*` 全部 skill 名
+- 列出 `~/.agents/skills/ljg-*` 全部 skill 名
 - grep `$SKILLS_REPO/README.md` 里出现的 `ljg-xxx`
 - 找出 local 有但 README 没有的——*几乎肯定意味着 README 漏更新*
 - 命中 → push 中止，报告差异
@@ -85,7 +85,7 @@ curl -s -X POST http://localhost:31337/notify \
 
 ```
 User: /ljg-push
-→ 检测 ~/.codex/skills/ljg-* 中跟 repo 有差异的 skills
+→ 检测 ~/.agents/skills/ljg-* 中跟 repo 有差异的 skills
 → master: rsync + bump version + commit + push
 → md: rsync + mdize + bump version + commit + push
 → 切回 master
@@ -110,4 +110,4 @@ User: /ljg-push --dry-run
 - *org 文件本体已自动转换（2026-06-12 起）*——template.md 等会被转成 .md 并删除原件，每次推送重新生成（rsync --delete 冲掉也无妨，幂等）。遗留手工项只剩正文里的 `*bold*` 标记。新增带复杂构件的 org reference 文件后，先 `--dry-run` 或沙盒跑一遍 mdize 看转换效果
 - *脚本会自动 bump patch version 在 plugin.json + marketplace.json*——如果你想 bump minor / major，先手动改完再跑脚本，脚本只追加 patch
 - *如果 md 分支的远端比本地新（继刚另一台机器推过）*，脚本会 `pull --rebase` 失败时尝试一次 `reset --hard origin/md` 重新应用——这会丢弃本地未推的 md 分支 commit。脚本前会提示
-- *当前路径*：skill 源固定在 `~/.codex/skills/`，工作 repo 固定在 `~/code/ljg-skills/`；不要从历史备份目录读取或推送
+- *当前路径*：skill 源固定在 `~/.agents/skills/`，工作 repo 固定在 `~/code/ljg-skills/`；不要从历史备份目录读取或推送

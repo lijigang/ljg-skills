@@ -25,7 +25,7 @@ curl -s -X POST http://localhost:31337/notify \
 2. *删了 skill 吗*？ → README 对应行要删
 3. *某个 skill 的描述大改了吗*？ → README 的简介可能要同步
 
-脚本会自动 grep README 里所有 `ljg-xxx` 名字，跟 `~/.codex/skills/ljg-*` 对比。如果有 skill 在 local 但不在 README，*push 直接中止*。
+脚本会自动 grep README 里所有 `ljg-xxx` 名字，跟 `~/.agents/skills/ljg-*` 对比。如果有 skill 在 local 但不在 README，*push 直接中止*。
 
 绕过办法（仅当你确认 README 已经审过、不需要更新）：
 
@@ -45,13 +45,13 @@ bash Push.sh --skip-readme-check
 ## Step 2: 执行脚本
 
 ```bash
-bash ~/.codex/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
+bash ~/.agents/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
 ```
 
 脚本逻辑：
 
 1. *Setup*：检查 `$HOME/code/ljg-skills` 是否存在，不存在则 clone
-2. *Detect*：对比 `~/.codex/skills/ljg-*` vs `repo/skills/ljg-*`，列出有差异的
+2. *Detect*：对比 `~/.agents/skills/ljg-*` vs `repo/skills/ljg-*`，列出有差异的
 3. *Master 推送*：
    - `git checkout master` + `git pull --rebase`
    - 对每个有差异的 skill：`rsync -a --delete --exclude='.git'`
@@ -92,7 +92,7 @@ md     @ v1.0.8   → pushed
 | 路径存在但不是 ljg-skills repo | 报错，不破坏现有目录 |
 | `git push` 被远端拒（远端有新 commit）| 尝试 `pull --rebase`，再推；冲突时报错让用户处理 |
 | `git pull --rebase` 冲突 | 报错，列出冲突文件，提示 `rebase --abort` 或手工解决 |
-| `~/.codex/skills/ljg-*` 没有任何变更 | 输出 "Nothing to push." 退出 |
+| `~/.agents/skills/ljg-*` 没有任何变更 | 输出 "Nothing to push." 退出 |
 
 ## 验收
 
