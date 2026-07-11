@@ -49,7 +49,7 @@ bunx skills add lijigang/ljg-skills -l
 | 参数 | 作用 |
 |------|------|
 | `-a codex` | 只安装给 Codex |
-| `-g` | 全局安装到 `~/.codex/skills/`（推荐）；不加则安装到项目级 `.agents/skills/` |
+| `-g` | 全局安装到 `~/.agents/skills/`（推荐）；不加则安装到项目级 `.agents/skills/` |
 | `--skill <name>` | 指定安装某个技能，可重复使用 |
 | `--skill '*'` | 安装仓库内全部技能 |
 | `#md` | 从 `md` branch 安装 Markdown 格式版本 |
@@ -61,7 +61,7 @@ bunx skills add lijigang/ljg-skills -l
 `ljg-card` 依赖 Playwright 截图，安装后需额外执行：
 
 ```bash
-cd ~/.codex/skills/ljg-card && bun install && bunx playwright install chromium
+cd ~/.agents/skills/ljg-card && bun install && bunx playwright install chromium
 ```
 
 ### 替代方式：git clone
@@ -71,13 +71,13 @@ cd ~/.codex/skills/ljg-card && bun install && bunx playwright install chromium
 ```bash
 # org-mode 版本（master）
 git clone --branch master --depth 1 https://github.com/lijigang/ljg-skills.git "$HOME/code/ljg-skills"
-mkdir -p "$HOME/.codex/skills"
-rsync -a "$HOME/code/ljg-skills/skills/" "$HOME/.codex/skills/"
+mkdir -p "$HOME/.agents/skills"
+rsync -a "$HOME/code/ljg-skills/skills/" "$HOME/.agents/skills/"
 
 # Markdown 版本（md）
 git clone --branch md --depth 1 https://github.com/lijigang/ljg-skills.git "$HOME/code/ljg-skills-md"
-mkdir -p "$HOME/.codex/skills"
-rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.codex/skills/"
+mkdir -p "$HOME/.agents/skills"
+rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.agents/skills/"
 ```
 
 ## 技能
@@ -103,4 +103,4 @@ rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.codex/skills/"
 | **ljg-relationship** | 关系分析 — 五层结构诊断 + 精神分析，通过对话引导帮用户"看见"关系真实结构 |
 | **ljg-roundtable** | 圆桌讨论 — 一个议题一场圆桌：真实人物逐轮交锋，每轮收一张 ASCII 结构图，散场全文存档 |
 | **ljg-present** | 演讲铸造器 — 默认高桥流（一页一关键词、奶白底墨字）；`-s` 标语流（VACAT/BIG STUDIOS 风：黑红双色块、ultra-bold、完整断言句撑屏）|
-| **ljg-push** | 推送引擎 — 把本地 `~/.codex/skills/ljg-*` 一键同步到 github repo（master + md 双分支）|
+| **ljg-push** | 推送引擎 — 把本地 `~/.agents/skills/ljg-*` 一键同步到 github repo（master + md 双分支）|
