@@ -1,6 +1,6 @@
 ---
 name: ljg-paper
-description: "Paper reader for non-academics. Turns one paper into one clear proposition: the problem, the paper's insight, and the judgment or action the reader can carry away. USE WHEN the user shares an arXiv link OR paper URL OR PDF OR local paper file OR paper title, or asks to read, explain, analyze, or understand a paper. Defaults to a saved Markdown note. NOT FOR experiment reproduction, exhaustive method summaries, formal peer review, benchmark tables, or literature surveys."
+description: "Paper reader for non-academics. Turns one paper into one clear proposition: the problem, the paper's insight, and the judgment or action the reader can carry away. USE WHEN the user shares an arXiv link OR paper URL OR PDF OR local paper file OR paper title, or asks to read, explain, analyze, or understand a paper. Defaults to a saved org note. NOT FOR experiment reproduction, exhaustive method summaries, formal peer review, benchmark tables, or literature surveys."
 ---
 
 # ljg-paper：读完只带走一件事
@@ -13,11 +13,11 @@ description: "Paper reader for non-academics. Turns one paper into one clear pro
 
 | 输入 | 必读 | 输出 |
 |---|---|---|
-| arXiv、PDF、paper URL、本地论文 | `ReadingGuide.md` | 按四段结构生成 Markdown 笔记 |
-| 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 按四段结构生成 Markdown 笔记 |
+| arXiv、PDF、paper URL、本地论文 | `ReadingGuide.md` | 按四段结构生成 org 笔记 |
+| 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 按四段结构生成 org 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一理解路径讲 |
 
-写 Markdown 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
+写 org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
 
 文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
@@ -39,10 +39,10 @@ description: "Paper reader for non-academics. Turns one paper into one clear pro
 
 顶层章节固定为：
 
-1. `# 速读`
-2. `# 它到底在解决什么`
-3. `# 它真正看见了什么`
-4. `# 我能带走什么`
+1. `* 速读`
+2. `* 它到底在解决什么`
+3. `* 它真正看见了什么`
+4. `* 我能带走什么`
 
 ## Examples
 
