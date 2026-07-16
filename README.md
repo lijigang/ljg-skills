@@ -102,5 +102,6 @@ rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.agents/skills/"
 | **ljg-read** | 伴读 — 陪你读任何文本，英文三层翻译（信达雅）+ 结构标注 + 深度提问 + 跨领域旁逸 |
 | **ljg-relationship** | 关系分析 — 五层结构诊断 + 精神分析，通过对话引导帮用户"看见"关系真实结构 |
 | **ljg-roundtable** | 圆桌讨论 — 一个议题一场圆桌：真实人物逐轮交锋，每轮收一张 ASCII 结构图，散场全文存档 |
+| **ljg-structure** | 母题结构风洞 — 从表层问题找到反复出现的母题，提炼可迁移结构，用 ASCII 图说明关系并设计最小可逆实验 |
 | **ljg-present** | 演讲铸造器 — 默认高桥流（一页一关键词、奶白底墨字）；`-s` 标语流（VACAT/BIG STUDIOS 风：黑红双色块、ultra-bold、完整断言句撑屏）|
 | **ljg-push** | 推送引擎 — 把本地 `~/.agents/skills/ljg-*` 一键同步到 github repo（master + md 双分支）|
