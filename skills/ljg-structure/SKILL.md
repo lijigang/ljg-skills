@@ -47,7 +47,7 @@ user_invocable: true
 
 默认取得两个时间值：`date +%Y%m%dT%H%M%S` 与 `date "+%Y-%m-%d %a %H:%M"`。写入：
 
-`~/Documents/notes/{时间戳}--结构-{主题}__structure.org`
+`~/Documents/notes/{时间戳}--结构-{主题}__structure.md`
 
 若用户明确说「只分析」「不落盘」或 `read-only`，直接在对话中给出同等完整的分析，不创建文件。
 
