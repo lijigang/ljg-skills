@@ -177,6 +177,7 @@ mdize_skill() {
       -e 's/__think\.org/__think.md/g' \
       -e 's/__concept\.org/__concept.md/g' \
       -e 's/__rank\.org/__rank.md/g' \
+      -e 's/__structure\.org/__structure.md/g' \
       -e 's/__constraint\.org/__constraint.md/g' \
       -e 's/__plain\.org/__plain.md/g' \
       -e 's/__blind\.org/__blind.md/g' \
