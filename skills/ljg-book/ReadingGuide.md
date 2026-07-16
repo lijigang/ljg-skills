@@ -139,7 +139,7 @@ ASCII 图放进：
 
 保存到：
 
-`~/Documents/notes/{时间戳}--拆书-{书名}__book.org`
+`~/Documents/notes/{时间戳}--拆书-{书名}__book.md`
 
 时间戳：
 
@@ -148,12 +148,14 @@ ASCII 图放进：
 
 文件头：
 
-```org
-#+TITLE: 拆书：《{书名}》
-#+SUBTITLE: {作者} | {一句话 f}
-#+DATE: [{YYYY-MM-DD Day HH:MM}]
-#+FILETAGS: :book:{领域}:
-#+IDENTIFIER: {YYYYMMDDTHHMMSS}
+```markdown
+---
+title: 拆书：《{书名}》
+subtitle: {作者} | {一句话 f}
+date: [{YYYY-MM-DD Day HH:MM}]
+tags: [book, {领域}]
+identifier: {YYYYMMDDTHHMMSS}
+---
 ```
 
 ## 9. 文风

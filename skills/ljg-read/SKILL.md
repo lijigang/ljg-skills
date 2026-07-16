@@ -212,7 +212,7 @@ version: "1.0.0"
 
 1. 运行 `date +%Y%m%dT%H%M%S` 获取时间戳
 2. 运行 `date "+%Y-%m-%d %a %H:%M"` 获取可读时间
-3. 写入 `~/Documents/notes/{时间戳}--伴读-{文本关键词}__reading.org`
+3. 写入 `~/Documents/notes/{时间戳}--伴读-{文本关键词}__reading.md`
 
 Org 文件结构：
 ```org

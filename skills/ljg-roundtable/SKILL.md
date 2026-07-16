@@ -95,13 +95,15 @@ Assistant: [就自由意志展开圆桌]
 讨论全文写进 org 文件，一字不差。发言、ASCII 图、综述，全部原文照录，不摘要，不压缩，不改写。
 
 1. `date +%Y%m%dT%H%M%S` 取时间戳
-2. 写入 `~/Documents/notes/{timestamp}--圆桌-{议题关键词}__roundtable.org`
+2. 写入 `~/Documents/notes/{timestamp}--圆桌-{议题关键词}__roundtable.md`
 3. 文件结构：
 
-   ```org
-   #+title: 圆桌：{议题}
-   #+date: [{日期}]
-   #+filetags: :roundtable:
+   ```markdown
+   ---
+   title: 圆桌：{议题}
+   date: [{日期}]
+   tags: [roundtable]
+   ---
    * 议题与参会者
    [人物名单：姓名、MBTI、立场、入选理由]
    * 开场：定义

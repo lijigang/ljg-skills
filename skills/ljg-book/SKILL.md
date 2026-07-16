@@ -24,7 +24,7 @@ user_invocable: true
 
 写 org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
 
-文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.org`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
+文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
 ## Completion Target
 
