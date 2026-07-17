@@ -104,9 +104,27 @@ curl -s -X POST https://i.weread.qq.com/api/agent/gateway \
 
 3. **估时长**——`wordCount / 280`（中文阅读速度）向上圆到 5 的倍数。无 wordCount 就按目录感觉在 15-45 分钟之间估一个；标题带「上篇/下篇」「卷一」这类宏观词，时长再 ×1.5。
 
-4. **构造链接**：`weread://reading?bId={bookId}&chapterUid={chapterUid}`
+4. **构造网页版链接**——微信读书网页阅读器不接受裸 `bookId` / `chapterUid`，必须先编码。用技能自带工具生成：
 
-**兜底**：搜索全空 / 没对症章节 → 选整本相关书，链接退到 `weread://reading?bId={bookId}`，文里说明为什么没能精准到章。
+```bash
+bun "${HOME}/.agents/skills/ljg-blind/Tools/WeReadWebUrl.ts" "<bookId>" "<chapterUid>"
+```
+
+工具输出形如：
+
+```text
+https://weread.qq.com/web/reader/{encodedBookId}k{encodedChapterUid}
+```
+
+把输出的完整 URL 写进笔记。不要手拼编码值，也不要把裸 ID 直接塞进 `/web/reader/`。
+
+**兜底**：搜索全空 / 没对症章节 → 选整本相关书，只传 bookId 生成网页版书籍入口：
+
+```bash
+bun "${HOME}/.agents/skills/ljg-blind/Tools/WeReadWebUrl.ts" "<bookId>"
+```
+
+文里说明为什么没能精准到章。
 
 ### 第五步 · 写笔记
 
@@ -131,7 +149,7 @@ curl -s -X POST https://i.weread.qq.com/api/agent/gateway \
 - 书：《书名》 — 作者
 - 章节：<章节标题>
 - 时长：约 N 分钟
-- 链接：[[weread://reading?bId=XXX&chapterUid=YYY][在微信读书打开]]
+- 链接：[[https://weread.qq.com/web/reader/ENCODED_BOOKkENCODED_CHAPTER][在微信读书网页版阅读本章]]
 - 为什么是它：<3-4 句。把盲区和这一章对上——这章具体讲什么、怎么补这个盲区。不要泛泛说"开阔视野"，要说清这一章的哪个东西正对这个盲区的哪个缺口。>
 ```
 
@@ -159,10 +177,16 @@ curl -s -X POST https://i.weread.qq.com/api/agent/gateway \
 
 - 盲区有具体证据吗？每一处都能指到昨天哪几句话？没有就退回第三步。
 - 只选了 1 个盲区、说透了吗？还是贪多点了三四个？
-- 章节链接里 bookId 和 chapterUid 都不为空、格式对？
+- 章节链接以 `https://weread.qq.com/web/reader/` 开头，并由工具用非空 bookId、chapterUid 生成？
+- 全文没有残留只能唤起移动 App 的专用协议链接？
 - 翻译腔查了吗？名词化、「是…的」句、可省的连词，扫一遍。
 - 切痕风金属比喻查了吗？「这一刀」「钉死」「砸实」一个不留。
 - 三段都有内容、不空段？
+
+## Gotchas
+
+- **网页版 reader 路径使用编码 ID。** `https://weread.qq.com/web/reader/573976?chapterUid=13` 会返回 404；必须用 `Tools/WeReadWebUrl.ts` 分别编码 bookId 与 chapterUid，再用 `k` 连接。
+- **章节定位不放在 query 参数。** 正确形态是 `/web/reader/{encodedBookId}k{encodedChapterUid}`；省掉章节编码只会打开整本书入口。
 
 ## 和「早信」的分工
 

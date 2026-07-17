@@ -2,7 +2,7 @@
   "name": "ljg-skills",
   "displayName": "LJG Skills Collection",
   "description": "Personal Claude Code skills collection for paper reading, content casting, and writing workflows",
-  "version": "1.17.68",
+  "version": "1.17.69",
   "owner": {
     "name": "lijigang",
     "url": "https://github.com/lijigang"
@@ -27,7 +27,7 @@
     {
       "name": "ljg-skills",
       "description": "LJG's personal Claude Code skills collection",
-      "version": "1.17.68",
+      "version": "1.17.69",
       "source": "./"
     }
   ]
