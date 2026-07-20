@@ -139,7 +139,7 @@ ASCII 图放进：
 
 保存到：
 
-`~/Documents/notes/{时间戳}--拆书-{书名}__book.md`
+`D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/{时间戳}--拆书-{书名}__book.md`
 
 时间戳：
 

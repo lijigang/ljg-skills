@@ -27,7 +27,7 @@ version: "6.3.0"
 - 时间戳：`date +%Y%m%dT%H%M%S`
 - 可读时间：`date "+%Y-%m-%d %a %H:%M"`
 - 文件名：`{时间戳}==z--{标题关键词}__write.md`
-- 输出目录：`~/Documents/notes/`
+- 输出目录：`D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/`
 
 ### Markdown 文件头
 
@@ -37,7 +37,7 @@ title:      {标题}
 date:       [{YYYY-MM-DD Day HH:MM}]
 tags:       [write]
 identifier: {YYYYMMDDTHHMMSS}
-author:     李继刚
+author:     
 ---
 ```
 
@@ -158,5 +158,5 @@ author:     李继刚
 1. 初稿 + 中文重写，两稿择优
 2. `date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"` 获取时间戳
 3. 从观点中提取关键词作为标题
-4. 写入 `~/Documents/notes/{时间戳}==z--{标题关键词}__write.md`
+4. 写入 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/{时间戳}==z--{标题关键词}__write.md`
 5. 报告路径

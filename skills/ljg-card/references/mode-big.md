@@ -19,7 +19,7 @@ Read `assets/big_template.html`
 - 和紙卡片 1036x1396 + 多重 radial-gradient 云晕 + SVG noise 纸张颗粒
 - `<filter id="weathered">` feTurbulence + feDisplacementMap 做旧滤镜（已配置 baseFrequency=0.82, scale=1.8）
 - `.main-text` 默认衬线碑刻字（Noto Serif SC 900 + 刻痕 text-shadow）
-- `.signature` 左下署名栏（logo + 李继刚）
+- `.signature` 左下署名栏（logo）
 - 模板变量：`{{FONT_SIZE}}` `{{MAIN_TEXT}}` `{{SOURCE_LINE}}` `{{CUSTOM_CSS}}`
 
 ## 步骤 2：理解内容
@@ -134,7 +134,7 @@ Read `assets/big_template.html`
 - [ ] 颜色是 `--ink` (#2C2826) 墨色，不是纯黑？
 - [ ] 和紙底色 `--paper` (#F4EFE6)，有云晕纹理？
 - [ ] 外层暗底 22px 形成阴影边框？
-- [ ] 左下署名栏在（logo + 李继刚）？
+- [ ] 左下署名栏在（logo）？
 - [ ] 朱砂高亮 ≤ 1 处？
 - [ ] 整体看：重、旧、悬，三样都在？
 

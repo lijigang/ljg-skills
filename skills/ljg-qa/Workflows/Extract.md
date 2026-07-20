@@ -138,7 +138,7 @@ denote schema 文件名：`{YYYYMMDDTHHMMSS}--qa-{主题}__qa.md`
 - 主题：核心论点的 5-10 字提炼，去标点。优先用方法名/概念名/灵魂句关键字
 - `__qa` 后缀：keyword tag，便于 denote 搜索
 
-输出路径：`~/Documents/notes/`
+输出路径：`D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/`
 
 写入后报告路径给用户。
 

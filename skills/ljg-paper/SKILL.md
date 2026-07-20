@@ -17,7 +17,7 @@ description: "Paper reader for non-academics. Turns one paper into one clear pro
 | 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 按四段结构生成 org 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一理解路径讲 |
 
-写 org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
+写 md 文件时再读 `references/template.md`。默认保存到 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/`。
 
 文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 

@@ -112,7 +112,7 @@ curl -s -X POST https://i.weread.qq.com/api/agent/gateway \
 
 获取时间戳：`date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"`（时间用当前，不是 target）。
 
-写入 `~/Documents/notes/{时间戳}--盲区-{主题}__blind.md`。markdown 格式，禁止 markdown 语法。
+写入 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/{时间戳}--盲区-{主题}__blind.md`。markdown 格式，禁止 markdown 语法。
 
 正文模板：
 

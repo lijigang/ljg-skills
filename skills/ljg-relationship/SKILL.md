@@ -195,7 +195,7 @@ Assistant: [识别"反复出现的模式"信号，启动结构+精神分析双�
 
 将分析整合为 markdown 格式并写入文件：
 1. 运行 `date +%Y%m%dT%H%M%S` 获取时间戳
-2. 写入 `~/Documents/notes/{timestamp}--关系分析-{关键词}__relationship.md`
+2. 写入 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/{timestamp}--关系分析-{关键词}__relationship.md`
 
 org 文件结构：
 ```org

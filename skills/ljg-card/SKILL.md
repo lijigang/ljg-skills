@@ -51,7 +51,7 @@ npm install playwright && npx playwright install chromium
 
 ### Footer
 
-- 左侧：logo + 李继刚（模板已硬编码）
+- 左侧：logo（模板已硬编码）
 - 右侧：内容来源，可选。有明确来源（作者名、arxiv ID、网站名）就填 `{{SOURCE_LINE}}`：`<span class="info-source">来源文字</span>`；没有就留空字符串。适用于 `-l`、`-i`、`-v`、`-c`、`-w`（`-m` 多卡无 footer）。
 
 ### 交付

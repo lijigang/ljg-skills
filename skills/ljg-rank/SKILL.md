@@ -480,5 +480,5 @@ A ---> B ---> C ---> D
 ## 输出
 
 1. 获取时间戳：`date +%Y%m%dT%H%M%S` 和 `date "+%Y-%m-%d %a %H:%M"`
-2. 写入 `~/Documents/notes/{时间戳}--{领域}的秩__rank.md`
+2. 写入 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/{时间戳}--{领域}的秩__rank.md`
 3. 报告文件路径给用户

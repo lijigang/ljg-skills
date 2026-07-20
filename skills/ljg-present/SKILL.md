@@ -152,7 +152,7 @@ Validator 负责静态契约：模板版本、JS 语法、标题 cover、header/
 ### Example 1：常规 outline 演示
 
 ```text
-User: 用 ljg-present 讲这个 ~/Documents/notes/talk.org
+User: 用 ljg-present 讲这个 D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/talk.md
 → 读取 Generate workflow、RenderingSpec 与 SloganTemplate
 → 保留全部 outline，生成标题 cover 与 black/red/yellow 主题页面
 → 运行 ValidateDeck，再输出 ~/Downloads/<title>.html

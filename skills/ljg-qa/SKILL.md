@@ -57,7 +57,7 @@ Running **Extract** in **ljg-qa**...
 ## 输出
 
 - 格式：markdown（`*bold*`，禁 markdown 语法）
-- 路径：`~/Documents/notes/`
+- 路径：`D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/`
 - denote 文件名：`{YYYYMMDDTHHMMSS}--qa-{核心主题 5-10 字}__qa.md`
 
 ## Examples

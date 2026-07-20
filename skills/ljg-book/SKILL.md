@@ -22,7 +22,7 @@ user_invocable: true
 | PDF、正文、样章、旧笔记 | 先读材料，再读 `ReadingGuide.md` | 保存 org 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一路径讲 |
 
-写 org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
+写 md 文件时再读 `references/template.md`。默认保存到 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/`。
 
 文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
