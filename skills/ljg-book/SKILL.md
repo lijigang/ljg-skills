@@ -30,7 +30,7 @@ user_invocable: true
 
 开头先给三行极简结论：
 
-```org
+```yaml
 - *x*：{作者在讨论什么问题}
 - *f*：{作者用什么核心回答处理 x}
 - *f(x)*：{接受 f 后，面对 x 应如何回应}
@@ -61,7 +61,7 @@ user_invocable: true
 
 最小形态：
 
-```org
+```yaml
 #+begin_example
 x：原来的问题
         │

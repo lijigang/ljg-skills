@@ -54,7 +54,7 @@ Assistant: [对"熵"进行八维解剖，生成 markdown 报告]
 
 整合为 markdown，结构：
 
-```org
+```yaml
 title: 概念解剖：{概念名}
 filetags: :concept:
 date: [YYYY-MM-DD]

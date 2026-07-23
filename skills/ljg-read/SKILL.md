@@ -215,7 +215,7 @@ version: "1.0.0"
 3. 写入 `~/Documents/notes/{时间戳}--伴读-{文本关键词}__reading.org`
 
 Org 文件结构：
-```org
+```yaml
 title: 伴读：{文本标题}
 date: [{可读时间}]
 filetags: :reading:

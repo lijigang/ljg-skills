@@ -134,7 +134,7 @@ bun "${HOME}/.agents/skills/ljg-blind/Tools/WeReadWebUrl.ts" "<bookId>"
 
 正文模板：
 
-```org
+```yaml
 title: 盲区扫描 · {一句话点出这个盲区}
 date: [YYYY-MM-DD Weekday HH:MM]
 filetags: :blind:weread:topology:

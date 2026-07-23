@@ -53,7 +53,7 @@ user_invocable: true
 
 文件必须是 markdown，禁止 Markdown。最小结构：
 
-```org
+```yaml
 title: 结构：{主题}
 date: [{可读时间}]
 identifier: {时间戳}

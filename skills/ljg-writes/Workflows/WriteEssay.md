@@ -136,6 +136,6 @@
 
 ## Step 10 — 保存与验证
 
-按 `SKILL.md` 的 Org 与 Denote 契约生成最终文件。只保存两遍重写后择优合成的最终稿，不把初稿、映射表或验收脚手架写入笔记。
+按 `SKILL.md` 的 Markdown 与 Denote 契约生成最终文件。只保存两遍重写后择优合成的最终稿，不把初稿、映射表或验收脚手架写入笔记。
 
-保存后回读全文，检查字数、Org 标题、文件名与 identifier，再运行 Denote 接受检查和 `org-lint`。
+保存后回读全文，检查字数、Markdown 标题、文件名与 identifier，再运行 Denote 接受检查。

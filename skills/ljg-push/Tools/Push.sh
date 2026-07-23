@@ -178,6 +178,7 @@ mdize_skill() {
       -e 's/__concept\.org/__concept.md/g' \
       -e 's/__rank\.org/__rank.md/g' \
       -e 's/__structure\.org/__structure.md/g' \
+      -e 's/__write\.org/__write.md/g' \
       -e 's/__constraint\.org/__constraint.md/g' \
       -e 's/__plain\.org/__plain.md/g' \
       -e 's/__blind\.org/__blind.md/g' \
@@ -186,10 +187,16 @@ mdize_skill() {
       -e 's/Org-mode/Markdown/g' \
       -e 's/加粗用 `\*bold\*`（单星号），禁止 `\*\*bold\*\*`/加粗用 `**bold**`（双星号）/g' \
       -e 's/标题层级从 `\*` 开始/标题层级从 `#` 开始/g' \
+      -e 's/Org 加粗使用单星号，标题从 `\*` 开始且不跳级。/Markdown 加粗使用双星号，标题从 `#` 开始且不跳级。/g' \
       -e 's/Org 文件头/Markdown 文件头/g' \
+      -e 's/Org 与 Denote/Markdown 与 Denote/g' \
+      -e 's/Org 标题/Markdown 标题/g' \
+      -e 's/验证 Denote 接受与 `org-lint`/验证 Denote 接受/g' \
+      -e 's/再运行 Denote 接受检查和 `org-lint`/再运行 Denote 接受检查/g' \
       "$file"
     sed -E -i '' \
-      -e 's/^#\+(title|subtitle|date|filetags|identifier|source|authors|venue):/\1:/' \
+      -e 's/^```org$/```yaml/' \
+      -e 's/^#\+(title|subtitle|date|filetags|identifier|source|author|authors|venue):/\1:/' \
       "$file"
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
