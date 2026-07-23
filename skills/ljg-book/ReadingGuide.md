@@ -101,7 +101,7 @@ f(x) 不是额外添加的个人感悟。它必须从 f 推出来。删掉 f 后
 
 ASCII 图放进：
 
-```yaml
+```org
 #+begin_example
 ...
 #+end_example
@@ -148,7 +148,7 @@ ASCII 图放进：
 
 文件头：
 
-```yaml
+```org
 #+TITLE: 拆书：《{书名}》
 #+SUBTITLE: {作者} | {一句话 f}
 #+DATE: [{YYYY-MM-DD Day HH:MM}]

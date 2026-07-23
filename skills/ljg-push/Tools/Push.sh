@@ -195,9 +195,11 @@ mdize_skill() {
       -e 's/再运行 Denote 接受检查和 `org-lint`/再运行 Denote 接受检查/g' \
       "$file"
     sed -E -i '' \
-      -e 's/^```org$/```yaml/' \
       -e 's/^#\+(title|subtitle|date|filetags|identifier|source|author|authors|venue):/\1:/' \
       "$file"
+    # Only relabel Org fences that now contain YAML-style front matter.
+    # Real Org examples (headings, #+begin_example, etc.) must keep the org fence.
+    perl -0pi -e 's/```org\n(?=(?:title|subtitle|date|filetags|identifier|source|author|authors|venue):)/```yaml\n/g' "$file"
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done
