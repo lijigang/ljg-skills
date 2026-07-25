@@ -61,7 +61,7 @@ bash $SKILLS_DIR/fix-ljg-org-to-md/init.sh "$MD_SAVE_DIR" "$AUTHOR_NAME" "$LOGO_
 
 | # | 内容 | 命中范围 |
 |---|------|---------|
-| 1 | `~/Documents/notes/` → `$MD_SAVE_DIR` | 所有 `.md` / `.html` |
+| 1 | `~/Documents/notes/` 和 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/` 等旧保存目录 → `$MD_SAVE_DIR` | 所有 `.md` / `.html` |
 | 2 | `李继刚` → `$AUTHOR_NAME` | HTML 模板 `>李继刚<`；MD 里 `logo + 李继刚` / `署名：印 李继刚` / 单独李继刚 |
 | 3 | `capture.js` 里 `logoUrl` 行 | `logoUrl = '$LOGO_PATH'` |
 | 4 | `__xxx.org` → `__xxx.md` | denote 文件名扩展 |
@@ -75,8 +75,8 @@ bash $SKILLS_DIR/fix-ljg-org-to-md/init.sh "$MD_SAVE_DIR" "$AUTHOR_NAME" "$LOGO_
 
 `init.sh` 输出结尾会打印四类需要人工判断的残留：
 
-### [a] `~/Documents/notes/` 残留
-一般不会有——若有，逐条判断是否是特殊上下文（例如注释里的历史路径）。
+### [a] `~/Documents/notes/` 或旧 Windows 保存目录残留
+脚本已内置替换 `~/Documents/notes/` 和 `D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/` 两种旧目录。一般不会有残留——若有，逐条判断是否是特殊上下文（例如注释里的历史路径），或又出现了另一种新的旧目录写法（需手工替换并考虑加进 `OLD_SAVE_DIRS`）。
 
 ### [b] `李继刚` 残留
 `AUTHOR_NAME` 空时脚本会兜底清空。仅当有奇怪上下文（如未预料的 markdown 语法）需 LLM 修补。
@@ -175,3 +175,4 @@ fix-ljg-org-to-md 初始化完成
 - **`original-prompt.md` 历史归档不动**
 - **URL 里的 `.org` 靠 `__xxx.org` 正则边界保护**——`arxiv.org` 不会被 `__[a-zA-Z]+\.org\b` 命中
 - **rsync --delete / robocopy /MIR 会删除目标多余文件**——先告知用户
+- **旧保存目录多源**——`init.sh` 的 `OLD_SAVE_DIRS` 数组集中管理所有待替换的旧目录（目前 `~/Documents/notes/` + `D:/WorkFiles/obisdian_repo/...`）；遇到新的旧目录只需往这个数组里加一行。路径含 `'` `+` 等字符，脚本用 python 做替换，不走 sed

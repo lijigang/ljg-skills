@@ -52,14 +52,30 @@ skip_file() {
 }
 
 # ==================== 1. md 保存目录 ====================
+# 已知的旧默认保存目录（都会被替换成 $MD_SAVE_DIR）。
+# 用 python 做替换，避免 sed 分隔符与路径里的 / ' + 等字符打架。
+OLD_SAVE_DIRS=(
+  "~/Documents/notes/"
+  "D:/WorkFiles/obisdian_repo/RK'Ideaverse_Sync/+/"
+)
 echo "[1/5] md 保存目录 → $MD_SAVE_DIR"
 find "$SKILLS_DIR" -type f \( -name '*.md' -o -name '*.html' \) -print0 \
   | while IFS= read -r -d '' f; do
       skip_file "$f" && continue
-      if grep -q '~/Documents/notes/' "$f"; then
-        sed_inplace "$f" "s|~/Documents/notes/|$MD_SAVE_DIR|g"
-        echo "  changed: ${f#$SKILLS_DIR/}"
-      fi
+      hit=0
+      for old in "${OLD_SAVE_DIRS[@]}"; do
+        if grep -qF "$old" "$f"; then
+          OLD="$old" NEW="$MD_SAVE_DIR" python3 - "$f" <<'PY'
+import os,sys
+f=sys.argv[1]
+s=open(f,encoding="utf-8").read()
+open(f,"w",encoding="utf-8").write(s.replace(os.environ["OLD"],os.environ["NEW"]))
+PY
+          hit=1
+        fi
+      done
+      [ "$hit" = 1 ] && echo "  changed: ${f#$SKILLS_DIR/}"
+      true
     done
 
 # ==================== 2. 作者署名 ====================
@@ -150,8 +166,8 @@ find "$SKILLS_DIR" -type f -name '*.md' -print0 \
 echo
 echo "=== 残留检查（跳过清单外） ==="
 
-echo "[a] ~/Documents/notes/ 残留："
-if grep -rn '~/Documents/notes/' "$SKILLS_DIR" 2>/dev/null \
+echo "[a] 旧保存目录残留 (~/Documents/notes/ 或 D:/WorkFiles/obisdian_repo/...)："
+if grep -rnE '~/Documents/notes/|D:/WorkFiles/obisdian_repo|obisdian_repo|obsidian_repo' "$SKILLS_DIR" 2>/dev/null \
      --include='*.md' --include='*.html' \
      | grep -vE '\.bak-v|fix-ljg-org-to-md'; then
   echo "  ↑ 需 LLM 判断"
