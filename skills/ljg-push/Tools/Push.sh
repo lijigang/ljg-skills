@@ -169,7 +169,8 @@ mdize_skill() {
   # 2) string swaps across all md files
   local files=()
   while IFS= read -r f; do files+=("$f"); done < <(find "$skill_dir" -name '*.md' -not -path '*/assets/*' 2>/dev/null)
-  local file r
+  local file r skill_name
+  skill_name=$(basename "$skill_dir")
   for file in ${files[@]+"${files[@]}"}; do
     sed -i '' \
       -e 's/__qa\.org/__qa.md/g' \
@@ -178,6 +179,7 @@ mdize_skill() {
       -e 's/__concept\.org/__concept.md/g' \
       -e 's/__rank\.org/__rank.md/g' \
       -e 's/__structure\.org/__structure.md/g' \
+      -e 's/__is\.org/__is.md/g' \
       -e 's/__write\.org/__write.md/g' \
       -e 's/__constraint\.org/__constraint.md/g' \
       -e 's/__plain\.org/__plain.md/g' \
@@ -210,6 +212,12 @@ mdize_skill() {
       -e 's/验证 Denote 接受与 `org-lint`/验证 Denote 接受/g' \
       -e 's/再运行 Denote 接受检查和 `org-lint`/再运行 Denote 接受检查/g' \
       "$file"
+    if [ "$skill_name" = "ljg-is" ]; then
+      sed -i '' \
+        -e 's/Org 笔记/Markdown 笔记/g' \
+        -e 's/Denote\/Org/Denote\/Markdown/g' \
+        "$file"
+    fi
     sed -E -i '' \
       -e 's/^#\+(title|subtitle|date|filetags|identifier|source|author|authors|venue):/\1:/' \
       "$file"
