@@ -1,6 +1,6 @@
 # ValidateNote
 
-校验 `ljg-is` 生成的 Markdown 笔记是否符合固定结构。
+校验 `ljg-is` 生成的 Org 或 Markdown 笔记是否符合六段固定结构，并检查关键词式「剥离」、可代入的「操作实验」和精简的两条「验证」。
 
 ```bash
 bun ~/.agents/skills/ljg-is/Tools/ValidateNote.ts \
@@ -14,4 +14,3 @@ bun ~/.agents/skills/ljg-is/Tools/ValidateNote.ts \
 ```bash
 bun test ~/.agents/skills/ljg-is/Tools/ValidateNote.test.ts
 ```
-
