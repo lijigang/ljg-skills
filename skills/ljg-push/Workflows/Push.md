@@ -59,7 +59,7 @@ bash ~/.agents/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
    - `git add` + `git commit` + `git push origin master`
 4. *Md 推送*：
    - `git checkout md` + `git pull --rebase`
-   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，引用全局改写）
+   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，引用全局改写；结构化 `- *标签*：` 转成 `- **标签**：`）
    - bump patch version
    - `git add` + `git commit` + `git push origin md`
 5. *收尾*：切回 `master`，让本地工作 repo 留在源分支
@@ -79,7 +79,7 @@ master @ v1.17.13 → pushed
 md     @ v1.0.8   → pushed
 
 仍需手工 review（自动转换不覆盖的差异）:
-  - ljg-xxx/SKILL.md  (正文 `*bold*` 标记——斜体歧义，脚本不动)
+  - ljg-xxx/SKILL.md  (正文 `*bold*` 标记——斜体歧义，脚本不动；结构化 bullet 标签除外)
 
 ══════════════════════════════════
 ```

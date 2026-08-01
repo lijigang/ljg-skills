@@ -58,14 +58,15 @@ REPO_URL="git@github.com:lijigang/ljg-skills.git"
 
 md 分支同步时自动转换（2026-06-12 起含 org 文件本体）：
 
-- *org 文件本体*：skill 内每个 `.org` 文件（assets/ 除外）转成同名 `.md` 并删除原件——org 头块→YAML frontmatter（含 `---` 围栏，`filetags`→`tags`）、`*` 标题→`#` 标题（层级保留）、`#+ATTR_*` 行删除、`[[file:x]]`→`![](x)`、`#+begin_src`→``` 围栏。其他 .md 文件里对被改名文件的引用同步全局改写
+- **org 文件本体**：skill 内每个 `.org` 文件（assets/ 除外）转成同名 `.md` 并删除原件——org 头块→YAML frontmatter（含 `---` 围栏，`filetags`→`tags`）、`*` 标题→`#` 标题（层级保留）、`#+ATTR_*` 行删除、`[[file:x]]`→`![](x)`、`#+begin_src`→``` 围栏。其他 .md 文件里对被改名文件的引用同步全局改写
 - 文件扩展引用：`__qa.md` → `__qa.md`、`__paper.md` → `__paper.md` 等（denote 命名约定）
 - 关键词：`markdown` → `markdown`、`Markdown` → `Markdown`
 - org 式格式指令：`加粗用 *bold*（单星号）…` → `加粗用 **bold**（双星号）`、`标题层级从 * 开始` → `从 # 开始`、`Markdown 文件头` → `Markdown 文件头`、行首 `#+title:` 等 8 个示例键 → YAML 键行
+- 结构化强调标签：行首 `- *标签*：` → `- **标签**：`；紧邻这类标签的 `org` 围栏同步改为 `markdown`
 
 *仍不自动转换*（按需手工）：
 
-- 正文里的 `*bold*` 标记：markdown 里 `*x*` 是斜体，盲替会破坏文档自身格式
+- 正文里的 `*bold*` 标记：markdown 里 `*x*` 是斜体，盲替会破坏文档自身格式；只有「行首 bullet + 全角冒号」标签会安全转换
 - SKILL.md 示例块里转出的 YAML 键行不带 `---` 围栏（已知整容项，不影响语义）
 
 ## Voice Notification
@@ -108,6 +109,7 @@ User: /ljg-push --dry-run
 - *master 必须先推*——md 分支的 markdown 化基于 master 的 org 版本做转换。反过来推会破坏顺序
 - *untracked 杂物（如 `assets/measure.js`）会被 rsync 同步到 repo*——如果不想推，先在本地删掉，或加进 `.gitignore`
 - *org 文件本体已自动转换（2026-06-12 起）*——template.md 等会被转成 .md 并删除原件，每次推送重新生成（rsync --delete 冲掉也无妨，幂等）。遗留手工项只剩正文里的 `*bold*` 标记。新增带复杂构件的 org reference 文件后，先 `--dry-run` 或沙盒跑一遍 mdize 看转换效果
+- *结构化标签不能靠枚举示例词*——`x`、`f(x)` 之外还会出现「主体/边界」「代入」等真实标签；转换器按 `- *标签*：` 的结构识别，发布后仍要扫描 md 文件是否残留单星标签
 - *脚本会自动 bump patch version 在 plugin.json + marketplace.json*——如果你想 bump minor / major，先手动改完再跑脚本，脚本只追加 patch
 - *如果 md 分支的远端比本地新（继刚另一台机器推过）*，脚本会 `pull --rebase` 失败时尝试一次 `reset --hard origin/md` 重新应用——这会丢弃本地未推的 md 分支 commit。脚本前会提示
-- *当前路径*：skill 源固定在 `~/.agents/skills/`，工作 repo 固定在 `~/code/ljg-skills/`；不要从历史备份目录读取或推送
+- **当前路径**：skill 源固定在 `~/.agents/skills/`，工作 repo 固定在 `~/code/ljg-skills/`；不要从历史备份目录读取或推送

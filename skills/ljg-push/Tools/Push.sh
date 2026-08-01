@@ -152,6 +152,7 @@ orgfile_to_md() {
 #      - Keywords: org-mode → markdown
 #      - Org-style format instructions: *bold* rule, heading-level rule,
 #        "Org 文件头", #+title:-style example lines → YAML keys
+#      - Org emphasized bullet labels: - *标签*： → - **标签**：
 # Does NOT touch: *bold* markers inside prose (markdown italics ambiguity).
 mdize_skill() {
   local skill_dir="$1"
@@ -223,11 +224,14 @@ mdize_skill() {
       "$file"
     perl -pi -e 's/^#\+(TITLE|SUBTITLE|DATE|FILETAGS|IDENTIFIER|SOURCE|AUTHOR|AUTHORS|VENUE):/\L$1:/;' "$file"
     sed -i '' -e 's/^filetags:/tags:/' "$file"
+    # A line-start bullet label followed by a full-width colon is structural,
+    # so it is safe to distinguish from ambiguous prose emphasis.
+    perl -pi -e 's/^- \*([^*\n]+)\*：/- **$1**：/;' "$file"
     # Only relabel Org fences that now contain YAML-style front matter.
     # Real Org examples (headings, #+begin_example, etc.) must keep the org fence.
     perl -0pi -e 's/```org\n(?=(?:title|subtitle|date|tags|identifier|source|author|authors|venue):)/```yaml\n/g' "$file"
     perl -0pi -e 's/```org\n#\+begin_example\n(.*?)#\+end_example\n```/```text\n$1```/gs' "$file"
-    perl -0pi -e 's/```org\n(?=- \*\*x\*\*：)/```markdown\n/g' "$file"
+    perl -0pi -e 's/```org\n(?=- \*\*[^*\n]+\*\*：)/```markdown\n/g' "$file"
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done
