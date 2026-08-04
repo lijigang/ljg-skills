@@ -7,6 +7,7 @@ export type ValidationResult = {
   errors: string[];
   identifier?: string;
   core?: string;
+  schema?: "legacy" | "ljg-is-v2";
 };
 
 type NoteFormat = "org" | "md";
@@ -16,7 +17,9 @@ type EmphasizedBullet = {
   value: string;
 };
 
-const REQUIRED_HEADINGS = ["问题", "完整表达", "剥离", "本质", "示例", "验证"];
+const LEGACY_REQUIRED_HEADINGS = ["问题", "完整表达", "剥离", "本质", "示例", "验证"];
+const V2_REQUIRED_HEADINGS = ["问题", "完整表达", "剥离", "本质", "示例", "结构迁移", "验证"];
+const V2_SCHEMA = "ljg-is-v2";
 const GENERIC_CORES = new Set([
   "服务",
   "价值",
@@ -115,7 +118,14 @@ export function validateNoteText(filePath: string, content: string): ValidationR
     effectiveFormat === "org" ? "filetags" : "tags",
     effectiveFormat,
   );
+  const declaredSchema = metadataValue(content, "schema", effectiveFormat);
+  const isV2 = declaredSchema === V2_SCHEMA;
+  const schema = isV2 ? V2_SCHEMA : "legacy";
   const metadataPrefix = effectiveFormat === "org" ? "#+" : "";
+
+  if (declaredSchema && !isV2) {
+    errors.push(`${metadataPrefix}schema 只支持 ${V2_SCHEMA}；无 schema 的历史笔记按 legacy 校验`);
+  }
 
   if (!title?.startsWith("本质：") || title === "本质：") {
     errors.push(`${metadataPrefix}title 必须是非空的「本质：<目标>」`);
@@ -138,8 +148,9 @@ export function validateNoteText(filePath: string, content: string): ValidationR
   const headings = [...content.matchAll(headingPattern)].map(
     (match) => match[1] ?? "",
   );
-  if (JSON.stringify(headings) !== JSON.stringify(REQUIRED_HEADINGS)) {
-    errors.push(`一级标题必须严格依次为：${REQUIRED_HEADINGS.join(" / ")}`);
+  const requiredHeadings = isV2 ? V2_REQUIRED_HEADINGS : LEGACY_REQUIRED_HEADINGS;
+  if (JSON.stringify(headings) !== JSON.stringify(requiredHeadings)) {
+    errors.push(`一级标题必须严格依次为：${requiredHeadings.join(" / ")}`);
   }
 
   if (effectiveFormat === "org") {
@@ -274,6 +285,34 @@ export function validateNoteText(filePath: string, content: string): ValidationR
     errors.push("「示例」的「点题」必须逐字包含最终核心");
   }
 
+  if (isV2) {
+    const transferBody = sectionBody(content, "结构迁移", effectiveFormat) ?? "";
+    const transferLines = nonEmptyLines(transferBody);
+    const transferEntries = parseEmphasizedBullets(transferBody, effectiveFormat);
+    const transferLabels = ["结构式", "变量", "迁移", "边界"];
+    if (
+      transferLines.length !== transferEntries.length
+      || !hasExactLabels(transferEntries, transferLabels)
+    ) {
+      errors.push("v2「结构迁移」必须严格依次使用强调 bullet：结构式 / 变量 / 迁移 / 边界");
+    }
+
+    const transferValues = new Map(transferEntries.map(({ label, value }) => [label, value]));
+    if (transferValues.has("结构式") && !transferValues.get("结构式")?.includes("->")) {
+      errors.push("v2「结构式」必须包含 ->，保留变化方向");
+    }
+    if (transferValues.has("变量") && !transferValues.get("变量")?.includes("=")) {
+      errors.push("v2「变量」必须使用 = 逐一解释结构式中的符号");
+    }
+    if (transferValues.has("迁移") && !transferValues.get("迁移")?.includes("->")) {
+      errors.push("v2「迁移」必须包含目标领域的具体 -> 状态变化");
+    }
+    const boundary = transferValues.get("边界");
+    if (boundary && (!boundary.includes("只迁移") || !boundary.includes("不迁移"))) {
+      errors.push("v2「边界」必须同时说明「只迁移」与「不迁移」的内容");
+    }
+  }
+
   const validationBody = sectionBody(content, "验证", effectiveFormat) ?? "";
   const validationLines = nonEmptyLines(validationBody);
   const validationEntries = parseEmphasizedBullets(validationBody, effectiveFormat);
@@ -289,6 +328,7 @@ export function validateNoteText(filePath: string, content: string): ValidationR
     errors,
     identifier,
     core,
+    schema,
   };
 }
 
@@ -304,7 +344,7 @@ if (import.meta.main) {
   const filePath = Bun.argv[2];
   if (filePath === "--help" || filePath === "-h") {
     console.log("用法：bun ValidateNote.ts <note-file>");
-    console.log("校验 ljg-is 笔记的六段结构、关键词剥离、代入式操作示例、两条验证与极简核心。");
+    console.log("校验 ljg-is 笔记：历史六段结构兼容；v2 七段结构增加结构式、变量、跨域迁移与边界。");
     process.exit(0);
   }
   if (!filePath) {
@@ -322,7 +362,13 @@ if (import.meta.main) {
 
   console.log(
     JSON.stringify(
-      { status: "ok", path: filePath, identifier: result.identifier, core: result.core },
+      {
+        status: "ok",
+        path: filePath,
+        identifier: result.identifier,
+        core: result.core,
+        schema: result.schema,
+      },
       null,
       2,
     ),

@@ -1,6 +1,8 @@
 # ValidateNote
 
-校验 `ljg-is` 生成的 Org 或 Markdown 笔记是否符合六段固定结构，并检查关键词式「剥离」、可代入的「操作实验」和精简的两条「验证」。
+校验 `ljg-is` 生成的 Org 或 Markdown 笔记。无 schema 的历史笔记继续按 v1 六段结构验收；带 `schema: ljg-is-v2` 的新笔记按七段结构验收，并检查「结构迁移」中的结构式、变量映射、远域迁移与边界。
+
+v2 一级标题严格依次为：`问题 / 完整表达 / 剥离 / 本质 / 示例 / 结构迁移 / 验证`。其中「结构迁移」严格使用四个强调 bullet：`结构式 / 变量 / 迁移 / 边界`。
 
 ```bash
 bun ~/.agents/skills/ljg-is/Tools/ValidateNote.ts \

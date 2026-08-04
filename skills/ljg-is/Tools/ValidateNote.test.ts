@@ -9,6 +9,7 @@ function goodNote(): string {
 #+date: [2026-08-01 Sat 01:02]
 #+identifier: 20260801T010203
 #+filetags: :is:
+#+schema: ljg-is-v2
 
 * 问题
 容易误认：把按需叫车、安全舒适和汽车这种实现当成 Taxi 的本质
@@ -32,6 +33,12 @@ function goodNote(): string {
 - *变化*：你：公司门口 -> 家门口
 - *点题*：你刚刚真正完成的是「把人从 A 点送到 B 点」；车型、价格和舒适度只是实现与质量
 
+* 结构迁移
+- *结构式*：(X, S0) -> (X, S1)
+- *变量*：X=承受变化的对象；S0=原位置；S1=目标位置
+- *迁移*：文件：下载目录 -> 归档目录；对象、起点、终点、方向与完成测试逐项对应
+- *边界*：只迁移对象的位置变化；不迁移乘客身份、付费关系、舒适度或运输载体
+
 * 验证
 - *替换*：换成公交车或步行，核心仍然成立
 - *删除*：再删「人」或起终点，就会失去对象或方向
@@ -44,6 +51,7 @@ title: 本质：Taxi
 date: 2026-08-01 01:02
 identifier: 20260801T010203
 tags: [is]
+schema: ljg-is-v2
 ---
 
 # 问题
@@ -68,10 +76,25 @@ tags: [is]
 - **变化**：你：公司门口 -> 家门口
 - **点题**：你刚刚真正完成的是「把人从 A 点送到 B 点」；车型、价格和舒适度只是实现与质量
 
+# 结构迁移
+- **结构式**：(X, S0) -> (X, S1)
+- **变量**：X=承受变化的对象；S0=原位置；S1=目标位置
+- **迁移**：文件：下载目录 -> 归档目录；对象、起点、终点、方向与完成测试逐项对应
+- **边界**：只迁移对象的位置变化；不迁移乘客身份、付费关系、舒适度或运输载体
+
 # 验证
 - **替换**：换成公交车或步行，核心仍然成立
 - **删除**：再删「人」或起终点，就会失去对象或方向
 `;
+}
+
+function legacyNote(): string {
+  return goodNote()
+    .replace("#+schema: ljg-is-v2\n", "")
+    .replace(
+      /\n\* 结构迁移\n(?:- .+\n){4}/u,
+      "",
+    );
 }
 
 function errorsFor(content: string, path = filePath): string[] {
@@ -79,6 +102,13 @@ function errorsFor(content: string, path = filePath): string[] {
 }
 
 describe("ValidateNote", () => {
+  test("template declares the v2 structure-transfer contract", async () => {
+    const template = await Bun.file(new URL("../Template.org", import.meta.url)).text();
+    const headings = [...template.matchAll(/^\* ([^\n]+)$/gmu)].map((match) => match[1]);
+    expect(template).toContain("#+schema: ljg-is-v2");
+    expect(headings).toEqual(["问题", "完整表达", "剥离", "本质", "示例", "结构迁移", "验证"]);
+  });
+
   test("accepts a valid ljg-is Org note", () => {
     const result = validateNoteText(filePath, goodNote());
     expect(result.ok).toBe(true);
@@ -89,6 +119,54 @@ describe("ValidateNote", () => {
     const result = validateNoteText(markdownFilePath, goodMarkdownNote());
     expect(result.ok).toBe(true);
     expect(result.core).toBe("把人从 A 点送到 B 点");
+  });
+
+  test("accepts a legacy six-section Org note without schema", () => {
+    const result = validateNoteText(filePath, legacyNote());
+    expect(result.ok).toBe(true);
+    expect(result.schema).toBe("legacy");
+  });
+
+  test("rejects a v2 note without the structure-transfer section", () => {
+    const note = goodNote().replace(
+      /\n\* 结构迁移\n(?:- .+\n){4}/u,
+      "",
+    );
+    expect(errorsFor(note).some((error) => error.includes("结构迁移"))).toBe(true);
+  });
+
+  test("rejects a v2 structural formula without a direction arrow", () => {
+    const note = goodNote().replace("(X, S0) -> (X, S1)", "X 从 S0 变到 S1");
+    expect(errorsFor(note).some((error) => error.includes("结构式") && error.includes("->"))).toBe(true);
+  });
+
+  test("rejects a v2 variable line without explicit mappings", () => {
+    const note = goodNote().replace(
+      "X=承受变化的对象；S0=原位置；S1=目标位置",
+      "X 是对象，S0 是原位置，S1 是目标位置",
+    );
+    expect(errorsFor(note).some((error) => error.includes("变量") && error.includes("="))).toBe(true);
+  });
+
+  test("rejects a v2 transfer without a concrete direction arrow", () => {
+    const note = goodNote().replace(
+      "文件：下载目录 -> 归档目录；对象、起点、终点、方向与完成测试逐项对应",
+      "文件从下载目录进入归档目录；对象、起点、终点、方向与完成测试逐项对应",
+    );
+    expect(errorsFor(note).some((error) => error.includes("迁移") && error.includes("->"))).toBe(true);
+  });
+
+  test("rejects a v2 boundary without both transfer limits", () => {
+    const note = goodNote().replace(
+      "只迁移对象的位置变化；不迁移乘客身份、付费关系、舒适度或运输载体",
+      "迁移对象的位置变化",
+    );
+    expect(errorsFor(note).some((error) => error.includes("只迁移") && error.includes("不迁移"))).toBe(true);
+  });
+
+  test("rejects an unknown schema", () => {
+    const note = goodNote().replace("#+schema: ljg-is-v2", "#+schema: ljg-is-v3");
+    expect(errorsFor(note).some((error) => error.includes("schema"))).toBe(true);
   });
 
   test("rejects Org structure in a Markdown note", () => {
