@@ -146,7 +146,7 @@ orgfile_to_md() {
 
 # Apply markdown-ization to a skill directory.
 #   1. Every *.org file → converted *.md sibling (orgfile_to_md), .org removed,
-#      references to the renamed file rewritten across all md files.
+#      references to the renamed file rewritten across Markdown and runtime text files.
 #   2. String swaps in all *.md files (assets/ excluded):
 #      - File-extension refs: __qa.org → __qa.md, etc.
 #      - Keywords: org-mode → markdown
@@ -232,6 +232,24 @@ mdize_skill() {
     perl -0pi -e 's/```org\n(?=(?:title|subtitle|date|tags|identifier|source|author|authors|venue):)/```yaml\n/g' "$file"
     perl -0pi -e 's/```org\n#\+begin_example\n(.*?)#\+end_example\n```/```text\n$1```/gs' "$file"
     perl -0pi -e 's/```org\n(?=- \*\*[^*\n]+\*\*：)/```markdown\n/g' "$file"
+    for r in ${renames[@]+"${renames[@]}"}; do
+      sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
+    done
+  done
+
+  # 3) Exact references to converted Org files can also live in runtime
+  # consumers (for example a TypeScript test loading ../Template.org).
+  # Rewrite only actual converted basenames, so fixture strings such as
+  # __is.org remain untouched unless that concrete file was converted.
+  local reference_files=()
+  while IFS= read -r f; do reference_files+=("$f"); done < <(
+    find "$skill_dir" -type f -not -path '*/assets/*' \
+      \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.mjs' \
+         -o -name '*.cjs' -o -name '*.json' -o -name '*.toml' \
+         -o -name '*.yaml' -o -name '*.yml' -o -name '*.sh' \) \
+      2>/dev/null
+  )
+  for file in ${reference_files[@]+"${reference_files[@]}"}; do
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done

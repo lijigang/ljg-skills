@@ -103,9 +103,14 @@ function errorsFor(content: string, path = filePath): string[] {
 
 describe("ValidateNote", () => {
   test("template declares the v2 structure-transfer contract", async () => {
-    const template = await Bun.file(new URL("../Template.org", import.meta.url)).text();
-    const headings = [...template.matchAll(/^\* ([^\n]+)$/gmu)].map((match) => match[1]);
-    expect(template).toContain("#+schema: ljg-is-v2");
+    const templateUrl = new URL("../Template.md", import.meta.url);
+    const template = await Bun.file(templateUrl).text();
+    const isMarkdownTemplate = templateUrl.pathname.endsWith(".md");
+    const headingPattern = isMarkdownTemplate ? /^# ([^\n]+)$/gmu : /^\* ([^\n]+)$/gmu;
+    const headings = [...template.matchAll(headingPattern)].map((match) => match[1]);
+    expect(template).toContain(
+      isMarkdownTemplate ? "schema: ljg-is-v2" : "#+schema: ljg-is-v2",
+    );
     expect(headings).toEqual(["问题", "完整表达", "剥离", "本质", "示例", "结构迁移", "验证"]);
   });
 
