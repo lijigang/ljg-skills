@@ -6,13 +6,11 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap');
 
   :root {
-    --bg: #FAFAFA;
-    --ink: #1a1a1a;
-    --ink-mid: #555;
-    --ink-light: #999;
-    --white: #FAFAFA;
-    --accent: #1a1a1a;
-    --tone: #E8E8E8;
+    --bg: #FAFAF7;
+    --ink: #1A1A1A;
+    --ink-mid: #55524F;
+    --ink-light: #96918B;
+    --tone: #E7E4DE;
     --serif: 'Noto Serif SC', 'KingHwa_OldSong', Georgia, serif;
     --sans: 'DM Sans', 'PingFang SC', system-ui, sans-serif;
     --mono: 'SF Mono', 'Menlo', monospace;
@@ -25,17 +23,37 @@
     width: 1080px;
     background: var(--bg);
     position: relative;
+    overflow: hidden;
   }
 
-  /* ink spatter texture */
-  .page > .grain {
-    position: absolute;
-    inset: 0;
-    filter: url(#inkgrain);
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 100;
+  .generated-visual,
+  .generated-art {
+    position: relative;
+    overflow: hidden;
+    background: var(--tone);
   }
+
+  .generated-visual[data-state="empty"] { display: none; }
+
+  .generated-visual--comic {
+    margin: 42px 60px 26px;
+    border: 4px solid var(--ink);
+    aspect-ratio: 16 / 9;
+  }
+
+  .generated-visual img,
+  .generated-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.08);
+  }
+
+  .generated-art--panel { min-height: 260px; }
+  .panel-wide { aspect-ratio: 16 / 9; }
+  .panel-square { aspect-ratio: 1; }
+  .panel-portrait { aspect-ratio: 3 / 4; }
 
   .colophon {
     position: relative;
@@ -47,53 +65,19 @@
     border-top: 3px solid var(--ink);
   }
 
-  .colophon .who {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .colophon .who img {
-    width: 40px; height: 40px;
-    border-radius: 50%; object-fit: cover;
-  }
-
-  .colophon .who span {
-    font: 400 24px/1 var(--sans);
-    color: var(--ink-mid);
-  }
-
-  .colophon .info-source {
-    font: 400 22px/1 var(--mono);
-    color: var(--ink-light);
-  }
+  .colophon .who { display: flex; align-items: center; gap: 14px; }
+  .colophon .who img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .colophon .who span { font: 400 24px/1 var(--sans); color: var(--ink-mid); }
+  .colophon .info-source { font: 400 22px/1 var(--mono); color: var(--ink-light); }
 
   {{CUSTOM_CSS}}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute">
-  <!-- ink grain filter -->
-  <filter id="inkgrain">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
-    <feColorMatrix type="saturate" values="0"/>
-  </filter>
-  <!-- halftone dot pattern -->
-  <filter id="halftone">
-    <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="1"/>
-    <feColorMatrix type="saturate" values="0"/>
-    <feComponentTransfer>
-      <feFuncA type="discrete" tableValues="0 1"/>
-    </feComponentTransfer>
-  </filter>
-  <!-- rough ink edge -->
-  <filter id="roughen">
-    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" result="noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
 <div class="page">
-  <div class="grain"></div>
+  <figure class="generated-visual generated-visual--comic" data-state="{{IMAGE_STATE}}">
+    <img src="{{IMAGE_SRC}}" alt="{{IMAGE_ALT}}">
+  </figure>
   {{CONTENT_HTML}}
   <div class="colophon">
     <div class="who">

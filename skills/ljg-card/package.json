@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "audit": "bun assets/audit.ts",
+    "fixtures": "bun assets/build-fixtures.ts"
+  },
   "dependencies": {
     "playwright": "^1.58.2"
   }

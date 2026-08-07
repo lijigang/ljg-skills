@@ -99,6 +99,27 @@ Chrome 规则：
 
 审计按 sourceId 首次出现顺序比对 manifest，并用 `index / total / joinBefore` 重建原始可见文本。同源续页必须连续、编号完整；`allSourcesReferencedOnce` 只作统计，`allSourcesReferenced` 与 `continuationsValid` 才是门槛。
 
+### 3.1 Minimal Composition Grammar
+
+页面类型描述源结构，composition 描述这一页在舞台上完成的唯一语义动作。两者不可混成可随机选择的模板。生成器先建立 composition manifest，模板再从既有字段确定性推导 `data-composition`；RAW_SLIDES 不接受作者手写的 style variant。
+
+优先级固定如下，前一项命中后停止：
+
+| Role | 判定 | 唯一主视觉动作 |
+|---|---|---|
+| `identity` | `cover:true` | 标题尺度 |
+| `chapter` | `emphasis:true` 或 `title:true` | 深浅色场或居中短信号线 |
+| `evidence` | `table` 或 `pre` | 表格 / 字符块自身结构 |
+| `quotation` | `quote:true` | 上下边界形成引用场 |
+| `sequence` | `semanticGroup:"list-run"` 或 2–4 行普通文字 | 单轴纵向节奏 |
+| `statement` | 其余普通文字 | 字号与留白 |
+
+「一页一意」不是一句一页。一个比较、递进或 3–4 项同层列表可以共同完成一个动作；两个无关判断不能因「放得下」而共页。拆分只能发生在原有句界、行界或结构边界，跨页仍按 `sourceParts` 逐字重建。
+
+每页只允许一个主视觉动作。全局 theme 的色场、静态网格或信号轨属于共同舞台，不授权页面再叠加图片、图标、侧栏或第二套装饰框。角色只决定阅读结构，不改变源文字，也不产生随机版式变体。
+
+空间预算：普通 line-based 主块宽度 `≤82vw`，cover `≤84vw`；左右 stage padding 对称，内容中心仍在 `47–53%W`。达到宽度或字号边界时先拆页，不能把内容区扩到满版，也不能把既有投影字号门槛下调。25% 缩略图中，`identity/chapter/statement` 必须保留单一文字焦点，`sequence/quotation` 必须读成一个组合块，`evidence` 必须只有一个主表格或 pre；footer 与装饰不能成为第二焦点。
+
 ## 4. Theme Grammar
 
 一篇演示只使用一个 theme。
@@ -127,6 +148,8 @@ Hacker 的生成语法：
 - 静态网格可以存在，但不得加入 glow、shadow、CRT、Matrix rain、闪烁光标或任何 animation/transition。
 
 ## 5. Text Length and Multi-line Density
+
+先判语义动作，再判行数与密度。若一页含两个无关动作，在原有结构边界拆页；若 3–4 个条目共同构成比较、递进或推演，则保留为一个 sequence。密度算法只决定同一动作怎样变大、换行或续页，不能反向决定内容意义。
 
 CJK 字符按 `1.8`，其他字符按 `1` 计权。
 
@@ -252,6 +275,7 @@ bun Tools/ValidateDeck.ts <html> --theme <theme>
 视觉验证：使用 Interceptor 的隔离测试 context，至少检查：
 
 - cover
+- 最终 DOM 中每页恰有一个 `data-composition`，并与 composition manifest 一致；六种实际出现的角色各抽查至少一页
 - 一级 emphasis 与二级 title 的空间节奏；三者保持同一水平中轴
 - 普通单行页
 - 所有 `data-semantic-atom=true` 页：每条 `.line` 的 Range rect 行数为 1，有效字号达到对应投影门槛
@@ -262,6 +286,7 @@ bun Tools/ValidateDeck.ts <html> --theme <theme>
 - 最大 ASCII/pre
 - 每一种公式
 - landscape 与 portrait 各一种尺寸
+- 25% 缩略图或等效 contact sheet：每页只有一个明显焦点，footer、装饰和次级区不与主内容竞争；普通文字主块 `≤82%W`，cover `≤84%W`
 
 真实浏览器逐页采集 computed style 与边界：除 table/pre 内部外，文字必须 `text-align:center`；内容中心落在 `47–53%W`；普通非 table/pre 页 `fitScale ≥0.80` 且零越界；语义原子改验最终有效字号 `≥56px` 且视觉行数为 1；其余字号满足本规范的投影门槛。table/pre 以各自的结构与密度门槛验收。
 

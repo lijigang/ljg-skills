@@ -165,6 +165,32 @@
     color: var(--text-mid);
   }
 
+  /* ── Generated raster imagery ── */
+  .generated-visual,
+  .generated-art {
+    margin: 0 0 42px;
+  }
+
+  .generated-visual[data-state="empty"] { display: none; }
+
+  .generated-visual img,
+  .generated-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 560px;
+    object-fit: contain;
+  }
+
+  .generated-art--inline { margin: 30px 0 38px; }
+  .generated-art--closing { margin: 38px 0 18px; }
+
+  .generated-art figcaption {
+    margin-top: 12px;
+    font: 400 22px/1.5 var(--font);
+    color: var(--text-dim);
+  }
+
   /* ── Drop Cap ── */
   .content .dropcap::first-letter {
     font: 700 128px/0.82 'KingHwa_OldSong', Georgia, serif;
@@ -224,6 +250,9 @@
 <body>
   <div class="card">
     {{TITLE_BLOCK}}
+    <figure class="generated-visual generated-visual--long" data-state="{{IMAGE_STATE}}">
+      <img src="{{IMAGE_SRC}}" alt="{{IMAGE_ALT}}">
+    </figure>
     <div class="content">
       {{BODY_HTML}}
     </div>

@@ -34,12 +34,14 @@ bun Tools/ValidateDeck.ts --help
 - 模板版本与 JavaScript 语法。
 - 文档标题 cover 与无重复合并路径。
 - Cover 显式采用 column 轴的水平/垂直居中，并以中心为缩放原点。
+- 六种 composition role 只由源语义字段确定性推导，并暴露为 `data-composition`；没有随机模板入口。
+- 普通文字主块保持 `≤82vw` 与对称 stage padding，留白不能被扩宽内容区偷偷吃掉。
 - 所有 line-based 页面共享居中文字契约；二级及以下 title 使用居中短信号线。
 - 中等文本分级止于计权长度 10，防止约 6 个中文字符或更长标题先过度放大、再被 fit guard 极端缩小。
 - 无信息 header；meta footer 仅 cover，pager 每页存在。
 - lines、table、pre 三种 renderer；table 仅在 `header:true` 时生成表头。
 - 2–4 行统一 rows、密度复合字号与竖屏中心轴。
-- 高桥流标记、xlong 换行字号、`min-width:0` 和 measured fit guard。
+- 高桥流标记、xlong 换行字号、`min-width:0`、留白预算和 measured fit guard。
 - 离线公式、价格字符串保护、ASCII 行数分级与表格投影字号。
 - sourceParts 续页 provenance 的运行时暴露。
 - 蓝牙翻页笔常见的方向键、PageUp/PageDown，以及输入/编辑态按键保护。

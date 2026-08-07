@@ -498,7 +498,7 @@
   }
 </style>
 </head>
-<body data-template-version="4.4.0" data-theme="{{THEME}}">
+<body data-template-version="4.5.0" data-theme="{{THEME}}">
 <main class="stage" id="stage"></main>
 <footer class="deck-footer">
   <div class="pager" id="pager">01 / 01</div>
@@ -620,6 +620,16 @@
 
   const SLIDES = normalizeSlides(RAW_SLIDES);
 
+  function compositionFor(slide) {
+    const lineCount = slide?.lines?.length ?? 0;
+    if (slide?.cover) return "identity";
+    if (slide?.emphasis || slide?.title) return "chapter";
+    if (slide?.table || slide?.pre != null) return "evidence";
+    if (slide?.quote) return "quotation";
+    if (slide?.semanticGroup === "list-run" || (lineCount >= 2 && lineCount <= 4)) return "sequence";
+    return "statement";
+  }
+
   SLIDES.forEach((slide) => {
     const element = document.createElement("section");
     element.className = "slide";
@@ -629,6 +639,7 @@
     if (slide.depth) element.dataset.depth = String(slide.depth);
     if (slide.quote) element.dataset.quote = "true";
     if (slide.semanticGroup) element.dataset.semanticGroup = slide.semanticGroup;
+    element.dataset.composition = compositionFor(slide);
     element.dataset.sourceIds = (slide.sourceIds || []).join(",");
     if (slide.sourceParts?.length) element.dataset.sourceParts = JSON.stringify(slide.sourceParts);
 
@@ -825,6 +836,7 @@
       layout: slides[index]?.dataset.layout,
       semanticAtom: slides[index]?.dataset.semanticAtom,
       semanticGroup: slides[index]?.dataset.semanticGroup,
+      composition: slides[index]?.dataset.composition,
       fitScale: slides[index]?.dataset.fitScale,
       fits: slides[index]?.dataset.fits
     }),

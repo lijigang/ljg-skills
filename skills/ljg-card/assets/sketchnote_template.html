@@ -6,31 +6,17 @@
   @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap');
 
   :root {
-    /* 基底 */
-    --bg: #FAF8F4;            /* 暖米白底 */
-    --ink: #1F1F1F;           /* off-black 正文 */
-    --ink-strong: #111111;    /* 标题 */
-    --ink-light: #6B6B6B;     /* 标注 */
-
-    /* 5 类学科语义色（deep = 色条/分类标签；light = 卡片底） */
-    --green-deep: #5B8A6F;
-    --green-light: #DCE3D5;
-    --blue-deep:  #5979A6;
-    --blue-light: #DCE3EB;
-    --red-deep:   #B85048;
-    --red-light:  #F0DDD3;
-    --gray-deep:  #7B7570;
-    --gray-light: #E5E2DC;
-    --amber-deep: #B8924A;
-    --amber-light:#F0E5D2;
-
-    /* 关系箭头 / 手写标注 */
-    --arrow: #D2693C;
-
-    /* 字族 */
+    --bg: #FAF8F4;
+    --paper: #F5F1E8;
+    --ink: #1F1F1F;
+    --ink-strong: #111111;
+    --ink-light: #6B6B6B;
+    --red: #B85048;
+    --blue-deep: #5979A6;
+    --amber: #B8924A;
     --sans: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
     --serif: 'Noto Serif SC', 'Songti SC', serif;
-    --hand: 'Caveat', '楷体', 'STKaiti', 'KaiTi', cursive;
+    --hand: 'Caveat', '楷体', 'STKaiti', cursive;
     --mono: 'SF Mono', 'Menlo', monospace;
   }
 
@@ -38,115 +24,40 @@
   html, body { width: 1080px; background: var(--bg); }
   body { font-family: var(--sans); color: var(--ink); }
 
-  .page {
-    width: 1080px;
-    background: var(--bg);
-    position: relative;
-    overflow: visible;
+  .page { width: 1080px; background: var(--bg); position: relative; overflow: hidden; }
+
+  .generated-visual,
+  .generated-art { position: relative; overflow: hidden; }
+  .generated-visual[data-state="empty"] { display: none; }
+
+  .generated-visual--sketchnote {
+    margin: 48px 60px 18px;
+    aspect-ratio: 16 / 9;
+    background: var(--paper);
   }
 
-  /* 极淡纸张噪点（不是点阵） */
-  .page > .grain {
-    position: absolute; inset: 0;
-    filter: url(#noise);
-    opacity: 0.025;
-    pointer-events: none;
-    z-index: 100;
-    mix-blend-mode: multiply;
+  .generated-visual img,
+  .generated-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
-  /* 整页 SVG overlay：用来画跨卡片的弯曲连接箭头 */
-  .relations {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 50;
-    overflow: visible;
-  }
-
-  /* 卡片基础样式：仅提供"骨架"，具体颜色由 {{CUSTOM_CSS}} 中的变体类覆盖 */
-  .card {
-    position: relative;
-    padding: 28px 32px 32px 40px;
-    background: var(--bg);
-    border-left: 5px solid var(--ink);
-  }
-  .card .category {
-    display: inline-block;
-    font: 500 22px/1 var(--sans);
+  .generated-art figcaption {
+    margin-top: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--amber);
+    font: italic 400 16px/1.45 var(--serif);
     color: var(--ink-light);
-    margin-bottom: 6px;
-    letter-spacing: 0.02em;
-  }
-  .card .concept {
-    font: 900 40px/1.15 var(--sans);
-    color: var(--ink-strong);
-    margin-bottom: 18px;
-    letter-spacing: -0.01em;
-  }
-  .card .body {
-    font: 400 22px/1.65 var(--sans);
-    color: var(--ink);
-  }
-  .card .body p + p { margin-top: 10px; }
-  .card .diagram {
-    margin: 14px 0 18px;
   }
 
-  /* 学科色变体 */
-  .card.green  { background: var(--green-light);  border-color: var(--green-deep); }
-  .card.green  .category { color: var(--green-deep); }
-  .card.blue   { background: var(--blue-light);   border-color: var(--blue-deep); }
-  .card.blue   .category { color: var(--blue-deep); }
-  .card.red    { background: var(--red-light);    border-color: var(--red-deep); }
-  .card.red    .category { color: var(--red-deep); }
-  .card.gray   { background: var(--gray-light);   border-color: var(--gray-deep); }
-  .card.gray   .category { color: var(--gray-deep); }
-  .card.amber  { background: var(--amber-light);  border-color: var(--amber-deep); }
-  .card.amber  .category { color: var(--amber-deep); }
+  .generated-art--origin { aspect-ratio: 4 / 3; }
+  .generated-art--failed { aspect-ratio: 16 / 9; }
+  .generated-art--reversal { aspect-ratio: 4 / 3; }
+  .generated-art--insight { aspect-ratio: 7 / 5; }
+  .generated-art--named { aspect-ratio: 4 / 3; }
 
-  /* 中央核心卡：更大、信息更密、不强绑学科色（默认中性米色） */
-  .card.core {
-    background: #F5F1E8;
-    border-left-color: var(--ink-strong);
-    padding: 36px 44px 40px 52px;
-  }
-  .card.core .concept {
-    font-size: 44px;
-    font-family: var(--serif);
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-  .card.core .body { font-size: 23px; }
-
-  /* 关系箭头标签：橙色手写体，浮于 SVG 路径之上 */
-  .relation-label {
-    position: absolute;
-    font: 600 30px/1.1 var(--hand);
-    color: var(--arrow);
-    transform-origin: left center;
-    pointer-events: none;
-    z-index: 60;
-    white-space: nowrap;
-  }
-
-  /* 顶部标题区 */
-  .title-block {
-    padding: 60px 60px 30px;
-  }
-  .title-block h1 {
-    font: 900 88px/1.0 var(--sans);
-    color: var(--ink-strong);
-    letter-spacing: -0.02em;
-    margin-bottom: 14px;
-  }
-  .title-block .subtitle {
-    font: 400 26px/1.5 var(--sans);
-    color: var(--ink-light);
-    max-width: 800px;
-  }
-
-  /* Footer */
   .colophon {
     position: relative;
     z-index: 10;
@@ -155,48 +66,22 @@
     justify-content: space-between;
     padding: 32px 60px 40px;
     margin-top: 30px;
-    border-top: 1px solid rgba(0,0,0,0.08);
+    border-top: 1px solid rgba(17,17,17,0.10);
   }
-  .colophon .who {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .colophon .who img {
-    width: 40px; height: 40px;
-    border-radius: 50%; object-fit: cover;
-  }
-  .colophon .who span {
-    font: 400 22px/1 var(--sans);
-    color: var(--ink-light);
-  }
-  .colophon .info-source {
-    font: 400 20px/1 var(--mono);
-    color: var(--ink-light);
-  }
+
+  .colophon .who { display: flex; align-items: center; gap: 14px; }
+  .colophon .who img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .colophon .who span { font: 400 22px/1 var(--sans); color: var(--ink-light); }
+  .colophon .info-source { font: 400 20px/1 var(--mono); color: var(--ink-light); }
 
   {{CUSTOM_CSS}}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute">
-  <filter id="noise">
-    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
-    <feColorMatrix type="saturate" values="0"/>
-  </filter>
-  <defs>
-    <!-- 橙色手绘箭头 marker -->
-    <marker id="arrow-orange" markerWidth="14" markerHeight="10" refX="13" refY="5" orient="auto">
-      <path d="M0,0 L14,5 L0,10 L4,5 Z" fill="#D2693C"/>
-    </marker>
-    <!-- 黑色细箭头 marker（卡片内部流程用） -->
-    <marker id="arrow-ink" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#1F1F1F"/>
-    </marker>
-  </defs>
-</svg>
 <div class="page">
-  <div class="grain"></div>
+  <figure class="generated-visual generated-visual--sketchnote" data-state="{{IMAGE_STATE}}">
+    <img src="{{IMAGE_SRC}}" alt="{{IMAGE_ALT}}">
+  </figure>
   {{CONTENT_HTML}}
   <div class="colophon">
     <div class="who">

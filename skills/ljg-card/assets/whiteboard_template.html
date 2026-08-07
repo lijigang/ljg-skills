@@ -10,13 +10,9 @@
     --board: #F7F3EC;
     --ink: #2C2826;
     --ink-light: #8A8478;
-    --red: #A09888;
+    --accent: #A64B3C;
     --blue: #7A8A98;
     --green: #7A8A7A;
-    --yellow: #7A6B4E;
-    --orange: #907A60;
-    --shu: #C03C28;
-    --marker-bg: rgba(44, 40, 38, 0.04);
     --hand: 'Kalam', 'PingFang SC', cursive;
     --marker: 'Permanent Marker', 'PingFang SC', cursive;
     --sans: 'DM Sans', 'PingFang SC', system-ui, sans-serif;
@@ -30,19 +26,11 @@
     width: 1080px;
     padding: 1px;
     background: rgba(180,170,155,0.15);
-    border-radius: 2px;
-    box-shadow: 0 2px 24px rgba(0,0,0,0.25);
-    position: relative;
+    box-shadow: 0 2px 24px rgba(44,40,38,0.20);
   }
 
-  .board {
-    width: 100%;
-    background: var(--board);
-    position: relative;
-    overflow: hidden;
-  }
+  .board { width: 100%; background: var(--board); position: relative; overflow: hidden; }
 
-  /* 和紙の光 — subtle warm light on paper */
   .board > .surface {
     position: absolute;
     inset: 0;
@@ -50,7 +38,45 @@
       radial-gradient(ellipse at 25% 20%, rgba(200,180,150,0.06) 0%, transparent 50%),
       radial-gradient(ellipse at 75% 55%, rgba(180,160,130,0.04) 0%, transparent 45%);
     pointer-events: none;
-    z-index: 0;
+  }
+
+  .generated-visual,
+  .generated-art { position: relative; z-index: 1; }
+  .generated-visual[data-state="empty"] { display: none; }
+
+  .generated-visual--whiteboard {
+    width: 360px;
+    margin: 42px 56px 12px auto;
+  }
+
+  .generated-visual img,
+  .generated-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .generated-art--whiteboard { max-width: 320px; }
+
+  .connector {
+    position: relative;
+    min-height: 48px;
+    border-left: 3px solid var(--accent);
+    margin-left: 28px;
+  }
+
+  .connector::after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: -1px;
+    width: 11px;
+    height: 11px;
+    border-right: 3px solid var(--accent);
+    border-bottom: 3px solid var(--accent);
+    transform: rotate(45deg);
   }
 
   .colophon {
@@ -60,68 +86,33 @@
     align-items: center;
     justify-content: space-between;
     padding: 24px 56px 28px;
-    border-top: 1px solid rgba(212,196,176,0.04);
+    border-top: 1px solid rgba(44,40,38,0.08);
   }
 
-  .colophon .who {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .colophon .who img {
-    width: 40px; height: 40px;
-    border-radius: 50%; object-fit: cover;
-  }
-
-  .colophon .who span {
-    font: 400 24px/1 var(--sans);
-    color: var(--ink-light);
-  }
-
-  .colophon .info-source {
-    font: 400 22px/1 var(--mono);
-    color: var(--ink-light);
-  }
+  .colophon .who { display: flex; align-items: center; gap: 14px; }
+  .colophon .who img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .colophon .who span { font: 400 24px/1 var(--sans); color: var(--ink-light); }
+  .colophon .info-source { font: 400 22px/1 var(--mono); color: var(--ink-light); }
 
   {{CUSTOM_CSS}}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute">
-  <defs>
-    <marker id="arrow-r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--red)" />
-    </marker>
-    <marker id="arrow-b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--blue)" />
-    </marker>
-    <marker id="arrow-w" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--ink)" />
-    </marker>
-    <marker id="arrow-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--green)" />
-    </marker>
-    <marker id="arrow-y" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--yellow)" />
-    </marker>
-    <marker id="arrow-s" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="var(--shu)" />
-    </marker>
-  </defs>
-</svg>
 <div class="board-frame">
-<div class="board">
-  <div class="surface"></div>
-  {{CONTENT_HTML}}
-  <div class="colophon">
-    <div class="who">
-      <img src="{{LOGO}}" alt="">
-      <span>李继刚</span>
+  <div class="board">
+    <div class="surface"></div>
+    <figure class="generated-visual generated-visual--whiteboard" data-state="{{IMAGE_STATE}}">
+      <img src="{{IMAGE_SRC}}" alt="{{IMAGE_ALT}}">
+    </figure>
+    {{CONTENT_HTML}}
+    <div class="colophon">
+      <div class="who">
+        <img src="{{LOGO}}" alt="">
+        <span>李继刚</span>
+      </div>
+      {{SOURCE_LINE}}
     </div>
-    {{SOURCE_LINE}}
   </div>
-</div>
 </div>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 import { resolve } from "node:path";
 
-const VERSION = "4.4.0";
+const VERSION = "4.5.0";
 
 const HELP = `ValidateDeck ${VERSION}
 
@@ -13,7 +13,7 @@ Usage:
 
 Checks:
   template version and JavaScript syntax
-  stable centered stage axis, chapter signal rule, header/footer contract
+  stable centered stage axis, finite composition grammar, whitespace budget, header/footer contract
   semantic-atom Takahashi typography, CJK tail guard, grouped rows and measured fit guard
   offline math guards and presentation key map
   zero motion and zero external resources
@@ -118,7 +118,7 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
   }
   if (syntaxPass) add("javascript-syntax", true, "script compiles");
 
-  add("template-version", html.includes('data-template-version="4.4.0"'), "template version is 4.4.0");
+  add("template-version", html.includes('data-template-version="4.5.0"'), "template version is 4.5.0");
   add("title-present", /<title>[^<]+<\/title>/i.test(html), "document title is non-empty");
   add("cover-normalization", script.includes("function normalizeSlides") && script.includes("cover: true") && script.includes("linesText(slides[0]) === title"), "title cover is synthesized or deduplicated");
   add("no-information-header", !/<header\b/i.test(html) && !/first-guide/i.test(html), "no header or top guide");
@@ -136,6 +136,27 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
   ) && ruleBodies(style, ".line").some((body) => /text-align\s*:\s*center/.test(body))
     && !script.includes("node.style.textAlign");
   add("centered-text-contract", centeredText, "all line-based pages inherit centered text without inline alignment overrides");
+
+  const compositionTokens = [
+    "function compositionFor(slide)",
+    'if (slide?.cover) return "identity"',
+    'if (slide?.emphasis || slide?.title) return "chapter"',
+    'if (slide?.table || slide?.pre != null) return "evidence"',
+    'if (slide?.quote) return "quotation"',
+    'slide?.semanticGroup === "list-run" || (lineCount >= 2 && lineCount <= 4)',
+    'return "sequence"',
+    'return "statement"',
+    "element.dataset.composition = compositionFor(slide)"
+  ];
+  add("composition-grammar", compositionTokens.every((token) => script.includes(token)), "all six composition roles derive deterministically from source-semantic fields");
+  add("composition-audit-interface", script.includes("composition: slides[index]?.dataset.composition"), "runtime audit exposes each slide's composition role");
+
+  const whitespaceBudget = ruleBodies(style, ".lines").some((body) =>
+    /width\s*:\s*min\(82vw,\s*1480px\)/.test(body)
+  ) && ruleBodies(style, ".slide").some((body) =>
+    /padding\s*:[^;]*var\(--stage-inline\)[^;]*;/.test(body)
+  );
+  add("whitespace-budget", whitespaceBudget, "regular text stays within 82vw on symmetric stage padding");
 
   const titleSignal = ruleBodies(style, '.slide[data-title="true"] .lines').some((body) =>
     /border-top\s*:\s*0/.test(body)
@@ -322,6 +343,18 @@ async function selfTest() {
     {
       id: "symmetric-hacker-stage",
       html: template.replace("left: 50%;\n    top: clamp(22px, 5vh, 66px);", "left: 12%;\n    top: clamp(22px, 5vh, 66px);")
+    },
+    {
+      id: "composition-grammar",
+      html: template.replace("element.dataset.composition = compositionFor(slide);", "")
+    },
+    {
+      id: "composition-audit-interface",
+      html: template.replace("composition: slides[index]?.dataset.composition,", "")
+    },
+    {
+      id: "whitespace-budget",
+      html: template.replace("width: min(82vw, 1480px);", "width: min(96vw, 1700px);")
     }
   ];
   const spatialFixturesRejected = spatialFixtures.every((fixture) =>

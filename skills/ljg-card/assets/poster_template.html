@@ -168,6 +168,29 @@
     color: var(--text-mid);
   }
 
+  /* ── Generated raster imagery ── */
+  .generated-visual,
+  .generated-art {
+    flex-shrink: 0;
+    margin: 0 0 34px;
+  }
+
+  .generated-visual[data-state="empty"] { display: none; }
+
+  .generated-visual img,
+  .generated-art img {
+    display: block;
+    width: 100%;
+    height: 360px;
+    object-fit: contain;
+  }
+
+  .generated-art figcaption {
+    margin-top: 10px;
+    font: 400 20px/1.45 var(--font);
+    color: var(--text-dim);
+  }
+
   /* ── Footer ── */
   .footer {
     flex-shrink: 0;
@@ -209,6 +232,9 @@
   <div class="card">
     {{HEADER_BLOCK}}
     {{TITLE_BLOCK}}
+    <figure class="generated-visual generated-visual--poster" data-state="{{IMAGE_STATE}}">
+      <img src="{{IMAGE_SRC}}" alt="{{IMAGE_ALT}}">
+    </figure>
     <div class="content">
       {{BODY_HTML}}
     </div>
