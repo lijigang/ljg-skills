@@ -2,8 +2,8 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
-const templateNames = ["long", "poster", "sketchnote", "comic", "whiteboard"];
-const modeNames = ["long", "poster", "sketchnote", "comic", "whiteboard"];
+const templateNames = ["long", "poster", "comic", "whiteboard"];
+const modeNames = ["long", "poster", "comic", "whiteboard"];
 const failures: string[] = [];
 
 async function text(path: string): Promise<string> {
@@ -41,7 +41,7 @@ for (const file of activeFiles) {
 }
 
 const skill = await text(join(root, "SKILL.md"));
-requireThat(/version:\s*"5\.0\.0"/.test(skill), "SKILL version is not 5.0.0");
+requireThat(/version:\s*"6\.0\.0"/.test(skill), "SKILL version is not 6.0.0");
 requireThat(skill.includes("references/image-generation.md"), "shared protocol missing from SKILL route");
 requireThat(skill.includes("`-l`（默认）"), "default long mode changed");
 
