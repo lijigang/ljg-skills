@@ -2,7 +2,7 @@
 name: ljg-card
 description: "Content caster (铸). Transforms text into PNG visuals through generated raster imagery plus precise HTML typography. Four molds: -l (default) long reading card, -m multi-card series, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '漫画', or '白板'."
 user_invocable: true
-version: "6.0.0"
+version: "6.1.0"
 ---
 
 # ljg-card：铸
@@ -15,7 +15,7 @@ version: "6.0.0"
 |---|---|---|---|
 | `-l`（默认） | 长图 | 1080 × auto | 1–3 个结构性视觉锚点 |
 | `-m` | 多卡 | 1080 × 1440 | 同系列母题；每卡最多一幅主图 |
-| `-c` | 漫画 | 1080 × auto | 所有分格的漫画主画面 |
+| `-c` | 漫画 | 1080 × auto | 缺口驱动、同案重跑的漫画分镜 |
 | `-w` | 白板 | 1080 × auto | 概念隐喻与局部手绘物件 |
 
 未给参数时使用 `-l`。
@@ -82,6 +82,33 @@ bunx playwright install chromium
 | `-m` | `references/mode-poster.md` | `assets/poster_template.html` |
 | `-c` | `references/mode-comic.md` | `assets/comic_template.html` |
 | `-w` | `references/mode-whiteboard.md` | `assets/whiteboard_template.html` |
+
+## Gotchas
+
+- `-c` 的格数由认知因果拍点决定，不设固定范围。短内容不凑格，长内容不因模板删掉承重关系。
+- 漫画主画面负责让动作与结果可见；概念名、对白、旁白和证据分寸仍由 HTML/CSS 写准，不能让图片模型代写解释。
+- 同案重跑要求角色、道具与空间连续。每格换一套隐喻会切断前后比较，即使单格都好看也不成立。
+- `object-fit: cover` 可能只裁坏一格。逐资产检查后仍要扫描所有分格的脸、手、关键道具与动作点，再检查最终 DOM、整图和重叠切片。
+
+## Examples
+
+**Example 1：把技术概念铸成漫画**
+
+```text
+User: 「把这篇技术解释做成漫画 -c」
+→ 固定一个最小案例，让零号模型先运行并暴露失败
+→ 每次只用一格引入当前缺口需要的概念，再回到同案重跑
+→ 最后从头运行完整模型，并留一个边界拍点
+```
+
+**Example 2：把完整长文铸成漫画**
+
+```text
+User: 「把这份已验收的完整笔记做成漫画 -c，不限格数」
+→ 先锁定 Org 路径与 SHA-256，再从全文因果主线选择认知拍点
+→ 格数服从承重关系与删除测试，不继承旧五格或固定页数
+→ 生成分格、组装 HTML，完成逐图、整图与重叠切片 QA
+```
 
 ## 交付合同
 

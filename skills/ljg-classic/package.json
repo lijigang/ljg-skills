@@ -1,0 +1,13 @@
+{
+  "name": "ljg-classic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test Tools/RenderClassic.test.ts",
+    "render": "bun Tools/RenderClassic.ts",
+    "validate": "bun Tools/ValidateClassic.ts"
+  },
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}
