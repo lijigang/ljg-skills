@@ -1,6 +1,6 @@
 ---
 name: ljg-paper
-description: "Paper reader for non-academics. Runs one concrete case until evidence exposes a gap, then shows how the paper changes the frame, operation, evidence, or feasible range and feeds the result into the next question. Produces natural, content-led Org notes with an invisible framework. USE WHEN the user shares an arXiv link OR paper URL OR PDF OR local paper file OR paper title, or asks to read, explain, analyze, or understand a paper. Defaults to a saved Org note. NOT FOR experiment reproduction, exhaustive method summaries, formal peer review, benchmark tables, or literature surveys."
+description: "Paper reader for non-academics. Runs one concrete case until evidence exposes a gap, then shows how the paper changes the frame, operation, evidence, or feasible range and feeds the result into the next question. Produces natural, content-led Markdown notes with an invisible framework. USE WHEN the user shares an arXiv link OR paper URL OR PDF OR local paper file OR paper title, or asks to read, explain, analyze, or understand a paper. Defaults to a saved Markdown note. NOT FOR experiment reproduction, exhaustive method summaries, formal peer review, benchmark tables, or literature surveys."
 ---
 
 # ljg-paper：让一个例子替读者想明白
@@ -49,11 +49,11 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 
 | 输入 | 必读 | 输出 |
 |---|---|---|
-| arXiv、PDF、paper URL、本地论文 | `ReadingGuide.md` | 生成由论文内容命名的 Org 笔记 |
-| 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 生成由论文内容命名的 Org 笔记 |
+| arXiv、PDF、paper URL、本地论文 | `ReadingGuide.md` | 生成由论文内容命名的 Markdown 笔记 |
+| 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 生成由论文内容命名的 Markdown 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一路径讲 |
 
-写 Org 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
+写 Markdown 文件时再读 `references/template.md`。默认保存到 `~/Documents/notes/`。
 
 文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
@@ -70,7 +70,7 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 - *一个例子能帮助理解，不能证明普遍成立。* 论文证据、作者解释、为了讲清而做的推演要分开写，适用范围紧跟相应结论。
 - *评测贡献不等于科学发现。* 新 benchmark 让问题可测，不等于解释了现实世界。
 - *公式不必全删。* 如果一个公式是最短的关系说明，保留它，下一句立刻翻译成普通话。
-- *`#+source` 不是参考资料列表。* 只放一个最接近论文原文的裸 URL。
+- *`source` 不是参考资料列表。* 只放一个最接近论文原文的裸 URL。
 - *允许论文没有惊天发现。* 工程改进就按工程改进来讲，不替作者拔高。
 
 ## 写作声音
@@ -105,7 +105,7 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 5. 只改当前被证据逼着改变的那一部分，再回到原例子重跑。
 6. 把新结果当作下一轮起点；还有缺口就继续，没有就停。
 7. 改变一个关键条件再跑一次，让适用范围显出来。
-8. 按事件、变化和条件生成正文标题；正文写完后再把三问压进 `#+description`。
+8. 按事件、变化和条件生成正文标题；正文写完后再把三问压进 `description`。
 
 可见标题不能是分析问题的名字，而要是论文内容本身。例如讲 ReAct，不写「论文解决什么 / 核心发现 / 我的启发」，而可以写：
 
@@ -141,8 +141,8 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 
 生成笔记后读回确认：
 
-- frontmatter 完整，包含正文写完后生成的 `#+description`，文件确实保存成功。
-- `#+source` 只有一个裸 URL。
+- frontmatter 完整，包含正文写完后生成的 `description`，文件确实保存成功。
+- `source` 只有一个裸 URL。
 - 每个顶层标题都在说论文里的具体事件、变化或条件，不是「问题、发现、启示」之类的分析栏位。
 - 正文不要求固定章数；若拆分中段，每个新增标题都对应一个真实的因果转折。
 - 开头是一个具体小例子，不是领域背景或论文摘要。
@@ -156,4 +156,4 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 - 证据和适用范围紧跟相应结论。
 - 图表若存在，确实比短句更容易看懂，而且没有夸大论文。
 - 若保留公式，下一句已经翻译成人话。
-- `#+description` 能回答「为什么需要这篇、作者多看见了什么、以后怎样判断」，但正文不拿这三问当目录。
+- `description` 能回答「为什么需要这篇、作者多看见了什么、以后怎样判断」，但正文不拿这三问当目录。

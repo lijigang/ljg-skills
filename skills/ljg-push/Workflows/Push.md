@@ -60,6 +60,7 @@ bash ~/.agents/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
 4. *Md 推送*：
    - `git checkout md` + `git pull --rebase`
    - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，Markdown 与运行时代码中的实际文件引用全局改写；结构化 `- *标签*：` 转成 `- **标签**：`）
+   - commit 前运行残留审计：拒绝未转换的输出指令、Org 头标记和非 assets `.org` 文件
    - bump patch version
    - `git add` + `git commit` + `git push origin md`
 5. *收尾*：切回 `master`，让本地工作 repo 留在源分支

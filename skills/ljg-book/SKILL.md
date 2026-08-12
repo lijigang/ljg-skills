@@ -1,6 +1,6 @@
 ---
 name: ljg-book
-description: "Book reader for non-specialists. Reconstructs a book through one governing tension: place the reader in a simple situation, let their natural understanding or response run, use the book's events, cases, arguments, or consequences to expose its limit, then revisit the situation until the author's judgment, mechanism, way of seeing, or unresolved tension becomes visible. USE WHEN given a book title, PDF, EPUB, excerpt, or asked 拆书, 分析这本书, 这本书在讲什么, 压缩一本书, or book. Defaults to a saved Org note. NOT FOR chapter summaries, papers, formal reviews, or single-concept deep dives."
+description: "Book reader for non-specialists. Reconstructs a book through one governing tension: place the reader in a simple situation, let their natural understanding or response run, use the book's events, cases, arguments, or consequences to expose its limit, then revisit the situation until the author's judgment, mechanism, way of seeing, or unresolved tension becomes visible. USE WHEN given a book title, PDF, EPUB, excerpt, or asked 拆书, 分析这本书, 这本书在讲什么, 压缩一本书, or book. Defaults to a saved Markdown note. NOT FOR chapter summaries, papers, formal reviews, or single-concept deep dives."
 user_invocable: true
 ---
 
@@ -16,11 +16,11 @@ user_invocable: true
 
 | 输入 | 必读 | 输出 |
 |---|---|---|
-| 书名 | 找到可靠材料后读 `ReadingGuide.md` | 保存 Org 笔记 |
-| PDF、EPUB、正文、样章、旧笔记 | 先读原文，再读 `ReadingGuide.md` | 保存 Org 笔记 |
+| 书名 | 找到可靠材料后读 `ReadingGuide.md` | 保存 Markdown 笔记 |
+| PDF、EPUB、正文、样章、旧笔记 | 先读原文，再读 `ReadingGuide.md` | 保存 Markdown 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一路径讲 |
 
-写 Org 文件时再读 `references/template.md`。每次任务都从 `references/coverage-map.md` 建立后台记录；材料薄时只填公共字段，全文材料则填完全部覆盖项。
+写 Markdown 文件时再读 `references/template.md`。每次任务都从 `references/coverage-map.md` 建立后台记录；材料薄时只填公共字段，全文材料则填完全部覆盖项。
 
 默认保存到 `~/Documents/notes/`。文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
@@ -115,7 +115,7 @@ user_invocable: true
 
 这两组只是语感示例。不要复制。一本书可以有两个标题，也可以有四五个；每出现一次真正的场景变化，才考虑换标题。
 
-正文前的 `#+DESCRIPTION` 在写完全文后补。它用一两句压缩这本书改变了什么看法，帮助检索，不承担导读目录的功能。
+正文前的 `description` 在写完全文后补。它用一两句压缩这本书改变了什么看法，帮助检索，不承担导读目录的功能。
 
 通常写 1000 到 1800 个汉字。短书可以更短，复杂书可以更长。字数只负责提醒是否失控，不能删掉理解所需的中间关系。
 
@@ -143,7 +143,7 @@ user_invocable: true
 | 两种机制反复对照 | 小表格 |
 | 两三句话已经足够 | 纯文字 |
 
-ASCII 图放进 Org 的 `#+begin_example` / `#+end_example`，宽度不超过 80 字符。一张足够。只把摘要换行排成图，不会帮助理解。
+ASCII 图放进 Markdown 围栏代码块，宽度不超过 80 字符。一张足够。只把摘要换行排成图，不会帮助理解。
 
 ## 写作声音
 
@@ -166,7 +166,7 @@ ASCII 图放进 Org 的 `#+begin_example` / `#+end_example`，宽度不超过 80
 6. 用书内事件、案例、论证或后果暴露缺口。
 7. 判断 x、R、f、E 中哪一项真正被改写，并把新结果带进下一场景。
 8. 继续回流，直到这本书形成的判断、机制、观看方式或矛盾完整出现。
-9. 回到开头，按内容变化命名标题，最后补 `#+DESCRIPTION`。
+9. 回到开头，按内容变化命名标题，最后补 `description`。
 10. 运行机械检查，再对照原文读回关键转折。
 
 ## Examples
@@ -189,7 +189,7 @@ ASCII 图放进 Org 的 `#+begin_example` / `#+end_example`，宽度不超过 80
 
 - 每次任务都有独立后台覆盖记录；材料等级、主要材料和支持边界已经填写。
 - 完整拆书走过问题、对象、机制、边界四类证据，并保留 5 到 12 个候选部件。
-- 文件确实保存，frontmatter、`#+DESCRIPTION` 与 Denote identifier 完整。
+- 文件确实保存，frontmatter、`description` 与 Denote identifier 完整。
 - 顶层标题来自具体事件、变化或条件，没有固定标题合同。
 - 成品没有研究工作台、材料等级或 x/R/f/E 等内部标签。
 - 开头是一件能想象的具体事情，旧理解或旧反应已经真实运行。
