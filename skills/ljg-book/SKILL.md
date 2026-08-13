@@ -22,7 +22,7 @@ user_invocable: true
 
 写 Markdown 文件时再读 `references/template.md`。每次任务都从 `references/coverage-map.md` 建立后台记录；材料薄时只填公共字段，全文材料则填完全部覆盖项。
 
-默认保存到 `~/Documents/notes/`。文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
+默认保存到 `~/Context/`。文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--拆书-{书名}__book.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 
 ## Gotchas
 
