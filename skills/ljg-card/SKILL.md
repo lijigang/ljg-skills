@@ -2,7 +2,7 @@
 name: ljg-card
 description: "Content caster (铸). Transforms text into PNG visuals through generated raster imagery plus precise HTML typography. Four molds: -l (default) long reading card, -m multi-card series, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '漫画', or '白板'."
 user_invocable: true
-version: "6.1.0"
+version: "6.1.1"
 ---
 
 # ljg-card：铸
@@ -30,6 +30,12 @@ version: "6.1.0"
 4. 当前 HTML 模板
 
 不得跳过共享图像协议直接写提示词，也不得把一种 mode 的图像语法套给另一种。
+
+## 全局临时目录约束
+
+无论从哪个目录启动，制卡前都必须在 `/tmp` 下建立本任务独占的临时目录。生成图候选稿、用于组版的源图、HTML、CSS、矢量草稿、渲染输入、截图草稿、QA 切片、缓存与日志等所有中间产物，全部只能写入该目录。
+
+只有用户明确要求交付的最终文件可以写入 `/tmp` 之外。候选 PNG 和未通过验收的渲染结果仍属于中间产物。完成前检查当前目录和仓库没有遗留中间文件，最终交付物验收后清理本任务的临时目录。
 
 ## 共同生产线
 

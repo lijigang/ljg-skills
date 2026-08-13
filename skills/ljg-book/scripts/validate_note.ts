@@ -32,6 +32,15 @@ const fullCoverageLoopFields = [
   "下一场景",
   "最后回到哪里",
 ];
+const fullConcretizationFields = [
+  "核心动作或变化",
+  "原状态",
+  "只改变的关键条件或动作",
+  "可见结果",
+  "角色、动作、方向与结果怎样对应",
+  "失败或反例怎样划出边界",
+  "删掉解释后，场景本身还能看见什么",
+];
 
 function displayWidth(line: string): number {
   return [...line].reduce((width, char) => width + (char.codePointAt(0)! > 127 ? 2 : 1), 0);
@@ -132,6 +141,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
   let materialGrade = "";
   let coverageZones = 0;
   let coverageLoopFields = 0;
+  let coverageConcretizationFields = 0;
   if (!coverage) {
     errors.push("所有拆书都必须提供 --coverage 后台覆盖记录");
   } else {
@@ -156,6 +166,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
         && /决定[：:]\s*(?:保留|合并|删除)(?:｜|\||$)/.test(candidate[0]),
       ).length;
       coverageLoopFields = fullCoverageLoopFields.filter((field) => substantive(lineField(coverage, field))).length;
+      coverageConcretizationFields = fullConcretizationFields.filter((field) => substantive(lineField(coverage, field))).length;
       const challengeFields = ["当前理解", "反证", "处理"].filter((field) => substantive(lineField(coverage, field))).length;
 
       if (authorFields !== 3) errors.push("完整拆书的覆盖记录没有填完作者自述的问题、对象与方法");
@@ -167,6 +178,9 @@ export function validate(content: string, file: string, coverage?: string): Resu
       }
       if (coverageLoopFields !== fullCoverageLoopFields.length) {
         errors.push("完整拆书的覆盖记录没有把例子从处境、张力和旧反应一路回流到返程");
+      }
+      if (coverageConcretizationFields !== fullConcretizationFields.length) {
+        errors.push("完整拆书的覆盖记录没有完成核心变化、场景对应、失败边界与删解释测试");
       }
       if (challengeFields !== 3) errors.push("完整拆书的覆盖记录没有完成当前理解、反证与处理");
     }
@@ -211,6 +225,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
       coverage_supplied: Boolean(coverage),
       coverage_zones: coverageZones,
       coverage_loop_fields: coverageLoopFields,
+      coverage_concretization_fields: coverageConcretizationFields,
       format: markdownMode ? "markdown" : "org",
     },
   };

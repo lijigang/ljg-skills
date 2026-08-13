@@ -77,6 +77,15 @@ function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书
 - 下一场景：谁决定参照点
 - 最后回到哪里：重新表述最初方案
 
+## 具象化门
+- 核心动作或变化：参照点改变，选择方向随之翻转
+- 原状态：救援方案用存活人数表达
+- 只改变的关键条件或动作：把存活人数改成死亡人数
+- 可见结果：多数人的选择从确定方案转向冒险方案
+- 角色、动作、方向与结果怎样对应：决策者不变，数字不变，只改表达方向，选择随之翻转
+- 失败或反例怎样划出边界：熟悉框架效应的人可能不翻转
+- 删掉解释后，场景本身还能看见什么：同一组数字换个方向，选择就变了
+
 ## 反证检查
 - 当前理解：表述改变参照点
 - 反证：熟练者可能不变
@@ -109,6 +118,7 @@ describe("validate ljg-book note", () => {
     expect(result.checks.top_headings).toBe(3);
     expect(result.checks.material_grade).toBe("完整拆书");
     expect(result.checks.coverage_zones).toBe(4);
+    expect(result.checks.coverage_concretization_fields).toBe(7);
   });
 
   test("keeps Markdown notes on the same contract", () => {
@@ -226,12 +236,19 @@ describe("validate ljg-book note", () => {
     expect(result.errors.join("\n")).toContain("一路回流到返程");
   });
 
+  test("rejects a complete coverage record with an empty concretization field", () => {
+    const result = validate(note(), filename, coverage().replace("- 删掉解释后，场景本身还能看见什么：同一组数字换个方向，选择就变了", "- 删掉解释后，场景本身还能看见什么："));
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("核心变化、场景对应、失败边界与删解释测试");
+  });
+
   for (const grade of ["初拆", "假设版"] as const) {
     test(`accepts minimal backstage coverage for ${grade}`, () => {
       const result = validate(note(), filename, coverage(grade));
       expect(result.ok).toBe(true);
       expect(result.checks.material_grade).toBe(grade);
       expect(result.checks.coverage_zones).toBe(0);
+      expect(result.checks.coverage_concretization_fields).toBe(0);
     });
   }
 
