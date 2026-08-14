@@ -265,6 +265,31 @@ describe("validate ljg-book note", () => {
     expect(comparison.checks.meta_narration_hits).toBe(1);
   });
 
+  test("rejects backstage evidence accounting inside the explanation", () => {
+    const result = validate(note({
+      firstBody: "这组纸条、杯子和薄书是讲解者依据旧稿局部关系构造的最小模型。它不是书中案例，也不是本轮真实材料测试，不能替钢材强度或工程结论作证。",
+    }), filename, coverage());
+    expect(result.ok).toBe(false);
+    expect(result.checks.backstage_accounting_hits).toBeGreaterThan(0);
+    expect(result.errors.join("\n")).toContain("后台核验语言");
+  });
+
+  test("rejects recurring model-management phrases from the reported note", () => {
+    const result = validate(note({
+      firstBody: "继续运行同一讲解模型。按模型规则，纸条被重新折起。旧稿保存的边界没有变，本轮不替它补参数。模型设定到这里结束。",
+    }), filename, coverage());
+    expect(result.ok).toBe(false);
+    expect(result.checks.backstage_accounting_hits).toBeGreaterThanOrEqual(5);
+  });
+
+  test("accepts an in-scene boundary stated through the object's limits", () => {
+    const result = validate(note({
+      firstBody: "桌上有十二根同样长、同样宽的纸条。把它们折成三角格，再首尾接起来。薄书还没放上去，先猜一猜：材料一样、数量一样，它们托得住的重量会一样吗？纸条不会告诉你钢梁能承受多少吨，却已经把问题拨正：决定结果的不只有材料，还有材料怎样连成一个整体。",
+    }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.backstage_accounting_hits).toBe(0);
+  });
+
   test("recognizes an opening that runs and names a result", () => {
     const result = validate(note(), filename, coverage());
     expect(result.checks.outside_camera_opening_hits).toBe(0);

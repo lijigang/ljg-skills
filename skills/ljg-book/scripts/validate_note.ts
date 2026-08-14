@@ -169,6 +169,22 @@ export function validate(content: string, file: string, coverage?: string): Resu
   if (metaNarrationHits.length > 0) {
     warnings.push(`正文含可能泄漏后台分析的讲台语言：${[...new Set(metaNarrationHits)].join("、")}；确认事情能否在删掉这些报幕后自行推进`);
   }
+  const backstageAccountingPatterns = [
+    /讲解者[^。！？\n]{0,30}(?:依据|根据|构造|自建|搭建|简化|设计)[^。！？\n]*/g,
+    /(?:不是|并非)书中(?:案例|例子|实验|原例|场景)/g,
+    /本轮[^。！？\n]*/g,
+    /(?:依据|根据|沿用|来自)[^。！？\n]{0,12}(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]*/g,
+    /(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]{0,12}(?:保存|提供|支持|记录|留下)[^。！？\n]*/g,
+    /不能替[^。！？\n]{0,50}(?:作证|证明|下结论)/g,
+    /(?:按模型规则|模型设定|继续运行[^。！？\n]{0,20}模型|仍在[^。！？\n]{0,12}模型里)/g,
+    /(?:没有|缺少)[^。！？\n]{0,20}(?:全文|原文|材料)(?:可核|可查|可验证)/g,
+  ];
+  const backstageAccountingHits = backstageAccountingPatterns.flatMap((pattern) =>
+    [...narrativeBody.matchAll(pattern)].map((match) => match[0]),
+  );
+  if (backstageAccountingHits.length > 0) {
+    errors.push(`正文含后台核验语言：${[...new Set(backstageAccountingHits)].join("、")}；把来源身份与材料状态移回 coverage，正文改写成对象已经回答什么、还需要哪些现实条件`);
+  }
   const sourceStructurePatterns = [
     /前言|序言|导言|导论|开篇|结论章|末章|章节|前部|中部|后部/g,
     /第[0-9一二三四五六七八九十百千万〇两]+(?:章|节|部|卷|篇)/g,
@@ -306,6 +322,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
       source_structure_hits: sourceStructureHits.length,
       outside_camera_opening_hits: outsideCameraOpeningHits,
       meta_narration_hits: metaNarrationHits.length,
+      backstage_accounting_hits: backstageAccountingHits.length,
       immediate_naming_hits: immediateNamingHits,
       dense_paragraph_hits: denseParagraphHits,
       max_paragraph_chars: maxParagraphChars,
