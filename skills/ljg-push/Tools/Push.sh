@@ -200,6 +200,7 @@ mdize_skill() {
       -e 's/template\.org/template.md/g' \
       -e 's/org-mode/markdown/g' \
       -e 's/Org-mode/Markdown/g' \
+      -e 's/文件必须是 markdown，禁止 Markdown。/文件必须是 Markdown，禁止 Org 格式。/g' \
       -e 's/Defaults to a saved org note/Defaults to a saved markdown note/g' \
       -e 's/Defaults to a saved Org note/Defaults to a saved Markdown note/g' \
       -e 's/Produces natural, content-led Org notes/Produces natural, content-led Markdown notes/g' \
@@ -289,7 +290,7 @@ audit_md_skill() {
   org_files=$(find "$skill_dir" -type f -name '*.org' -not -path '*/assets/*' 2>/dev/null || true)
   output_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En \
-      'Defaults to a saved Org note|Produces natural, content-led Org notes|保存 Org 笔记|生成由论文内容命名的 Org 笔记|写 Org 文件时|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|`#\+(DESCRIPTION|description|source)`|Org 的 (`)?#\+begin_example|Org example 块' \
+      'Defaults to a saved Org note|Produces natural, content-led Org notes|保存 Org 笔记|生成由论文内容命名的 Org 笔记|写 Org 文件时|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|文件必须是 (markdown|Markdown)，禁止 Markdown|`#\+(DESCRIPTION|description|source)`|Org 的 (`)?#\+begin_example|Org example 块' \
       2>/dev/null || true)
   markup_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En '^#\+(TITLE|SUBTITLE|DESCRIPTION|DATE|FILETAGS|IDENTIFIER|begin_|end_)' \

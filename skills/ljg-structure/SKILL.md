@@ -78,7 +78,7 @@ user_invocable: true
 
 若用户明确说「只分析」「不落盘」或 `read-only`，直接在对话中给出同等完整的分析，不创建文件。
 
-文件必须是 markdown，禁止 Markdown。最小结构：
+文件必须是 Markdown，禁止 Org 格式。最小结构：
 
 ```yaml
 title: 结构：{主题}
