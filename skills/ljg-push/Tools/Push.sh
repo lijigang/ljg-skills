@@ -203,6 +203,7 @@ mdize_skill() {
       -e 's/生成由论文内容命名的 Org 笔记/生成由论文内容命名的 Markdown 笔记/g' \
       -e 's/写 org 文件时/写 Markdown 文件时/g' \
       -e 's/写 Org 文件时/写 Markdown 文件时/g' \
+      -e 's/所有生成的 Org 文件/所有生成的 Markdown 文件/g' \
       -e 's/写入 Org 后运行/写入 Markdown 后运行/g' \
       -e 's/`#+DESCRIPTION`/`description`/g' \
       -e 's/`#+description`/`description`/g' \
@@ -283,7 +284,7 @@ audit_md_skill() {
   org_files=$(find "$skill_dir" -type f -name '*.org' -not -path '*/assets/*' 2>/dev/null || true)
   output_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En \
-      'Defaults to a saved Org note|Produces natural, content-led Org notes|保存 Org 笔记|生成由论文内容命名的 Org 笔记|写 Org 文件时|写入 Org 后运行|`#\+(DESCRIPTION|description|source)`|Org 的 (`)?#\+begin_example|Org example 块' \
+      'Defaults to a saved Org note|Produces natural, content-led Org notes|保存 Org 笔记|生成由论文内容命名的 Org 笔记|写 Org 文件时|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|`#\+(DESCRIPTION|description|source)`|Org 的 (`)?#\+begin_example|Org example 块' \
       2>/dev/null || true)
   markup_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En '^#\+(TITLE|SUBTITLE|DESCRIPTION|DATE|FILETAGS|IDENTIFIER|begin_|end_)' \

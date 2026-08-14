@@ -82,7 +82,7 @@ x_t --[在 R_t 中运行 f_t]--> 结果
 | 只有论文标题 | 找到可靠原文后读 `ReadingGuide.md` | 生成由论文内容命名的 Markdown 笔记 |
 | 用户明确只要口头解释 | `ReadingGuide.md` | 不写文件，按同一路径讲 |
 
-写 Markdown 文件时再读 `references/template.md`。所有生成的 Org 文件统一保存到 `~/Context/`；目录不存在时先创建，不再写入其他默认目录。
+写 Markdown 文件时再读 `references/template.md`。所有生成的 Markdown 文件统一保存到 `~/Context/`；目录不存在时先创建，不再写入其他默认目录。
 
 文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.md`；时间戳用 `date +%Y%m%dT%H%M%S` 生成。
 

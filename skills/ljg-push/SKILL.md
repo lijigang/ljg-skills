@@ -112,6 +112,7 @@ User: /ljg-push --dry-run
 - *重命名引用可能藏在运行时代码里*——例如测试用 `new URL("../Template.org", import.meta.url)` 读取模板；只改 Markdown 文档会让 md 分支缺文件。转换器会按本次实际转出的 basename 精确改写 `.ts` / `.js` / `.json` / `.sh` 等文本消费者，同时保留没有对应实体文件的 Org 测试夹具字符串
 - *结构化标签不能靠枚举示例词*——`x`、`f(x)` 之外还会出现「主体/边界」「代入」等真实标签；转换器按 `- *标签*：` 的结构识别，发布后仍要扫描 md 文件是否残留单星标签
 - *Markdown 转换不能只匹配小写 `org`*——技能正文常写 `Org`、内联 `description`，Org 模板的 `# 注释` 在 Markdown 里还会变成标题；转换器统一处理这些形式，并在 md commit 前扫描输出指令、Org 标记和残留 `.org` 文件
+- *输出格式残留不能只扫动词短语*——「写 Markdown 文件时」转掉后，同段的「所有生成的 Markdown 文件」仍可能留下，令 md 分支继续要求生成 Org。转换器和提交前审计都要覆盖这种保存路径句式；否则一次成功 push 会把旧格式契约重新带回远端
 - *脚本会自动 bump patch version 在 plugin.json + marketplace.json*——如果你想 bump minor / major，先手动改完再跑脚本，脚本只追加 patch
 - *如果 md 分支的远端比本地新（继刚另一台机器推过）*，脚本会 `pull --rebase` 失败时尝试一次 `reset --hard origin/md` 重新应用——这会丢弃本地未推的 md 分支 commit。脚本前会提示
 - **当前路径**：skill 源固定在 `~/.agents/skills/`，工作 repo 固定在 `~/code/ljg-skills/`；不要从历史备份目录读取或推送
