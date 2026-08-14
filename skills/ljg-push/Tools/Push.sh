@@ -62,6 +62,10 @@ setup_repo() {
 detect_updates() {
   for local_skill in "$SKILLS_LOCAL"/ljg-*; do
     [ -d "$local_skill" ] || continue
+    # A prefixed workspace/eval directory is not a publishable skill unless its
+    # root contains the skill entrypoint. This keeps benchmark snapshots such as
+    # ljg-book-workspace out of README checks, rsync, commits, and releases.
+    [ -f "$local_skill/SKILL.md" ] || continue
     local name
     name=$(basename "$local_skill")
     local repo_skill="$SKILLS_REPO/skills/$name"
@@ -77,6 +81,7 @@ detect_updates() {
 list_all_local() {
   for local_skill in "$SKILLS_LOCAL"/ljg-*; do
     [ -d "$local_skill" ] || continue
+    [ -f "$local_skill/SKILL.md" ] || continue
     local name
     name=$(basename "$local_skill")
     echo "$name"

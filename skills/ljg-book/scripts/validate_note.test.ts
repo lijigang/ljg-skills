@@ -3,9 +3,9 @@ import { validate } from "./validate_note";
 
 const filename = "20260812T120000--拆书-示例__book.org";
 const defaultHeadings = [
-  "为什么换一种说法，选择就翻了",
-  "人先站在哪里，再看得到失",
-  "同一决定怎样重新问一遍",
+  "四句话摆在眼前，你会不会点头",
+  "遮住最后一句，证据突然少了一块",
+  "再看同一句话，你开始等哪种证据",
 ];
 
 function note(options: {
@@ -20,16 +20,16 @@ function note(options: {
   const headings = options.headings ?? defaultHeadings;
   const bodies = headings.map((heading, index) => {
     const body = index === 0
-      ? options.firstBody ?? "小李要在两个方案中选一个。他按最自然的办法作出选择，结果却和自己的目标相反。"
+      ? options.firstBody ?? "四句话摆在小李面前。他顺着前三句的危险感点了头。遮住最后一句，他才发现前三句只能证明问题严重。这就叫理由还没有走到结论。"
       : index === headings.length - 1
-        ? "回到原来的选择，小李现在会先检查参照条件，再决定怎样行动。"
-        : "他先看见一个遗漏的条件。把它放回原来的选择，结果立刻改变。新的结果又露出另一个问题，于是他继续检查角色之间的关系。";
+        ? "回到同一句话，小李不急着赞成或反对。他现在会先问，哪一种比较结果能证明处罚真的更有效。"
+        : "一份地区比较放回原来的判断。处罚变重以后事故没有下降，刚才那一下点头停住了。也就是说，问题严重不等于这个办法有效。";
     return `* ${heading}\n\n${body}\n`;
   }).join("\n");
 
   return `#+TITLE: 拆书：《示例》
-#+SUBTITLE: 某作者 | 一次判断变化
-${options.description === "" ? "" : `#+DESCRIPTION: ${options.description ?? "同一组结果换一种说法，选择为什么会翻转。"}\n`}#+DATE: [2026-08-12 Wed 12:00]
+#+SUBTITLE: 某作者 | 同一句结论为什么开始等待证据
+${options.description === "" ? "" : `#+DESCRIPTION: ${options.description ?? "四句话让人顺势点头；遮住最后一句，理由与结论之间的缺口显出来。"}\n`}#+DATE: [2026-08-12 Wed 12:00]
 #+FILETAGS: :book:test:
 #+IDENTIFIER: ${options.identifier ?? "20260812T120000"}
 
@@ -37,13 +37,25 @@ ${options.opening ?? ""}${bodies}
 ${options.diagram ?? ""}${options.tail ?? ""}`;
 }
 
-function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书"): string {
+function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书", support = "是——原书有完整选择实验"): string {
   const boundary = `# ljg-book 后台覆盖记录
 
 ## 材料边界
 - 材料等级：${grade}
 - 主要材料：原书全文与作者访谈
 - 能支持到：支持核心机制与边界，不延伸到作者未讨论的领域
+- 材料能否支撑具体运行：${support}
+
+## 读者运行门
+- 读者先问什么：为什么同一句结论听起来很顺
+- 稳定对象或最小模型：四句话组成的手机政策论证
+- 读者第一次会猜什么：问题严重，所以处罚应该更重
+- 最小动作或变化：遮住最后一句，只看前三句
+- 立刻出现的结果：前三句只能证明问题存在
+- 结果紧接着叫什么：理由与结论之间还有缺口
+- 同一对象怎样再运行：放入比较证据后重新判断是否升级处罚
+- 陌生读者能怎样复述：问题严重不等于某个办法已经有效
+- 原书依据与简化边界：案例来自原书，只压缩措辞，不增加结果
 `;
   if (grade !== "完整拆书") return boundary;
 
@@ -66,30 +78,32 @@ function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书
 - [candidate] 名称：D｜位置：4｜解决的问题：d｜与其他部件的关系：d｜决定：保留｜删除测试：不能删
 - [candidate] 名称：E｜位置：5｜解决的问题：e｜与其他部件的关系：e｜决定：保留｜删除测试：不能删
 
-## 例子回流
-- 处境：两个方案
-- 贯穿张力：同一结果为什么带出不同选择
-- 最自然的理解或反应：选确定方案
-- 得到的结果：换种说法后选择翻转
-- 证据或事件暴露的缺口：概率没变却无法解释翻转
-- 被改写的是 x / R / f / E 中哪一项：R，判断参照改变
-- 改写后的结果：得失重新呈现
-- 下一场景：谁决定参照点
-- 最后回到哪里：重新表述最初方案
-
-## 具象化门
-- 核心动作或变化：参照点改变，选择方向随之翻转
-- 原状态：救援方案用存活人数表达
-- 只改变的关键条件或动作：把存活人数改成死亡人数
-- 可见结果：多数人的选择从确定方案转向冒险方案
-- 角色、动作、方向与结果怎样对应：决策者不变，数字不变，只改表达方向，选择随之翻转
-- 失败或反例怎样划出边界：熟悉框架效应的人可能不翻转
-- 删掉解释后，场景本身还能看见什么：同一组数字换个方向，选择就变了
+## 全书取舍
+- 贯穿全书的普通问题：什么时候一句结论才值得相信
+- 正文保留哪两到四个关系：理由与结论、比较证据、替代解释
+- 为什么这些关系足以让读者理解全书主干：它们让同一判断从直觉走到带条件行动
+- 哪些重要内容留在后台而不进入正文：证据类型清单与全部谬误名称
+- 各模块如何继续使用同一对象，或为什么必须换对象：始终回到手机政策论证重做判断
 
 ## 反证检查
 - 当前理解：表述改变参照点
 - 反证：熟练者可能不变
 - 处理：限定适用条件
+`;
+}
+
+function legacyCoverage(): string {
+  return `# 旧覆盖
+- 材料等级：初拆
+- 主要材料：旧笔记
+- 能支持到：支持局部理解
+- 镜头站在哪里：方案摆在眼前
+- 读者或人物先看见什么：两组数字
+- 解释出现前会怎样判断或行动：先选确定方案
+- 这个判断先产生什么可见结果：换说法后改选
+- 哪条证据、事件或对象反馈打断它：概率没有变化
+- 命名以后回到哪一幕重跑：回到原方案
+- 原书依据与简化边界：只压缩原案例
 `;
 }
 
@@ -103,7 +117,7 @@ identifier: 20260812T120000
 
 # 为什么换一种说法，选择就翻了
 
-小李先选确定方案，换一种表述后却改选冒险方案。
+小李先选确定方案，换一种表述后却改选冒险方案。这就是参照点在移动。
 
 # 同一决定怎样重新问一遍
 
@@ -112,13 +126,17 @@ identifier: 20260812T120000
 }
 
 describe("validate ljg-book note", () => {
-  test("accepts three content-led headings", () => {
+  test("accepts the new runnable full-book contract", () => {
     const result = validate(note(), filename, coverage());
     expect(result.ok).toBe(true);
-    expect(result.checks.top_headings).toBe(3);
     expect(result.checks.material_grade).toBe("完整拆书");
     expect(result.checks.coverage_zones).toBe(4);
-    expect(result.checks.coverage_concretization_fields).toBe(7);
+    expect(result.checks.coverage_runnable_fields).toBe(9);
+    expect(result.checks.coverage_book_selection_fields).toBe(5);
+    expect(result.checks.runnable_support).toContain("是");
+    expect(result.checks.coverage_loop_fields).toBe(0);
+    expect(result.checks.coverage_concretization_fields).toBe(0);
+    expect(result.checks.immediate_naming_hits).toBeGreaterThan(0);
   });
 
   test("keeps Markdown notes on the same contract", () => {
@@ -131,10 +149,10 @@ describe("validate ljg-book note", () => {
   for (const count of [2, 4] as const) {
     test(`accepts ${count} content-led headings`, () => {
       const headings = [
-        "为什么换一种说法，选择就翻了",
-        "人先站在哪里，再看得到失",
-        "谁在悄悄移动参照点",
-        "同一决定怎样重新问一遍",
+        "四句话摆在眼前，你会不会点头",
+        "遮住最后一句，证据突然少了一块",
+        "一份比较结果怎样改变选择",
+        "再看同一句话，你开始等哪种证据",
       ].slice(0, count);
       const result = validate(note({ headings }), filename, coverage());
       expect(result.ok).toBe(true);
@@ -143,41 +161,24 @@ describe("validate ljg-book note", () => {
   }
 
   test("rejects fewer than two top headings", () => {
-    const result = validate(note({ headings: ["为什么换一种说法，选择就翻了"] }), filename, coverage());
+    const result = validate(note({ headings: ["四句话摆在眼前，你会不会点头"] }), filename, coverage());
     expect(result.ok).toBe(false);
     expect(result.errors.join("\n")).toContain("至少需要 2 个");
   });
 
-  test("rejects the old fixed headings", () => {
-    const result = validate(note({ headings: ["走进这个问题", "作者怎样一步步看见", "回到现实", "资料校准"] }), filename, coverage());
+  test("rejects old fixed or generic headings", () => {
+    const result = validate(note({ headings: ["走进这个问题", "问题"] }), filename, coverage());
     expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("旧框架");
+    expect(result.errors.join("\n")).toContain("旧框架或空泛标签");
   });
 
-  test("rejects an exact generic heading without rejecting a specific question", () => {
-    const rejected = validate(note({ headings: ["问题", "问题为什么越来越大"] }), filename, coverage());
-    const accepted = validate(note({ headings: ["问题为什么越来越大", "同一办法怎样制造第二个问题"] }), filename, coverage());
-    expect(rejected.ok).toBe(false);
-    expect(rejected.errors.join("\n")).toContain("空泛标签");
-    expect(accepted.ok).toBe(true);
-  });
-
-  test("rejects a visible research-calibration label", () => {
-    const result = validate(note({ tail: "\n* 资料校准\n\n- 某来源\n" }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.checks.calibration_hits).toBeGreaterThan(0);
-  });
-
-  test("rejects a visible material-grade field", () => {
-    const result = validate(note({ tail: "\n- 材料等级：完整拆书\n" }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("只能写在后台");
-  });
-
-  test("requires a description", () => {
-    const result = validate(note({ description: "" }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("#+DESCRIPTION");
+  test("rejects visible backstage fields and missing description", () => {
+    const calibration = validate(note({ tail: "\n* 资料校准\n\n- 某来源\n" }), filename, coverage());
+    const grade = validate(note({ tail: "\n- 材料等级：完整拆书\n" }), filename, coverage());
+    const description = validate(note({ description: "" }), filename, coverage());
+    expect(calibration.ok).toBe(false);
+    expect(grade.ok).toBe(false);
+    expect(description.ok).toBe(false);
   });
 
   test("rejects exposed x/R/f/E labels", () => {
@@ -194,74 +195,99 @@ describe("validate ljg-book note", () => {
     });
   }
 
-  test("rejects an identifier mismatch", () => {
-    const result = validate(note({ identifier: "20260812T120001" }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("与文件名");
+  test("rejects identifier mismatch and missing coverage", () => {
+    const mismatch = validate(note({ identifier: "20260812T120001" }), filename, coverage());
+    const missing = validate(note(), filename);
+    expect(mismatch.ok).toBe(false);
+    expect(missing.ok).toBe(false);
   });
 
-  test("requires a backstage coverage record", () => {
-    const result = validate(note(), filename);
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("所有拆书都必须提供");
+  test("requires source boundary and valid material grade", () => {
+    const boundary = validate(note(), filename, coverage("初拆").replace("- 能支持到：支持核心机制与边界，不延伸到作者未讨论的领域", "- 能支持到："));
+    const grade = validate(note(), filename, coverage("初拆").replace("材料等级：初拆", "材料等级：大概读过"));
+    expect(boundary.ok).toBe(false);
+    expect(grade.ok).toBe(false);
   });
 
-  test("rejects a complete coverage record missing one evidence zone", () => {
-    const result = validate(note(), filename, coverage().replace("[boundary]", "[missing]"));
+  test("requires yes or no for runnable material support", () => {
+    const result = validate(note(), filename, coverage("初拆", "也许可以"));
     expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("四类证据");
+    expect(result.errors.join("\n")).toContain("必须明确写是或否");
   });
 
-  test("rejects a complete evidence zone whose location is blank", () => {
-    const result = validate(note(), filename, coverage().replace("位置：loc-90", "位置："));
+  test("requires all runnable fields when material says yes", () => {
+    const incomplete = coverage("初拆").replace("- 同一对象怎样再运行：放入比较证据后重新判断是否升级处罚", "- 同一对象怎样再运行：");
+    const result = validate(note(), filename, incomplete);
     expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("四类证据");
+    expect(result.errors.join("\n")).toContain("没有填完普通问题、稳定对象");
   });
 
-  test("does not count an unlocated evidence zone as covered", () => {
-    const result = validate(note(), filename, coverage().replace("位置：loc-90", "位置：未找到"));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("四类证据");
+  test("allows an honest no while warning against fabricated scenes", () => {
+    const thin = coverage("初拆", "否——只有目录，没有可还原的动作与结果")
+      .replace("- 稳定对象或最小模型：四句话组成的手机政策论证", "- 稳定对象或最小模型：")
+      .replace("- 最小动作或变化：遮住最后一句，只看前三句", "- 最小动作或变化：");
+    const result = validate(note(), filename, thin);
+    expect(result.ok).toBe(true);
+    expect(result.warnings.join("\n")).toContain("材料不足以支撑具体运行");
   });
 
-  test("rejects an unfilled candidate placeholder", () => {
-    const result = validate(note(), filename, coverage().replace("名称：E｜位置：5", "名称：｜位置：5"));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("候选部件必须填完");
+  test("keeps legacy coverage readable with a migration warning", () => {
+    const result = validate(note(), filename, legacyCoverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.runnable_support).toBe("legacy");
+    expect(result.checks.coverage_embodiment_fields).toBe(7);
+    expect(result.warnings.join("\n")).toContain("旧版现场化门");
   });
 
-  test("rejects a complete coverage record with an empty loop field", () => {
-    const result = validate(note(), filename, coverage().replace("- 最后回到哪里：重新表述最初方案", "- 最后回到哪里："));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("一路回流到返程");
+  test("rejects incomplete full-book evidence, candidates, selection, and challenge", () => {
+    const zone = validate(note(), filename, coverage().replace("[boundary]", "[missing]"));
+    const candidate = validate(note(), filename, coverage().replace("名称：E｜位置：5", "名称：｜位置：5"));
+    const selection = validate(note(), filename, coverage().replace("- 各模块如何继续使用同一对象，或为什么必须换对象：始终回到手机政策论证重做判断", "- 各模块如何继续使用同一对象，或为什么必须换对象："));
+    const challenge = validate(note(), filename, coverage().replace("- 处理：限定适用条件", "- 处理："));
+    expect(zone.ok).toBe(false);
+    expect(candidate.ok).toBe(false);
+    expect(selection.ok).toBe(false);
+    expect(challenge.ok).toBe(false);
   });
 
-  test("rejects a complete coverage record with an empty concretization field", () => {
-    const result = validate(note(), filename, coverage().replace("- 删掉解释后，场景本身还能看见什么：同一组数字换个方向，选择就变了", "- 删掉解释后，场景本身还能看见什么："));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("核心变化、场景对应、失败边界与删解释测试");
-  });
-
-  for (const grade of ["初拆", "假设版"] as const) {
-    test(`accepts minimal backstage coverage for ${grade}`, () => {
-      const result = validate(note(), filename, coverage(grade));
+  for (const opening of ["书中给出一段手机论证。", "叙述者带着儿子骑摩托车远行。"] as const) {
+    test(`warns when the opening camera stays outside: ${opening}`, () => {
+      const result = validate(note({ firstBody: opening }), filename, coverage());
       expect(result.ok).toBe(true);
-      expect(result.checks.material_grade).toBe(grade);
-      expect(result.checks.coverage_zones).toBe(0);
-      expect(result.checks.coverage_concretization_fields).toBe(0);
+      expect(result.checks.outside_camera_opening_hits).toBe(1);
     });
   }
 
-  test("rejects coverage missing a shared source-boundary field", () => {
-    const result = validate(note(), filename, coverage("初拆").replace("- 能支持到：支持核心机制与边界，不延伸到作者未讨论的领域", "- 能支持到："));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("主要材料与能支持到哪里");
+  test("warns when backstage stage directions or controlled comparisons leak", () => {
+    const stage = validate(note({ firstBody: "小李读完四句话。这一步汇集了全书对证据的盘问。" }), filename, coverage());
+    const comparison = validate(note({ firstBody: "小李先点头。保留同一组数字，只改变表达方式，选择随即翻转。" }), filename, coverage());
+    expect(stage.checks.meta_narration_hits).toBe(1);
+    expect(comparison.checks.meta_narration_hits).toBe(1);
   });
 
-  test("rejects an invalid backstage material grade", () => {
-    const result = validate(note(), filename, coverage("初拆").replace("材料等级：初拆", "材料等级：大概读过"));
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("完整拆书 / 初拆 / 假设版");
+  test("recognizes an opening that runs and names a result", () => {
+    const result = validate(note(), filename, coverage());
+    expect(result.checks.outside_camera_opening_hits).toBe(0);
+    expect(result.checks.meta_narration_hits).toBe(0);
+    expect(result.checks.immediate_naming_hits).toBeGreaterThan(0);
+  });
+
+  test("warns when no result receives an adjacent name", () => {
+    const result = validate(note({
+      firstBody: "四句话摆在小李面前。他顺着危险感点了头。后来他又考虑了许多别的因素。",
+      headings: ["四句话摆在眼前", "后来又有很多因素"],
+    }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.immediate_naming_hits).toBe(0);
+    expect(result.warnings.join("\n")).toContain("结果后立即命名");
+  });
+
+  test("warns on an overloaded paragraph and sentence", () => {
+    const dense = "小李看着同一组数字，" + "一个关系又带出另一个关系，".repeat(24) + "这就是概念拥挤。";
+    const result = validate(note({ firstBody: dense }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.dense_paragraph_hits).toBeGreaterThan(0);
+    expect(result.checks.long_sentence_hits).toBeGreaterThan(0);
   });
 
   test("rejects an over-wide ASCII diagram", () => {
