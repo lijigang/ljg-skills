@@ -1,8 +1,8 @@
 ---
 name: ljg-card
-description: "Content caster (铸). Transforms text into PNG visuals through generated raster imagery plus precise HTML typography. Four molds: -l (default) long reading card, -m multi-card series, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '漫画', or '白板'."
+description: "Content caster (铸). Transforms text into PNG visuals through generated raster imagery plus precise HTML typography. Three molds: -l (default) long reading card, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '漫画', or '白板'."
 user_invocable: true
-version: "6.1.1"
+version: "7.0.0"
 ---
 
 # ljg-card：铸
@@ -14,7 +14,6 @@ version: "6.1.1"
 | 参数 | 模具 | 尺寸 | 图像角色 |
 |---|---|---|---|
 | `-l`（默认） | 长图 | 1080 × auto | 1–3 个结构性视觉锚点 |
-| `-m` | 多卡 | 1080 × 1440 | 同系列母题；每卡最多一幅主图 |
 | `-c` | 漫画 | 1080 × auto | 缺口驱动、同案重跑的漫画分镜 |
 | `-w` | 白板 | 1080 × auto | 概念隐喻与局部手绘物件 |
 
@@ -77,7 +76,6 @@ bunx playwright install chromium
 ## Footer
 
 - `-l`、`-c`、`-w`：左侧保留 logo + 李继刚；右侧用 `{{SOURCE_LINE}}` 写明确来源，没有来源则替换为空字符串。
-- `-m`：保留页码信息，不新增来源推断。
 - logo 是既有品牌位图，不属于生成图，也不能拿来充当测试外的内容插图。
 
 ## mode 路由
@@ -85,7 +83,6 @@ bunx playwright install chromium
 | 参数 | mode 文件 | 模板 |
 |---|---|---|
 | `-l` | `references/mode-long.md` | `assets/long_template.html` |
-| `-m` | `references/mode-poster.md` | `assets/poster_template.html` |
 | `-c` | `references/mode-comic.md` | `assets/comic_template.html` |
 | `-w` | `references/mode-whiteboard.md` | `assets/whiteboard_template.html` |
 
@@ -129,4 +126,4 @@ bun run audit
 bun run fixtures
 ```
 
-第一条检查共享协议、四路引用、位图槽、空槽与禁用项；第二条在 `/tmp/ljg-card-v6-fixtures/` 生成四份最小代表 HTML，随后用 `capture.ts` 实际截图并读回 PNG。
+第一条检查共享协议、三路引用、位图槽、空槽与禁用项；第二条在 `/tmp/ljg-card-v7-fixtures/` 生成三份最小代表 HTML，随后用 `capture.ts` 实际截图并读回 PNG。

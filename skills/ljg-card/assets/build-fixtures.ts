@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
-const output = "/tmp/ljg-card-v6-fixtures";
+const output = "/tmp/ljg-card-v7-fixtures";
 const logo = `file://${join(import.meta.dir, "logo.png")}`;
 
 await mkdir(output, { recursive: true });
@@ -33,15 +33,6 @@ const fixtures: Record<string, Record<string, string>> = {
     TITLE_BLOCK: '<div class="title-area"><h1>长图的视觉锚点</h1></div>',
     BODY_HTML: '<p class="dropcap">生成图只在真正承载结构的位置出现，其他段落保持安静。</p><p class="highlight">图片负责看见，文字负责说准。</p>',
   },
-  poster: {
-    ...common,
-    BG_COLOR: "#FAF8F2",
-    ACCENT_COLOR: "#9A4939",
-    HEADER_BLOCK: '<div class="header"><span class="running-title">同系列 · 结构验收</span></div>',
-    TITLE_BLOCK: '<div class="title-area"><h1>每卡一个判断</h1></div>',
-    BODY_HTML: '<p>固定画布里，主图、标题和正文都有自己的安全区。</p>',
-    PAGE_INFO: "01 / 03",
-  },
   comic: {
     ...common,
     CUSTOM_CSS: '.fixture { margin: 24px 60px 42px; padding: 32px; border: 4px solid var(--ink); } .fixture h1 { font: 900 68px/1 var(--serif); } .fixture p { margin-top: 18px; font: 400 28px/1.5 var(--sans); }',
@@ -68,7 +59,7 @@ for (const [name, imageValues] of Object.entries({
   "long-empty": { IMAGE_STATE: "empty", IMAGE_SRC: "", IMAGE_ALT: "" },
   "long-broken": {
     IMAGE_STATE: "ready",
-    IMAGE_SRC: "file:///tmp/ljg-card-v6-fixtures/does-not-exist.png",
+    IMAGE_SRC: "file:///tmp/ljg-card-v7-fixtures/does-not-exist.png",
     IMAGE_ALT: "用于验证损坏图片会被截图门禁拒绝",
   },
 })) {

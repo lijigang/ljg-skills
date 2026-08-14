@@ -2,8 +2,8 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
-const templateNames = ["long", "poster", "comic", "whiteboard"];
-const modeNames = ["long", "poster", "comic", "whiteboard"];
+const templateNames = ["long", "comic", "whiteboard"];
+const modeNames = ["long", "comic", "whiteboard"];
 const failures: string[] = [];
 
 async function text(path: string): Promise<string> {
