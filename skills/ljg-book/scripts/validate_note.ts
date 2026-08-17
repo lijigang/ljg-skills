@@ -12,6 +12,7 @@ export type Result = {
 };
 
 const validMaterialGrades = ["完整拆书", "初拆", "假设版"] as const;
+const essenceHeading = "读完后留下什么";
 const forbiddenExactHeadings = new Set([
   "走进这个问题",
   "作者怎样一步步看见",
@@ -186,9 +187,57 @@ export function validate(content: string, file: string, coverage?: string): Resu
 
   const headingPattern = markdownMode ? /^# ([^#].*)$/gm : /^\* ([^*].*)$/gm;
   const headingMatches = [...content.matchAll(headingPattern)];
-  const headings = headingMatches.map((match) => match[1].trim());
+  const allHeadings = headingMatches.map((match) => match[1].trim());
+  const essenceHeadingIndexes = allHeadings
+    .map((heading, index) => heading === essenceHeading ? index : -1)
+    .filter((index) => index >= 0);
+  const essenceHeadingIndex = essenceHeadingIndexes[0] ?? -1;
+  const essenceHeadingMatch = essenceHeadingIndex >= 0 ? headingMatches[essenceHeadingIndex] : undefined;
+  const essenceSection = essenceHeadingMatch?.index !== undefined
+    ? content.slice(essenceHeadingMatch.index + essenceHeadingMatch[0].length).trim()
+    : "";
+  const headings = allHeadings.filter((heading) => heading !== essenceHeading);
   if (headings.length < 2) {
     errors.push(`至少需要 2 个由具体事件、变化或条件命名的一级标题，当前为 ${headings.length}`);
+  }
+
+  if (essenceHeadingIndexes.length === 0) {
+    errors.push(`成品最后必须有一级标题“${essenceHeading}”`);
+  } else if (essenceHeadingIndexes.length > 1) {
+    errors.push(`一级标题“${essenceHeading}”只能出现一次`);
+  } else if (essenceHeadingIndex !== allHeadings.length - 1) {
+    errors.push(`“${essenceHeading}”必须是成品最后一个一级标题`);
+  }
+
+  const essenceParagraphs = essenceSection
+    .split(/\r?\n\s*\r?\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+  const essenceText = essenceParagraphs.join(" ").replace(/\s+/g, " ").trim();
+  const essenceChars = [...essenceText.replace(/\s/g, "")].length;
+  const essenceSentenceCount = essenceText
+    .split(/[。！？]+/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean).length;
+  const essenceFormatLineHits = [...essenceSection.matchAll(/^(?:[-+] |\d+[.)] |(?:\*{2,}|#{2,}) )/gm)].length;
+  if (essenceHeadingIndexes.length === 1) {
+    if (essenceParagraphs.length !== 1) {
+      errors.push(`“${essenceHeading}”只写一个自然段，当前为 ${essenceParagraphs.length} 段`);
+    }
+    if (essenceFormatLineHits > 0) {
+      errors.push(`“${essenceHeading}”不能写成分类清单或子标题；结构、洞见、模型等只在后台帮助寻找精神内核`);
+    }
+    if (essenceChars < 24) {
+      errors.push(`精神内核只有 ${essenceChars} 字，仍像主题词或口号；用极直白的话说清作者最终想纠正、重连或保留什么`);
+    }
+    if (essenceSentenceCount > 4) {
+      errors.push(`精神内核用了 ${essenceSentenceCount} 句，已经不够收束；压到一至四句`);
+    }
+    if (essenceChars > 220) {
+      errors.push(`精神内核共 ${essenceChars} 字，已经变成另一份摘要；只留下作者最想让读者真正明白的那层关系`);
+    } else if (essenceChars > 160) {
+      warnings.push(`精神内核共 ${essenceChars} 字，可能还不够精练；检查能否继续去掉解释而不损失核心`);
+    }
   }
 
   const genericHeadingHits = headings.filter((heading) => forbiddenExactHeadings.has(heading));
@@ -296,6 +345,8 @@ export function validate(content: string, file: string, coverage?: string): Resu
   let requiredWholeBookAnchorHits = 0;
   let missingWholeBookAnchors: string[] = [];
   let genericWholeBookAnchorHits: string[] = [];
+  let coverageEssenceFields = 0;
+  let coverageTitleAnswer = "";
   let coverageBookSelectionFields = 0;
   let coverageNarrativeContinuityFields = 0;
   let coverageLegacyNarrativeSelectionFields = 0;
@@ -327,6 +378,16 @@ export function validate(content: string, file: string, coverage?: string): Resu
     coverageRunnableFields = legacyRunnableFields.filter((field) => substantive(lineField(coverage, field))).length;
     coverageEmbodimentFields = legacyEmbodimentFields.filter((field) => substantive(lineField(coverage, field))).length;
     if (substantive(currentSupport)) {
+      const essenceCoverageFields = ["作者最后只想留下什么", "正文中哪两个相隔较远的转折共同托住它", "是否需要回答书名", "精神内核可替换性反测"];
+      coverageEssenceFields = essenceCoverageFields
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      coverageTitleAnswer = lineField(coverage, "是否需要回答书名");
+      if (coverageEssenceFields !== essenceCoverageFields.length) {
+        errors.push("当前版覆盖记录必须填完精神内核、两个相隔转折、书名判断与可替换性反测");
+      }
+      if (substantive(coverageTitleAnswer) && !/^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(coverageTitleAnswer)) {
+        errors.push("“是否需要回答书名”必须明确写是或否，并说明书名是否承载精神内核");
+      }
       if (!/^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(currentSupport)) {
         errors.push("“材料能否支撑认识更新路径”必须明确写是或否，并说明依据");
       } else if (/^是/.test(currentSupport) && coverageUnderstandingFields !== understandingPathFields.length) {
@@ -353,6 +414,10 @@ export function validate(content: string, file: string, coverage?: string): Resu
       warnings.push("覆盖记录仍使用旧版现场化门；本次兼容通过，下次重跑时请改用认识更新门");
     } else {
       errors.push("覆盖记录必须填写认识更新门，或提供完整的旧版读者运行门/现场化门以便兼容读取");
+    }
+
+    if (substantive(currentSupport) && materialGrade !== "完整拆书" && requiredWholeBookAnchors.length < 1) {
+      errors.push("初拆或假设版也必须声明至少 1 个材料真正支持的整书锚点，精神内核不能只剩通用主题");
     }
 
     if (materialGrade === "完整拆书") {
@@ -470,6 +535,14 @@ export function validate(content: string, file: string, coverage?: string): Resu
       required_whole_book_anchor_hits: requiredWholeBookAnchorHits,
       missing_whole_book_anchors: missingWholeBookAnchors.join("｜"),
       generic_whole_book_anchors: genericWholeBookAnchorHits.join("｜"),
+      essence_heading_count: essenceHeadingIndexes.length,
+      essence_is_last_heading: essenceHeadingIndex >= 0 && essenceHeadingIndex === allHeadings.length - 1,
+      essence_paragraph_count: essenceParagraphs.length,
+      essence_sentence_count: essenceSentenceCount,
+      essence_format_line_hits: essenceFormatLineHits,
+      essence_chars: essenceChars,
+      coverage_essence_fields: coverageEssenceFields,
+      coverage_title_answer: coverageTitleAnswer,
       coverage_understanding_fields: coverageUnderstandingFields,
       coverage_runnable_fields: coverageUnderstandingFields === understandingPathFields.length
         ? coverageUnderstandingFields

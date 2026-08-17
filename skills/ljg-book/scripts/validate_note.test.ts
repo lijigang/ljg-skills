@@ -16,6 +16,10 @@ function note(options: {
   diagram?: string;
   description?: string;
   tail?: string;
+  essenceHeading?: string;
+  essenceBody?: string;
+  omitEssence?: boolean;
+  afterEssence?: string;
 } = {}): string {
   const headings = options.headings ?? defaultHeadings;
   const bodies = headings.map((heading, index) => {
@@ -26,6 +30,11 @@ function note(options: {
         : "一份地区比较放回原来的判断。处罚变重以后事故没有下降，刚才那一下点头停住了。也就是说，问题严重不等于这个办法有效。";
     return `* ${heading}\n\n${body}\n`;
   }).join("\n");
+  const essence = options.omitEssence ? "" : `
+* ${options.essenceHeading ?? "读完后留下什么"}
+
+${options.essenceBody ?? "问题很严重，并不能直接推出处罚有效。这本书真正想留下的是：判断一项主张时，先找理由与结论之间缺少的那一步，再等能补上它的比较证据。"}
+`;
 
   return `#+TITLE: 拆书：《示例》
 #+SUBTITLE: 某作者 | 同一句结论为什么开始等待证据
@@ -34,7 +43,7 @@ ${options.description === "" ? "" : `#+DESCRIPTION: ${options.description ?? "�
 #+IDENTIFIER: ${options.identifier ?? "20260812T120000"}
 
 ${options.opening ?? ""}${bodies}
-${options.diagram ?? ""}${options.tail ?? ""}`;
+${options.diagram ?? ""}${options.tail ?? ""}${essence}${options.afterEssence ?? ""}`;
 }
 
 function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书", support = "是——原书足以还原判断怎样被证据改变"): string {
@@ -67,6 +76,12 @@ function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书
 - 结尾回到哪里：回到群里的四句话重新判断
 - 陌生读者能怎样复述：问题严重不等于某个办法已经有效
 - 原书依据与简化边界：案例来自原书，只压缩措辞，不增加结果
+
+## 精神内核门
+- 作者最后只想留下什么：问题严重不等于处罚有效，理由与结论之间缺的那一步必须由比较证据补上
+- 正文中哪两个相隔较远的转折共同托住它：开头四句话让人自然点头；结尾回到同一句话等待比较结果
+- 是否需要回答书名：否——《示例》只是测试占位标题，不承载核心关系
+- 精神内核可替换性反测：保留四句话、处罚与比较结果之间的具体缺口，删掉它们就会退化成一般的批判性思考口号
 `;
   if (grade !== "完整拆书") return boundary;
 
@@ -205,6 +220,10 @@ identifier: 20260812T120000
 # 同一决定怎样重新问一遍
 
 他现在会先检查参照条件，再决定怎样行动。
+
+# 读完后留下什么
+
+数字没变，判断却可能因为起点变了而翻转。这本书最后想留下的，是先看自己正从哪里比较，再决定眼前的选择是否真的不同。
 `;
 }
 
@@ -223,6 +242,13 @@ describe("validate ljg-book note", () => {
     expect(result.checks.coverage_book_selection_fields).toBe(5);
     expect(result.checks.coverage_narrative_continuity_fields).toBe(5);
     expect(result.checks.coverage_candidate_count).toBe(5);
+    expect(result.checks.essence_heading_count).toBe(1);
+    expect(result.checks.essence_is_last_heading).toBe(true);
+    expect(result.checks.essence_paragraph_count).toBe(1);
+    expect(result.checks.essence_sentence_count).toBe(2);
+    expect(result.checks.essence_format_line_hits).toBe(0);
+    expect(result.checks.coverage_essence_fields).toBe(4);
+    expect(result.checks.coverage_title_answer).toContain("否");
     expect(result.checks.understanding_path_support).toContain("是");
     expect(result.checks.coverage_loop_fields).toBe(0);
     expect(result.checks.coverage_concretization_fields).toBe(0);
@@ -259,6 +285,75 @@ describe("validate ljg-book note", () => {
     const result = validate(note({ headings: ["走进这个问题", "问题"] }), filename, coverage());
     expect(result.ok).toBe(false);
     expect(result.errors.join("\n")).toContain("旧框架或空泛标签");
+  });
+
+  test("requires a substantive final essence section", () => {
+    const missing = validate(note({ omitEssence: true }), filename, coverage());
+    const empty = validate(note({ essenceBody: "要多思考。" }), filename, coverage());
+    expect(missing.ok).toBe(false);
+    expect(missing.errors.join("\n")).toContain("最后必须有一级标题");
+    expect(empty.ok).toBe(false);
+    expect(empty.errors.join("\n")).toContain("主题词或口号");
+  });
+
+  test("requires the essence section to be last and rejects category lists", () => {
+    const misplaced = validate(note({ afterEssence: "\n* 又补一个结论\n\n这段不该出现在精华之后。\n" }), filename, coverage());
+    const oldLabels = validate(note({ essenceBody: "- *结构*：四句话先让人点头。\n- *洞见*：问题严重不等于办法有效。\n- *模型*：再等待比较结果。" }), filename, coverage());
+    expect(misplaced.ok).toBe(false);
+    expect(misplaced.errors.join("\n")).toContain("最后一个一级标题");
+    expect(oldLabels.ok).toBe(false);
+    expect(oldLabels.errors.join("\n")).toContain("不能写成分类清单");
+  });
+
+  test("allows the core to answer a load-bearing book title without listing anchors", () => {
+    const result = validate(note({
+      essenceBody: "所谓《表象与本质》，并不是越过表面去找一个永远不变的标签。真正的本质，是当前处境让我们从许多可能关系里抓住了哪一条。",
+    }), filename, coverage().replace("- 是否需要回答书名：否——《示例》只是测试占位标题，不承载核心关系", "- 是否需要回答书名：是——书名把固定标签与当前关系的冲突放在一起"));
+    expect(result.ok).toBe(true);
+    expect(result.checks.essence_paragraph_count).toBe(1);
+    expect(result.checks.coverage_title_answer).toContain("是");
+  });
+
+  test("rejects multiple essence paragraphs even when each is substantive", () => {
+    const result = validate(note({
+      essenceBody: "问题严重并不能直接推出处罚有效，理由与结论之间仍然缺少效果证据。\n\n真正的判断要等比较结果进入以后，才能知道这项办法是否值得采用。",
+    }), filename, coverage());
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("只写一个自然段");
+  });
+
+  test("warns when the essence section stops being concise", () => {
+    const longEssence = `四句话和处罚之间的关系需要反复检查，${"比较结果必须真正补上理由与结论之间缺失的联系，".repeat(6)}否则问题再严重也不能证明办法有效。`;
+    const result = validate(note({ essenceBody: longEssence }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.essence_chars).toBeGreaterThan(160);
+    expect(result.checks.essence_chars).toBeLessThanOrEqual(220);
+    expect(result.warnings.join("\n")).toContain("可能还不够精练");
+  });
+
+  test("rejects an essence section that grows into another summary", () => {
+    const bloated = `四句话和处罚之间的关系需要反复检查，${"比较结果必须真正补上理由与结论之间缺失的联系，".repeat(12)}否则问题再严重也不能证明办法有效。`;
+    const result = validate(note({ essenceBody: bloated }), filename, coverage());
+    expect(result.ok).toBe(false);
+    expect(result.checks.essence_chars).toBeGreaterThan(220);
+    expect(result.errors.join("\n")).toContain("变成另一份摘要");
+  });
+
+  test("requires the spiritual-core coverage and an explicit title decision", () => {
+    const missing = validate(note(), filename, coverage().replace("- 正文中哪两个相隔较远的转折共同托住它：开头四句话让人自然点头；结尾回到同一句话等待比较结果", "- 正文中哪两个相隔较远的转折共同托住它："));
+    const undecided = validate(note(), filename, coverage().replace("- 是否需要回答书名：否——《示例》只是测试占位标题，不承载核心关系", "- 是否需要回答书名：看情况"));
+    expect(missing.ok).toBe(false);
+    expect(missing.errors.join("\n")).toContain("两个相隔转折");
+    expect(undecided.ok).toBe(false);
+    expect(undecided.errors.join("\n")).toContain("必须明确写是或否");
+  });
+
+  test("requires at least one source-specific anchor for partial notes", () => {
+    const partialCoverage = coverage("初拆")
+      .replace("- 正文必须出现的整书锚点：四句话｜处罚｜比较结果", "- 正文必须出现的整书锚点：");
+    const result = validate(note(), filename, partialCoverage);
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("初拆或假设版也必须声明至少 1 个");
   });
 
   test("rejects visible backstage fields and missing description", () => {
