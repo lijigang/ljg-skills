@@ -3,7 +3,7 @@ name: ljg-roundtable
 description: >-
   一个议题，一场圆桌：主持人请来 3-5 位真实人物，定义开场，逐轮交锋，
   每轮收一张 ASCII 结构图，用户用指令控节奏（可/止/深入此节/引入新人物），
-  散场后全文存入 org 笔记。Use when user says "圆桌讨论", "圆桌",
+  散场后全文存入 Markdown 笔记。Use when user says "圆桌讨论", "圆桌",
   "roundtable", "辩论", or wants to explore a topic through
   multi-perspective structured debate.
 ---
@@ -92,29 +92,31 @@ Assistant: [就自由意志展开圆桌]
 
 ### 六、存档
 
-讨论全文写进 org 文件，一字不差。发言、ASCII 图、综述，全部原文照录，不摘要，不压缩，不改写。
+讨论全文写进 Markdown 文件，一字不差。发言、ASCII 图、综述，全部原文照录，不摘要，不压缩，不改写。
 
 1. `date +%Y%m%dT%H%M%S` 取时间戳
-2. 写入 `~/Documents/notes/{timestamp}--圆桌-{议题关键词}__roundtable.org`
+2. 写入 `~/Context/{timestamp}--圆桌-{议题关键词}__roundtable.md`
 3. 文件结构：
 
-   ```org
-   #+title: 圆桌：{议题}
-   #+date: [{日期}]
-   #+filetags: :roundtable:
-   * 议题与参会者
+   ```markdown
+   ---
+   title: 圆桌：{议题}
+   date: [{日期}]
+   tags: roundtable
+   ---
+   # 议题与参会者
    [人物名单：姓名、MBTI、立场、入选理由]
-   * 开场：定义
+   # 开场：定义
    [主持人开场词 + 每人的定义发言]
-   * 各轮讨论记录
-   ** 第 N 轮：{引导问题}
-   *** 发言记录
+   # 各轮讨论记录
+   ## 第 N 轮：{引导问题}
+   ### 发言记录
    [本轮全部发言原文，含行动标签和简言之]
-   *** 主持人综述
+   ### 主持人综述
    [争议点 + ASCII 图 + 下一层问题]
-   * 知识网络（全局）
+   # 知识网络（全局）
    [全局总结 + 知识网络图]
-   * 开放问题
+   # 开放问题
    [没谈完的方向]
    ```
 

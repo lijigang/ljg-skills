@@ -59,6 +59,24 @@ for (const mode of modeNames) {
   requireThat(body.includes("bun assets/capture.ts"), `mode capture command is not Bun: ${mode}`);
 }
 
+const longMode = await text(join(root, "references", "mode-long.md"));
+for (const term of [
+  "静线叙事",
+  "3 秒",
+  "15 秒",
+  "60 秒",
+  "原状 → 压力 → 变化 → 余波",
+  "问题 → 机制 → 证据 → 边界 → 决策",
+  "整卡缩略",
+  "非专属视觉属性",
+  "无论参照对象身份",
+  "不写创作者姓名",
+  ".evidence-boundary",
+  ".closing-judgment",
+]) {
+  requireThat(longMode.includes(term), `long-mode contract missing: ${term}`);
+}
+
 for (const name of templateNames) {
   const body = await text(join(root, "assets", `${name}_template.html`));
   requireThat(body.includes(`generated-visual--${name}`), `mode class missing: ${name}`);
@@ -66,6 +84,63 @@ for (const name of templateNames) {
   requireThat(body.includes('src="{{IMAGE_SRC}}"'), `image source slot missing: ${name}`);
   requireThat(body.includes('alt="{{IMAGE_ALT}}"'), `image alt slot missing: ${name}`);
   requireThat(body.includes('[data-state="empty"]'), `empty image hiding missing: ${name}`);
+}
+
+const longTemplate = await text(join(root, "assets", "long_template.html"));
+for (const placeholder of [
+  "BG_COLOR",
+  "ACCENT_COLOR",
+  "TITLE_BLOCK",
+  "BODY_HTML",
+  "SOURCE_LINE",
+  "LOGO",
+  "IMAGE_STATE",
+  "IMAGE_SRC",
+  "IMAGE_ALT",
+]) {
+  requireThat(longTemplate.includes(`{{${placeholder}}}`), `long placeholder missing: ${placeholder}`);
+}
+for (const primitive of [
+  ".highlight",
+  ".prompt",
+  ".dropcap",
+  ".subtitle",
+  ".item",
+  "blockquote",
+  ".divider",
+  ".generated-art--inline",
+  ".generated-art--closing",
+  ".footer",
+  ".eyebrow",
+  ".deck",
+  ".narrative-beat",
+  ".beat-index",
+  ".metric-row",
+  ".metric",
+  ".evidence-boundary",
+  ".closing-judgment",
+]) {
+  requireThat(longTemplate.includes(primitive), `long CSS surface missing: ${primitive}`);
+}
+for (const token of ["#292621", "#746F68", "#DED7CC", "#B6533F"]) {
+  requireThat(longMode.includes(token) || longTemplate.includes(token), `quiet-line token missing: ${token}`);
+}
+
+const fixtureBuilder = await text(join(root, "assets", "build-fixtures.ts"));
+for (const primitive of [
+  'class="eyebrow"',
+  'class="deck"',
+  'class="narrative-beat"',
+  'class="beat-index"',
+  'class="metric-row"',
+  'class="metric"',
+  'class="evidence-boundary"',
+  'class="closing-judgment"',
+]) {
+  requireThat(fixtureBuilder.includes(primitive), `long fixture does not exercise: ${primitive}`);
+}
+for (const envName of ["LJG_CARD_FIXTURE_DIR", "LJG_CARD_FIXTURE_IMAGE"]) {
+  requireThat(fixtureBuilder.includes(envName), `fixture override missing: ${envName}`);
 }
 
 const routes = [...skill.matchAll(/`((?:references|assets)\/[A-Za-z0-9._-]+)`/g)].map(match => match[1]);

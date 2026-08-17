@@ -37,29 +37,114 @@ ${options.opening ?? ""}${bodies}
 ${options.diagram ?? ""}${options.tail ?? ""}`;
 }
 
-function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书", support = "是——原书有完整选择实验"): string {
+function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书", support = "是——原书足以还原判断怎样被证据改变"): string {
   const boundary = `# ljg-book 后台覆盖记录
 
 ## 材料边界
 - 材料等级：${grade}
 - 主要材料：原书全文与作者访谈
 - 能支持到：支持核心机制与边界，不延伸到作者未讨论的领域
-- 材料能否支撑具体运行：${support}
+- 材料能否支撑认识更新路径：${support}
 
-## 读者运行门
-- 读者先问什么：为什么同一句结论听起来很顺
-- 稳定对象或最小模型：四句话组成的手机政策论证
-- 读者第一次会猜什么：问题严重，所以处罚应该更重
-- 最小动作或变化：遮住最后一句，只看前三句
-- 立刻出现的结果：前三句只能证明问题存在
-- 结果紧接着叫什么：理由与结论之间还有缺口
-- 同一对象怎样再运行：放入比较证据后重新判断是否升级处罚
+## 整书身份门
+- 这是什么类型或形态的书：一本让普通读者亲手检查论证的分析书
+- 字面上跟着谁、什么对象或什么问题展开：跟着群里的四句话检验政策主张
+- 起点、主要变化与终点：从顺势点头，到遮住结论发现缺口，再等待比较结果
+- 不可省略的主线：四句话的理由链与处罚效果证据
+- 主线为什么属于同一本书：前者提出结论，后者决定结论能否成立
+- 正文必须出现的整书锚点：四句话｜处罚｜比较结果
+- 三十秒整书复述：一组政策主张怎样从直觉点头走到等待效果证据
+- 可迁移性反测：若替换四句话、处罚与比较结果，复述就不再指向这本书
+
+## 认识更新门
+- 读者进入什么具体处境：群里转来四句话，最后一句主张加重处罚
+- 最初最自然会怎样理解：问题严重，所以处罚应该更重
+- 哪个事实、事件或结果让它不够：遮住结论后，前三句只能证明问题存在
+- 作者增加了什么关系或条件：理由与政策结论之间还需要效果证据
+- 回看原处境，什么已经改变：重新看到结论时会先等比较结果
+- 新结果自然带出什么问题：还要排除哪些替代原因
+- 贯穿全文的扶手：同一句政策主张是否已经得到足够支持
+- 结尾回到哪里：回到群里的四句话重新判断
 - 陌生读者能怎样复述：问题严重不等于某个办法已经有效
 - 原书依据与简化边界：案例来自原书，只压缩措辞，不增加结果
 `;
   if (grade !== "完整拆书") return boundary;
 
   return `${boundary}
+## 作者的发现路径
+- 作者一直在追问什么：为什么选择会翻转
+- 作者用什么材料或经历逼近：对照两种说法与选择结果
+- 最终改变了什么判断：判断结论时要检查中间缺失的关系
+
+## 全书证据
+- [starting-point] 位置：loc-01｜最初的处境、困惑或自然理解怎样建立：选择翻转｜证据：案例
+- [pressure] 位置：loc-20｜什么使原来的理解不再够用：相同事实得到不同选择｜证据：对照
+- [revision] 位置：loc-50｜作者增加了什么关系、条件或观看方式：参照点｜证据：实验
+- [boundary] 位置：loc-90｜最后形成什么、停在哪里：条件限制｜证据：反例
+
+## 候选部件
+- [candidate] 名称：A｜位置：1｜解决的问题：a｜与其他部件的关系：a｜决定：保留｜删除测试：不能删
+- [candidate] 名称：B｜位置：2｜解决的问题：b｜与其他部件的关系：b｜决定：保留｜删除测试：不能删
+- [candidate] 名称：C｜位置：3｜解决的问题：c｜与其他部件的关系：c｜决定：保留｜删除测试：不能删
+- [candidate] 名称：D｜位置：4｜解决的问题：d｜与其他部件的关系：d｜决定：保留｜删除测试：不能删
+- [candidate] 名称：E｜位置：5｜解决的问题：e｜与其他部件的关系：e｜决定：保留｜删除测试：不能删
+
+## 全书取舍
+- 贯穿全书的困惑或张力：什么时候一句结论才值得相信
+- 正文保留哪些必要转折：理由与结论、比较证据、替代解释
+- 为什么这些转折足以让读者理解全书主干：它们让同一判断从直觉走到带条件行动
+- 哪些重要内容留在后台而不进入正文：证据类型清单与全部谬误名称
+- 每次转折怎样由前一结果带出下一问题：理由缺口要求效果证据，效果证据再要求排除替代原因
+
+## 叙事连续性门
+- 开篇留下的真实问题：问题严重是否足以推出加重处罚
+- 转折链：直觉点头 → 遮住结论发现缺口 → 等待效果证据 → 排除替代原因
+- 每次换场为什么不可提前：没有先发现理由缺口，比较结果就只是额外资料
+- 换序测试：先给比较结果会让读者不知道它在补哪一个缺口
+- 摘句拼接反测：只留下四句话、处罚和比较结果，会失去从直觉到证据要求的认识变化
+
+## 反证检查
+- 当前理解：表述改变参照点
+- 反证：熟练者可能不变
+- 处理：限定适用条件
+`;
+}
+
+function legacyRunnableCoverage(): string {
+  return `# 上一版覆盖
+- 材料等级：初拆
+- 主要材料：旧笔记
+- 能支持到：支持局部理解
+- 材料能否支撑具体运行：是——旧记录完整
+- 读者先问什么：为什么会点头
+- 稳定对象或最小模型：四句话
+- 读者第一次会猜什么：应该加重处罚
+- 最小动作或变化：遮住结论
+- 立刻出现的结果：理由只证明问题严重
+- 结果紧接着叫什么：理由与结论缺口
+- 同一对象怎样再运行：加入效果证据
+- 陌生读者能怎样复述：严重不等于办法有效
+- 原书依据与简化边界：只压缩原例
+`;
+}
+
+function legacyCoverage(): string {
+  return `# 旧覆盖
+- 材料等级：初拆
+- 主要材料：旧笔记
+- 能支持到：支持局部理解
+- 镜头站在哪里：方案摆在眼前
+- 读者或人物先看见什么：两组数字
+- 解释出现前会怎样判断或行动：先选确定方案
+- 这个判断先产生什么可见结果：换说法后改选
+- 哪条证据、事件或对象反馈打断它：概率没有变化
+- 命名以后回到哪一幕重跑：回到原方案
+- 原书依据与简化边界：只压缩原案例
+`;
+}
+
+function legacyFullCoverage(): string {
+  return `${legacyCoverage()}
 ## 作者自述
 - 问题：为什么选择会翻转
 - 对象：风险判断
@@ -78,32 +163,30 @@ function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书
 - [candidate] 名称：D｜位置：4｜解决的问题：d｜与其他部件的关系：d｜决定：保留｜删除测试：不能删
 - [candidate] 名称：E｜位置：5｜解决的问题：e｜与其他部件的关系：e｜决定：保留｜删除测试：不能删
 
-## 全书取舍
-- 贯穿全书的普通问题：什么时候一句结论才值得相信
-- 正文保留哪两到四个关系：理由与结论、比较证据、替代解释
-- 为什么这些关系足以让读者理解全书主干：它们让同一判断从直觉走到带条件行动
-- 哪些重要内容留在后台而不进入正文：证据类型清单与全部谬误名称
-- 各模块如何继续使用同一对象，或为什么必须换对象：始终回到手机政策论证重做判断
+## 例子回流
+- 处境：两个方案
+- 贯穿张力：同一结果为什么带出不同选择
+- 最自然的理解或反应：选确定方案
+- 得到的结果：换种说法后选择翻转
+- 证据或事件暴露的缺口：概率没变却无法解释翻转
+- 被改写的是 x / R / f / E 中哪一项：R，判断参照改变
+- 改写后的结果：得失重新呈现
+- 下一场景：谁决定参照点
+- 最后回到哪里：重新表述最初方案
+
+## 具象化门
+- 核心动作或变化：参照点改变，选择方向随之翻转
+- 原状态：救援方案用存活人数表达
+- 只改变的关键条件或动作：把存活人数改成死亡人数
+- 可见结果：多数人的选择从确定方案转向冒险方案
+- 角色、动作、方向与结果怎样对应：数字不变，只改表达方向，选择随之翻转
+- 失败或反例怎样划出边界：熟悉框架效应的人可能不翻转
+- 删掉解释后，场景本身还能看见什么：同一组数字换个方向，选择就变了
 
 ## 反证检查
 - 当前理解：表述改变参照点
 - 反证：熟练者可能不变
 - 处理：限定适用条件
-`;
-}
-
-function legacyCoverage(): string {
-  return `# 旧覆盖
-- 材料等级：初拆
-- 主要材料：旧笔记
-- 能支持到：支持局部理解
-- 镜头站在哪里：方案摆在眼前
-- 读者或人物先看见什么：两组数字
-- 解释出现前会怎样判断或行动：先选确定方案
-- 这个判断先产生什么可见结果：换说法后改选
-- 哪条证据、事件或对象反馈打断它：概率没有变化
-- 命名以后回到哪一幕重跑：回到原方案
-- 原书依据与简化边界：只压缩原案例
 `;
 }
 
@@ -126,17 +209,23 @@ identifier: 20260812T120000
 }
 
 describe("validate ljg-book note", () => {
-  test("accepts the new runnable full-book contract", () => {
+  test("accepts the dual whole-book identity and understanding-path contract", () => {
     const result = validate(note(), filename, coverage());
     expect(result.ok).toBe(true);
     expect(result.checks.material_grade).toBe("完整拆书");
     expect(result.checks.coverage_zones).toBe(4);
-    expect(result.checks.coverage_runnable_fields).toBe(9);
+    expect(result.checks.coverage_whole_book_identity_fields).toBe(8);
+    expect(result.checks.required_whole_book_anchor_count).toBe(3);
+    expect(result.checks.required_whole_book_anchor_hits).toBe(3);
+    expect(result.checks.missing_whole_book_anchors).toBe("");
+    expect(result.checks.coverage_understanding_fields).toBe(10);
+    expect(result.checks.coverage_runnable_fields).toBe(10);
     expect(result.checks.coverage_book_selection_fields).toBe(5);
-    expect(result.checks.runnable_support).toContain("是");
+    expect(result.checks.coverage_narrative_continuity_fields).toBe(5);
+    expect(result.checks.coverage_candidate_count).toBe(5);
+    expect(result.checks.understanding_path_support).toContain("是");
     expect(result.checks.coverage_loop_fields).toBe(0);
     expect(result.checks.coverage_concretization_fields).toBe(0);
-    expect(result.checks.immediate_naming_hits).toBeGreaterThan(0);
   });
 
   test("keeps Markdown notes on the same contract", () => {
@@ -195,6 +284,14 @@ describe("validate ljg-book note", () => {
     });
   }
 
+  for (const sentence of ["居民走进城市中部。", "河流穿过大陆中部以后转向东南。"] as const) {
+    test(`allows ordinary spatial use of source-structure words: ${sentence}`, () => {
+      const result = validate(note({ firstBody: sentence }), filename, coverage());
+      expect(result.ok).toBe(true);
+      expect(result.checks.source_structure_hits).toBe(0);
+    });
+  }
+
   test("rejects identifier mismatch and missing coverage", () => {
     const mismatch = validate(note({ identifier: "20260812T120001" }), filename, coverage());
     const missing = validate(note(), filename);
@@ -209,26 +306,41 @@ describe("validate ljg-book note", () => {
     expect(grade.ok).toBe(false);
   });
 
-  test("requires yes or no for runnable material support", () => {
+  test("requires yes or no for understanding-path material support", () => {
     const result = validate(note(), filename, coverage("初拆", "也许可以"));
     expect(result.ok).toBe(false);
     expect(result.errors.join("\n")).toContain("必须明确写是或否");
   });
 
-  test("requires all runnable fields when material says yes", () => {
-    const incomplete = coverage("初拆").replace("- 同一对象怎样再运行：放入比较证据后重新判断是否升级处罚", "- 同一对象怎样再运行：");
+  test("rejects complete-book coverage when understanding-path support starts with no", () => {
+    const result = validate(note(), filename, coverage("完整拆书", "否——只有目录，无法看见认识怎样改变"));
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("完整拆书");
+    expect(result.errors.join("\n")).toContain("材料不足以支撑认识更新路径");
+  });
+
+  test("requires all understanding-path fields when material says yes", () => {
+    const incomplete = coverage("初拆").replace("- 新结果自然带出什么问题：还要排除哪些替代原因", "- 新结果自然带出什么问题：");
     const result = validate(note(), filename, incomplete);
     expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("没有填完普通问题、稳定对象");
+    expect(result.errors.join("\n")).toContain("没有填完具体处境、自然理解");
   });
 
   test("allows an honest no while warning against fabricated scenes", () => {
-    const thin = coverage("初拆", "否——只有目录，没有可还原的动作与结果")
-      .replace("- 稳定对象或最小模型：四句话组成的手机政策论证", "- 稳定对象或最小模型：")
-      .replace("- 最小动作或变化：遮住最后一句，只看前三句", "- 最小动作或变化：");
+    const thin = coverage("初拆", "否——只有目录，无法看见认识怎样改变")
+      .replace("- 读者进入什么具体处境：群里转来四句话，最后一句主张加重处罚", "- 读者进入什么具体处境：")
+      .replace("- 哪个事实、事件或结果让它不够：遮住结论后，前三句只能证明问题存在", "- 哪个事实、事件或结果让它不够：");
     const result = validate(note(), filename, thin);
     expect(result.ok).toBe(true);
-    expect(result.warnings.join("\n")).toContain("材料不足以支撑具体运行");
+    expect(result.warnings.join("\n")).toContain("材料不足以支撑认识更新路径");
+  });
+
+  test("keeps the previous runnable coverage readable with a migration warning", () => {
+    const result = validate(note(), filename, legacyRunnableCoverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.runnable_support).toContain("是");
+    expect(result.checks.coverage_runnable_fields).toBe(9);
+    expect(result.warnings.join("\n")).toContain("旧版读者运行门");
   });
 
   test("keeps legacy coverage readable with a migration warning", () => {
@@ -239,15 +351,73 @@ describe("validate ljg-book note", () => {
     expect(result.warnings.join("\n")).toContain("旧版现场化门");
   });
 
+  test("rejects legacy complete coverage that has no whole-book identity gate", () => {
+    const result = validate(note(), filename, legacyFullCoverage().replace("材料等级：初拆", "材料等级：完整拆书"));
+    expect(result.ok).toBe(false);
+    expect(result.checks.coverage_loop_fields).toBe(9);
+    expect(result.checks.coverage_concretization_fields).toBe(7);
+    expect(result.checks.coverage_legacy_narrative_selection_fields).toBe(0);
+    expect(result.errors.join("\n")).toContain("整书身份");
+  });
+
+  test("rejects an incomplete whole-book identity gate", () => {
+    const incomplete = coverage().replace("- 起点、主要变化与终点：从顺势点头，到遮住结论发现缺口，再等待比较结果", "- 起点、主要变化与终点：");
+    const result = validate(note(), filename, incomplete);
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("整书身份");
+  });
+
+  test("rejects generic or absent whole-book anchors", () => {
+    const generic = validate(note(), filename, coverage().replace("四句话｜处罚｜比较结果", "问题｜关系｜结论"));
+    const absent = validate(note(), filename, coverage().replace("四句话｜处罚｜比较结果", "四句话｜处罚｜马尾藻海"));
+    expect(generic.ok).toBe(false);
+    expect(generic.errors.join("\n")).toContain("过于通用");
+    expect(absent.ok).toBe(false);
+    expect(absent.errors.join("\n")).toContain("没有出现在正文");
+  });
+
+  test("anti: a polished theme essay cannot pass as a complete book without identity", () => {
+    const themeOnly = coverage().replace(/\n## 整书身份门[\s\S]*?(?=\n## 认识更新门)/, "\n");
+    const result = validate(note(), filename, themeOnly);
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("整书身份");
+  });
+
   test("rejects incomplete full-book evidence, candidates, selection, and challenge", () => {
     const zone = validate(note(), filename, coverage().replace("[boundary]", "[missing]"));
     const candidate = validate(note(), filename, coverage().replace("名称：E｜位置：5", "名称：｜位置：5"));
-    const selection = validate(note(), filename, coverage().replace("- 各模块如何继续使用同一对象，或为什么必须换对象：始终回到手机政策论证重做判断", "- 各模块如何继续使用同一对象，或为什么必须换对象："));
+    const selection = validate(note(), filename, coverage().replace("- 每次转折怎样由前一结果带出下一问题：理由缺口要求效果证据，效果证据再要求排除替代原因", "- 每次转折怎样由前一结果带出下一问题："));
     const challenge = validate(note(), filename, coverage().replace("- 处理：限定适用条件", "- 处理："));
     expect(zone.ok).toBe(false);
     expect(candidate.ok).toBe(false);
     expect(selection.ok).toBe(false);
     expect(challenge.ok).toBe(false);
+  });
+
+  test("rejects a complete-book map without narrative continuity", () => {
+    const incomplete = coverage().replace("- 换序测试：先给比较结果会让读者不知道它在补哪一个缺口", "- 换序测试：");
+    const result = validate(note(), filename, incomplete);
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("叙事连续性门");
+  });
+
+  test("allows long explanations without a length warning", () => {
+    const longBody = "小李继续沿着同一个问题检查证据。新的事实不是补充材料，而是回答上一段留下的未知。".repeat(120);
+    const result = validate(note({ tail: `\n${longBody}\n` }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.body_chars).toBeGreaterThan(3000);
+    expect(result.warnings.join("\n")).not.toContain("1000–3000");
+  });
+
+  test("allows anchors and candidates to grow with the book", () => {
+    const extraAnchors = ["遮住结论", "理由缺口", "效果证据", "替代原因", "重新判断"];
+    const expandedCoverage = coverage()
+      .replace("四句话｜处罚｜比较结果", `四句话｜处罚｜比较结果｜${extraAnchors.join("｜")}`)
+      .replace("\n## 全书取舍", `${Array.from({ length: 8 }, (_, index) => `\n- [candidate] 名称：扩展${index + 1}｜位置：${index + 6}｜解决的问题：扩展问题${index + 1}｜与其他部件的关系：承接上一转折｜决定：保留｜删除测试：删除会使转折断裂`).join("")}\n\n## 全书取舍`);
+    const result = validate(note({ tail: `\n${extraAnchors.join("，")}。\n` }), filename, expandedCoverage);
+    expect(result.ok).toBe(true);
+    expect(result.checks.required_whole_book_anchor_count).toBe(8);
+    expect(result.checks.coverage_candidate_count).toBe(13);
   });
 
   for (const opening of ["书中给出一段手机论证。", "叙述者带着儿子骑摩托车远行。"] as const) {
@@ -279,8 +449,28 @@ describe("validate ljg-book note", () => {
       firstBody: "继续运行同一讲解模型。按模型规则，纸条被重新折起。旧稿保存的边界没有变，本轮不替它补参数。模型设定到这里结束。",
     }), filename, coverage());
     expect(result.ok).toBe(false);
-    expect(result.checks.backstage_accounting_hits).toBeGreaterThanOrEqual(5);
+    expect(result.checks.backstage_accounting_hits).toBeGreaterThanOrEqual(4);
   });
+
+  test("allows ordinary historical use of 本轮", () => {
+    const result = validate(note({
+      firstBody: "本轮通胀里，企业第一次没有扩产。原来只看价格的判断，现在还得加入库存和利率。",
+    }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.backstage_accounting_hits).toBe(0);
+  });
+
+  for (const sentence of [
+    "本轮材料价格上涨以后，企业第一次没有扩产。",
+    "他的旧稿保存了战争前的城市地图。",
+    "根据旧稿修复城墙，反而暴露了地基裂缝。",
+  ] as const) {
+    test(`allows book content that shares words with backstage accounting: ${sentence}`, () => {
+      const result = validate(note({ firstBody: sentence }), filename, coverage());
+      expect(result.ok).toBe(true);
+      expect(result.checks.backstage_accounting_hits).toBe(0);
+    });
+  }
 
   test("accepts an in-scene boundary stated through the object's limits", () => {
     const result = validate(note({
@@ -290,21 +480,35 @@ describe("validate ljg-book note", () => {
     expect(result.checks.backstage_accounting_hits).toBe(0);
   });
 
-  test("recognizes an opening that runs and names a result", () => {
+  test("recognizes an immersive opening without requiring a naming formula", () => {
     const result = validate(note(), filename, coverage());
     expect(result.checks.outside_camera_opening_hits).toBe(0);
     expect(result.checks.meta_narration_hits).toBe(0);
-    expect(result.checks.immediate_naming_hits).toBeGreaterThan(0);
   });
 
-  test("warns when no result receives an adjacent name", () => {
+  test("accepts delayed naming when the understanding path remains concrete", () => {
     const result = validate(note({
-      firstBody: "四句话摆在小李面前。他顺着危险感点了头。后来他又考虑了许多别的因素。",
-      headings: ["四句话摆在眼前", "后来又有很多因素"],
+      firstBody: "四句话摆在小李面前。他顺着危险感点了头。遮住最后一句以后，前三句话仍然成立，处罚却不再是唯一答案。",
+      headings: ["四句话摆在眼前", "处罚为什么不再是唯一答案"],
     }), filename, coverage());
     expect(result.ok).toBe(true);
-    expect(result.checks.immediate_naming_hits).toBe(0);
-    expect(result.warnings.join("\n")).toContain("结果后立即命名");
+    expect(result.warnings.join("\n")).not.toContain("立即命名");
+  });
+
+  test("accepts a historical path whose question stays stable while scenes change", () => {
+    const result = validate(note({
+      firstBody: "港口刚开放时，商人只盯着更便宜的货。几年以后，税收、造船和城市人口一起变了，原来那笔买卖已经装不下它带来的后果。",
+      headings: ["一船便宜货靠岸", "买卖怎样改了整座城", "同一个问题来到下一座港口"],
+    }), filename, coverage("初拆"));
+    expect(result.ok).toBe(true);
+  });
+
+  test("accepts a literary path that clarifies a tension without solving it", () => {
+    const result = validate(note({
+      firstBody: "他在葬礼上没有哭。周围人先把这当成冷漠，后来审判谈得最多的仍不是那场死亡，而是他的眼泪。一个人的情感方式开始替他的行为受审。",
+      headings: ["葬礼上没有出现的眼泪", "审判为什么一直回到那一天", "看清矛盾，不替它收尾"],
+    }), filename, coverage("初拆"));
+    expect(result.ok).toBe(true);
   });
 
   test("warns on an overloaded paragraph and sentence", () => {

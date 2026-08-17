@@ -40,6 +40,74 @@ ok()   { printf '\033[32m✓ %s\033[0m\n' "$*"; }
 warn() { printf '\033[33m! %s\033[0m\n' "$*"; }
 err()  { printf '\033[31m✗ %s\033[0m\n' "$*" >&2; }
 
+# Detection and synchronization share this exact file-tree boundary:
+#   - content is compared by checksum, so mtime-only drift is ignored
+#   - regular-file permissions are mirrored, while detection only treats the
+#     executable bit as Git-material
+#   - directory-only changes are ignored by detection
+#   - dependency/VCS trees and Finder metadata are out of scope
+# Deliberately do not add broad backup patterns here: .bak/.backup files are
+# publishable content and must remain visible to both detection and sync.
+RSYNC_SCOPE_ARGS=(
+  --recursive
+  --links
+  --checksum
+  --perms
+  --delete
+  --exclude='.git/'
+  --exclude='node_modules/'
+  --exclude='.DS_Store'
+)
+
+rsync_skill_tree() {
+  local source_dir="$1"
+  local target_dir="$2"
+  shift 2
+  rsync "${RSYNC_SCOPE_ARGS[@]}" "$@" "$source_dir/" "$target_dir/"
+}
+
+# Ignore directory-only and timestamp-only records. For a permission-only file
+# record, compare the one mode bit Git tracks: executability.
+rsync_has_material_changes() {
+  local source_dir="$1"
+  local target_dir="$2"
+  local change_code relative_path deletion_path source_exec target_exec
+
+  while IFS='|' read -r change_code relative_path; do
+    [ -n "$change_code" ] || continue
+    if [[ "$change_code" == \*deleting* ]]; then
+      deletion_path="$relative_path"
+      [ -n "$deletion_path" ] || deletion_path=${change_code#\*deleting }
+      [[ "$deletion_path" == */ ]] || return 0
+      continue
+    fi
+    [ "${change_code:1:1}" = "d" ] && continue
+    # macOS ships Bash 3.2, where backslashes on an unquoted `=~` RHS are
+    # consumed before regex matching. The old regex therefore treated content
+    # codes such as `>fcsT....` as timestamp-only. Match rsync's exact
+    # nine-character timestamp records instead.
+    if [ "$change_code" = ".f..t...." ] || [ "$change_code" = ".f..T...." ]; then
+      continue
+    fi
+
+    if [ "${change_code:1:1}" = "f" ] \
+        && [[ "$change_code" == *p* ]] \
+        && [[ "$change_code" != *c* ]] \
+        && [[ "$change_code" != *s* ]] \
+        && [[ "$change_code" != *+* ]]; then
+      source_exec=0
+      target_exec=0
+      [ -x "$source_dir/$relative_path" ] && source_exec=1
+      [ -x "$target_dir/$relative_path" ] && target_exec=1
+      [ "$source_exec" != "$target_exec" ] && return 0
+      continue
+    fi
+
+    return 0
+  done
+  return 1
+}
+
 setup_repo() {
   if [ ! -d "$SKILLS_REPO" ]; then
     log "Cloning $REPO_URL → $SKILLS_REPO"
@@ -71,8 +139,13 @@ detect_updates() {
     local repo_skill="$SKILLS_REPO/skills/$name"
     if [ ! -d "$repo_skill" ]; then
       echo "$name"
-    elif ! diff -rq --exclude='.git' "$local_skill" "$repo_skill" > /dev/null 2>&1; then
-      echo "$name"
+    else
+      local changes
+      changes=$(rsync_skill_tree "$local_skill" "$repo_skill" \
+        --dry-run --itemize-changes --out-format='%i|%n%L')
+      if rsync_has_material_changes "$local_skill" "$repo_skill" <<< "$changes"; then
+        echo "$name"
+      fi
     fi
   done
 }
@@ -181,9 +254,19 @@ mdize_skill() {
   # 2) string swaps across all md files
   local files=()
   while IFS= read -r f; do files+=("$f"); done < <(find "$skill_dir" -name '*.md' -not -path '*/assets/*' 2>/dev/null)
-  local file r skill_name
+  local file r skill_name preserve_crlf
   skill_name=$(basename "$skill_dir")
   for file in ${files[@]+"${files[@]}"}; do
+    # ljg-push documents both source and generated branches. Rewriting its
+    # explanatory Org examples would corrupt the publisher's own contract.
+    if [ "$skill_name" = "ljg-push" ]; then
+      continue
+    fi
+    preserve_crlf=0
+    if perl -0777 -ne 'exit((/\r\n/ && !/(?<!\r)\n/) ? 0 : 1)' "$file"; then
+      preserve_crlf=1
+    fi
+    bun "$SKILLS_LOCAL/ljg-push/Tools/MdizeEmbeddedOrg.ts" "$file"
     sed -i '' \
       -e 's/__qa\.org/__qa.md/g' \
       -e 's/__paper\.org/__paper.md/g' \
@@ -197,26 +280,47 @@ mdize_skill() {
       -e 's/__plain\.org/__plain.md/g' \
       -e 's/__blind\.org/__blind.md/g' \
       -e 's/__book\.org/__book.md/g' \
+      -e 's/__reading\.org/__reading.md/g' \
+      -e 's/__relationship\.org/__relationship.md/g' \
+      -e 's/__roundtable\.org/__roundtable.md/g' \
       -e 's/template\.org/template.md/g' \
       -e 's/org-mode/markdown/g' \
       -e 's/Org-mode/Markdown/g' \
       -e 's/文件必须是 markdown，禁止 Markdown。/文件必须是 Markdown，禁止 Org 格式。/g' \
+      -e 's/markdown 格式，禁止 markdown 语法/Markdown 格式，禁止 Org 语法/g' \
       -e 's/Defaults to a saved org note/Defaults to a saved markdown note/g' \
       -e 's/Defaults to a saved Org note/Defaults to a saved Markdown note/g' \
       -e 's/Produces natural, content-led Org notes/Produces natural, content-led Markdown notes/g' \
       -e 's/保存 org 笔记/保存 Markdown 笔记/g' \
       -e 's/保存 Org 笔记/保存 Markdown 笔记/g' \
+      -e 's/保存为 org 文件/保存为 Markdown 文件/g' \
+      -e 's/保存 Org/保存 Markdown/g' \
+      -e 's/生成 Org 文件/生成 Markdown 文件/g' \
+      -e 's/写入 notes 里的 org 文件/写入 notes 里的 Markdown 文件/g' \
+      -e 's/写入 Org 文件/写入 Markdown 文件/g' \
+      -e 's/写入 org 文件/写入 Markdown 文件/g' \
+      -e 's/写成 org 笔记/写成 Markdown 笔记/g' \
+      -e 's/指定的 org 路径/指定的 Markdown 路径/g' \
+      -e 's/Org 文件结构/Markdown 文件结构/g' \
+      -e 's/org 文件结构/Markdown 文件结构/g' \
+      -e 's/存入 org 笔记/存入 Markdown 笔记/g' \
+      -e 's/写进 org 文件/写进 Markdown 文件/g' \
+      -e 's/不入 org/不入 Markdown/g' \
       -e 's/生成由论文内容命名的 Org 笔记/生成由论文内容命名的 Markdown 笔记/g' \
       -e 's/写 org 文件时/写 Markdown 文件时/g' \
       -e 's/写 Org 文件时/写 Markdown 文件时/g' \
+      -e 's/写 Org 时/写 Markdown 时/g' \
+      -e 's/Org 使用/Markdown 使用/g' \
       -e 's/所有生成的 Org 文件/所有生成的 Markdown 文件/g' \
       -e 's/写入 Org 后运行/写入 Markdown 后运行/g' \
       -e 's/`#+DESCRIPTION`/`description`/g' \
       -e 's/`#+description`/`description`/g' \
       -e 's/`#+source`/`source`/g' \
+      -e 's/`#+IDENTIFIER`/`identifier`/g' \
       -e 's/Org 的 `#+begin_example` \/ `#+end_example`/Markdown 围栏代码块/g' \
       -e 's/Org 的 #+begin_example \/ #+end_example/Markdown 围栏代码块/g' \
       -e 's/Org example 块/Markdown 围栏代码块/g' \
+      -e 's/`#+begin_example` 块/Markdown 围栏代码块/g' \
       -e 's/\/note\.org/\/note.md/g' \
       -e 's/<note\.org>/<note.md>/g' \
       -e 's/- \*x\*：/- **x**：/g' \
@@ -229,18 +333,57 @@ mdize_skill() {
       -e 's/org example ASCII 图/Markdown fenced ASCII 图/g' \
       -e 's/org 的 `#+begin_example` \/ `#+end_example` 块/Markdown 的 fenced code block/g' \
       -e 's/加粗用 `\*bold\*`（单星号），禁止 `\*\*bold\*\*`/加粗用 `**bold**`（双星号）/g' \
+      -e 's/加粗用 `\*bold\*`（markdown），不用 `\*\*bold\*\*`（markdown）/加粗用 `**bold**`（双星号）/g' \
+      -e 's/输出必须是纯 markdown 语法，禁止任何 markdown 语法/输出必须是纯 Markdown 语法，禁止 Org 语法/g' \
+      -e 's/格式：markdown（`\*bold\*`，禁 markdown 语法）/格式：Markdown（`**bold**`，禁 Org 语法）/g' \
       -e 's/标题层级从 `\*` 开始/标题层级从 `#` 开始/g' \
       -e 's/Org 加粗使用单星号，标题从 `\*` 开始且不跳级。/Markdown 加粗使用双星号，标题从 `#` 开始且不跳级。/g' \
       -e 's/Org 文件头/Markdown 文件头/g' \
       -e 's/Org 与 Denote/Markdown 与 Denote/g' \
       -e 's/Org 标题/Markdown 标题/g' \
+      -e 's/Org 输出在可用的 Emacs\/Denote 环境中确认：文件名与 identifier 一致、Denote 接受、Notes 索引或 consult-notes 可见、`org-lint` 无阻断问题。Markdown 输出由同一校验器检查 YAML 元数据、标题顺序与 identifier。/Markdown 输出由同一校验器检查 YAML 元数据、标题顺序与 identifier，并在可用的 Emacs\/Denote 环境中确认文件名与 identifier 一致、Denote 接受、Notes 索引或 consult-notes 可见。/g' \
+      -e 's/格式校验、Denote 或 org-lint 不通过/格式校验或 Denote 不通过/g' \
       -e 's/验证 Denote 接受与 `org-lint`/验证 Denote 接受/g' \
       -e 's/再运行 Denote 接受检查和 `org-lint`/再运行 Denote 接受检查/g' \
+      -e 's/真实 Emacs 负责 Denote、consult-notes 与 Org lint/真实 Emacs 负责 Denote 与 consult-notes/g' \
+      -e 's/，并实际运行 `org-lint`。保留真实 lint 结果，不把未执行或非阻断提示说成零问题。/。/g' \
+      -e 's/，并实际运行 `org-lint`。若正在运行的 Emacs 服务不可用，就使用能加载本机 Denote、consult、consult-notes 与 Org 的批处理 Emacs；/。若正在运行的 Emacs 服务不可用，就使用能加载本机 Denote、consult 与 consult-notes 的批处理 Emacs；/g' \
       "$file"
     if [ "$skill_name" = "ljg-is" ]; then
       sed -i '' \
         -e 's/Org 笔记/Markdown 笔记/g' \
         -e 's/Denote\/Org/Denote\/Markdown/g' \
+        -e 's/`#+schema: ljg-is-v2`/`schema: ljg-is-v2`/g' \
+        "$file"
+    fi
+    if [ "$skill_name" = "ljg-invest" ]; then
+      sed -i '' \
+        -e 's/PROJECT_NAME\.org/PROJECT_NAME.md/g' \
+        -e 's/example-ai\.org/example-ai.md/g' \
+        "$file"
+    fi
+    if [ "$skill_name" = "ljg-blind" ]; then
+      sed -i '' \
+        -e 's/## org 严格语法（禁混 markdown）/## Markdown 严格语法（禁混 Org）/g' \
+        -e 's/标题用 `\*` \/ `\*\*` \/ `\*\*\*`，不要 `#`/标题用 `#` \/ `##` \/ `###`，不要用星号充当标题/g' \
+        -e 's/加粗 `\*字\*`，斜体 `\/字\/`，等宽 `~code~`/加粗 `**字**`，斜体 `*字*`，等宽 `code`/g' \
+        -e 's/列表用 `-`，不要 `\*`（`\*` 在 org 是标题）/列表用 `-`；标题使用 `#`/g' \
+        -e 's/链接 `\[\[url\]\[text\]\]`，不要 `\[text\](url)`/链接使用 `[text](url)`/g' \
+        -e 's/分隔线 `-----`，不要 `---`；不要 markdown 的 `>` 引用/分隔线使用 `---`；引用使用 `>`/g' \
+        "$file"
+    fi
+    if [ "$skill_name" = "ljg-learn" ]; then
+      sed -i '' \
+        -e 's/分隔线用空行或 org 标题层级区分，不用 `---`（markdown 分隔符）/分隔线用空行或 Markdown 标题层级区分；需要分隔线时使用 `---`/g' \
+        -e 's/列表用 `- item` 或 `1. item`，不用 markdown 的 `\* item`（因为 `\*` 在 org 中是标题）/列表用 `- item` 或 `1. item`；标题使用 `#`/g' \
+        -e 's/代码用 `~code~` 或 `=code=`，不用反引号/代码使用反引号包裹/g' \
+        -e 's/整合为 markdown/整合为 Markdown/g' \
+        "$file"
+    fi
+    if [ "$skill_name" = "ljg-qa" ]; then
+      sed -i '' \
+        -e 's/列表用 `- item`，不用 `\* item`（`\*` 在 org 是标题）/列表用 `- item`；标题使用 `#`/g' \
+        -e 's/代码用 `~code~` 或 `=code=`，不用反引号/代码使用反引号包裹/g' \
         "$file"
     fi
     sed -E -i '' \
@@ -251,14 +394,12 @@ mdize_skill() {
     # A line-start bullet label followed by a full-width colon is structural,
     # so it is safe to distinguish from ambiguous prose emphasis.
     perl -pi -e 's/^- \*([^*\n]+)\*：/- **$1**：/;' "$file"
-    # Only relabel Org fences that now contain YAML-style front matter.
-    # Real Org examples (headings, #+begin_example, etc.) must keep the org fence.
-    perl -0pi -e 's/```org\n(?=(?:title|subtitle|date|tags|identifier|source|author|authors|venue):)/```yaml\n/g' "$file"
-    perl -0pi -e 's/```org\n#\+begin_example\n(.*?)#\+end_example\n```/```text\n$1```/gs' "$file"
-    perl -0pi -e 's/```org\n(?=- \*\*[^*\n]+\*\*：)/```markdown\n/g' "$file"
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done
+    if [ "$preserve_crlf" = "1" ]; then
+      perl -0777 -pi -e 's/(?<!\r)\n/\r\n/g' "$file"
+    fi
   done
 
   # 3) Exact references to converted Org files can also live in runtime
@@ -277,6 +418,19 @@ mdize_skill() {
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done
+    # Eval prompts are executable output contracts. Convert only phrases that
+    # require an Org deliverable; mentions of Org as accepted input stay intact.
+    if [[ "$file" == */evals/*.json ]]; then
+      sed -i '' \
+        -e 's/把 Org 与 coverage/把 Markdown 与 coverage/g' \
+        -e 's/保存 Org 与 coverage/保存 Markdown 与 coverage/g' \
+        -e 's/的 Org；/的 Markdown；/g' \
+        -e 's/的 Org：/的 Markdown：/g' \
+        "$file"
+    fi
+    # A stdin default controls which parser the validator selects. On the md
+    # branch it must default to Markdown while explicit Org fixtures remain.
+    sed -E -i '' 's/(stdin__[a-z0-9-]+)\.org/\1.md/g' "$file"
   done
 }
 
@@ -285,22 +439,43 @@ mdize_skill() {
 # that would make an md-branch skill emit Org or expose Org markup.
 audit_md_skill() {
   local skill_dir="$1"
-  local org_files output_residuals markup_residuals
+  local skill_name org_files output_residuals markup_residuals eval_residuals runtime_default_residuals
+  skill_name=$(basename "$skill_dir")
 
   org_files=$(find "$skill_dir" -type f -name '*.org' -not -path '*/assets/*' 2>/dev/null || true)
+  # ljg-push is meta-documentation for both branches, so its literal Org
+  # examples describe the source side and are not an output-format residual.
+  if [ "$skill_name" = "ljg-push" ]; then
+    if [ -n "$org_files" ]; then
+      err "markdown conversion residuals in $skill_name"
+      printf '%s\n' "$org_files" >&2
+      return 1
+    fi
+    return 0
+  fi
   output_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En \
-      'Defaults to a saved Org note|Produces natural, content-led Org notes|保存 Org 笔记|生成由论文内容命名的 Org 笔记|写 Org 文件时|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|文件必须是 (markdown|Markdown)，禁止 Markdown|`#\+(DESCRIPTION|description|source)`|Org 的 (`)?#\+begin_example|Org example 块' \
+      'Defaults to a saved Org note|Produces natural, content-led Org notes|生成 Org 文件|保存(为)? (Org|org)(笔记|文件)?|存入 (Org|org)|写进 (Org|org)|写入 (Org|org) 文件|写成 org 笔记|(Org|org) 文件结构|指定的 org 路径|不入 org|Org 严格语法|org 严格语法|禁混 markdown|禁 markdown 语法|禁止任何 markdown 语法|__[a-z0-9_-]+\.org|命名按 denote[^[:cntrl:]]*\.org|生成由论文内容命名的 Org 笔记|写 Org 文件时|写 Org 时|Org 使用|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|Org lint|org-lint|文件必须是 (markdown|Markdown)，禁止 Markdown|(markdown|Markdown) 格式，禁止 (markdown|Markdown) 语法|加粗用 `\*bold\*`|代码用 `~code~`|不用反引号|`#\+(DESCRIPTION|description|source|IDENTIFIER|identifier|schema)`|(嵌入|ASCII 图)[^[:cntrl:]]*#\+begin_example|Org 的 (`)?#\+begin_example|Org example 块' \
       2>/dev/null || true)
   markup_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
-    | xargs -0 grep -En '^#\+(TITLE|SUBTITLE|DESCRIPTION|DATE|FILETAGS|IDENTIFIER|begin_|end_)' \
+    | xargs -0 grep -En '^[[:space:]]*#\+[A-Za-z_]+:|^[[:space:]]*#\+(begin|end)_(example|src|quote)([[:space:]]|$)|^[[:space:]]*```org[[:space:]]*$|^- \*[^*]+\*：|\[\[[^]]+\]\[[^]]+\]\]' \
+      2>/dev/null || true)
+  eval_residuals=$(find "$skill_dir" -type f -path '*/evals/*.json' -print0 \
+    | xargs -0 grep -En '把 Org 与 coverage|保存 Org 与 coverage|的 Org(；|：)' \
+      2>/dev/null || true)
+  runtime_default_residuals=$(find "$skill_dir" -type f -not -path '*/assets/*' \
+    \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.mjs' \
+       -o -name '*.cjs' -o -name '*.json' -o -name '*.sh' \) -print0 \
+    | xargs -0 grep -En 'stdin__[a-z0-9-]+\.org' \
       2>/dev/null || true)
 
-  if [ -n "$org_files$output_residuals$markup_residuals" ]; then
+  if [ -n "$org_files$output_residuals$markup_residuals$eval_residuals$runtime_default_residuals" ]; then
     err "markdown conversion residuals in $(basename "$skill_dir")"
     [ -n "$org_files" ] && printf '%s\n' "$org_files" >&2
     [ -n "$output_residuals" ] && printf '%s\n' "$output_residuals" >&2
     [ -n "$markup_residuals" ] && printf '%s\n' "$markup_residuals" >&2
+    [ -n "$eval_residuals" ] && printf '%s\n' "$eval_residuals" >&2
+    [ -n "$runtime_default_residuals" ] && printf '%s\n' "$runtime_default_residuals" >&2
     return 1
   fi
 }
@@ -310,7 +485,7 @@ sync_skill() {
   local name="$1"
   local apply_mdize="$2"   # 0|1
   local target="$SKILLS_REPO/skills/$name"
-  rsync -a --delete --exclude='.git' "$SKILLS_LOCAL/$name/" "$target/"
+  rsync_skill_tree "$SKILLS_LOCAL/$name" "$target"
   if [ "$apply_mdize" = "1" ]; then
     mdize_skill "$target"
   fi

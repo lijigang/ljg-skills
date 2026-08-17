@@ -5,12 +5,15 @@
 <style>
   :root {
     --bg: {{BG_COLOR}};
-    --text: #1D1D1F;
-    --text-mid: #6E6E73;
-    --text-dim: #ACACB0;
+    --text: #292621;
+    --text-mid: #746F68;
+    --text-dim: #A39C92;
     --accent: {{ACCENT_COLOR}};
-    --rule: #E5E5EA;
-    --font: 'KingHwa_OldSong', 'PingFang SC', system-ui, sans-serif;
+    --rule: #DED7CC;
+    --panel: #F2ECE2;
+    --font-display: 'PingFang SC', 'Noto Sans CJK SC', system-ui, sans-serif;
+    --font-body: 'PingFang SC', 'Noto Sans CJK SC', system-ui, sans-serif;
+    --font: var(--font-body);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,7 +26,7 @@
   .card {
     width: 1080px;
     background: var(--bg);
-    padding: 64px 72px 52px;
+    padding: 68px 76px 54px;
     display: flex;
     flex-direction: column;
   }
@@ -31,14 +34,30 @@
   /* ── Title ── */
   .title-area {
     flex-shrink: 0;
-    margin-bottom: 52px;
+    margin-bottom: 44px;
+  }
+
+  .title-area .eyebrow {
+    font: 600 22px/1.4 var(--font-display);
+    color: var(--accent);
+    letter-spacing: 0.13em;
+    margin-bottom: 18px;
   }
 
   .title-area h1 {
-    font: 700 84px/1.15 var(--font);
+    max-width: 900px;
+    font: 700 78px/1.12 var(--font-display);
     color: var(--text);
-    letter-spacing: -0.03em;
-    margin-bottom: 22px;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+  }
+
+  .title-area .deck {
+    max-width: 820px;
+    font: 400 31px/1.58 var(--font-body);
+    color: var(--text-mid);
+    letter-spacing: -0.01em;
+    margin-bottom: 26px;
   }
 
   .title-area::after {
@@ -57,13 +76,13 @@
   }
 
   .content p {
-    font: 400 36px/1.7 var(--font);
+    font: 400 34px/1.72 var(--font-body);
     color: var(--text);
     margin-bottom: 28px;
   }
 
   .content .highlight {
-    font: 500 40px/1.55 var(--font);
+    font: 550 39px/1.55 var(--font-display);
     color: var(--text);
     padding: 14px 0 14px 26px;
     border-left: 3px solid var(--accent);
@@ -71,21 +90,21 @@
   }
 
   .content .prompt {
-    font: 500 38px/1.55 var(--font);
-    color: #1D3A1D;
-    background: #E8F1E0;
+    font: 500 36px/1.58 var(--font-body);
+    color: var(--text);
+    background: var(--panel);
     padding: 24px 30px 24px 36px;
-    border-left: 4px solid #5A8B5A;
+    border-left: 4px solid var(--accent);
     margin: 32px 0;
     letter-spacing: -0.01em;
   }
 
   .content .prompt strong {
-    color: #1D3A1D;
+    color: var(--text);
   }
 
   .content h2 {
-    font: 600 42px/1.4 var(--font);
+    font: 650 42px/1.38 var(--font-display);
     color: var(--text);
     margin: 44px 0 22px;
     letter-spacing: -0.02em;
@@ -96,7 +115,7 @@
   }
 
   .content .subtitle {
-    font: 400 22px/2 var(--font);
+    font: 500 22px/2 var(--font-display);
     color: var(--text-dim);
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -112,13 +131,13 @@
   }
 
   .content .item .label {
-    font: 500 36px/1.5 var(--font);
+    font: 600 35px/1.5 var(--font-display);
     color: var(--text);
     margin-bottom: 6px;
   }
 
   .content .item p {
-    font: 400 32px/1.65 var(--font);
+    font: 400 32px/1.68 var(--font-body);
     color: var(--text-mid);
     margin-bottom: 0;
   }
@@ -130,7 +149,7 @@
   }
 
   .content blockquote p {
-    font: 300 36px/1.7 var(--font);
+    font: 400 34px/1.7 var(--font-body);
     color: var(--text-mid);
     margin-bottom: 6px;
   }
@@ -152,7 +171,7 @@
   }
 
   .content ul li {
-    font: 400 36px/1.7 var(--font);
+    font: 400 34px/1.7 var(--font-body);
     color: var(--text);
     padding: 4px 0 4px 28px;
     position: relative;
@@ -163,6 +182,92 @@
     position: absolute;
     left: 0;
     color: var(--text-mid);
+  }
+
+  /* ── Quiet narrative primitives ── */
+  .narrative-beat {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 24px;
+    padding: 30px 0 26px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .narrative-beat:last-of-type {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .beat-index {
+    padding-top: 4px;
+    font: 650 24px/1.4 'Menlo', 'SF Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .narrative-beat h2 {
+    margin: 0 0 10px;
+    font-size: 38px;
+  }
+
+  .narrative-beat p {
+    margin-bottom: 0;
+    color: var(--text-mid);
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin: 38px 0;
+  }
+
+  .metric {
+    min-height: 148px;
+    padding: 22px 0 10px;
+    border-top: 3px solid var(--accent);
+  }
+
+  .metric strong {
+    display: block;
+    font: 700 50px/1.12 var(--font-display);
+    color: var(--text);
+    letter-spacing: -0.04em;
+    margin-bottom: 10px;
+  }
+
+  .metric span {
+    display: block;
+    font: 400 24px/1.55 var(--font-body);
+    color: var(--text-mid);
+  }
+
+  .evidence-boundary {
+    margin: 40px 0;
+    padding: 30px 32px 26px;
+    border: 1px solid var(--rule);
+    background: var(--panel);
+  }
+
+  .evidence-boundary > strong:first-child {
+    display: block;
+    margin-bottom: 12px;
+    font: 650 22px/1.4 var(--font-display);
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  .evidence-boundary p {
+    margin-bottom: 0;
+    color: var(--text-mid);
+  }
+
+  .closing-judgment {
+    margin: 48px 0 12px;
+    padding-top: 30px;
+    border-top: 4px solid var(--accent);
+    font: 650 43px/1.48 var(--font-display);
+    color: var(--text);
+    letter-spacing: -0.025em;
   }
 
   /* ── Generated raster imagery ── */
@@ -178,7 +283,7 @@
     display: block;
     width: 100%;
     height: auto;
-    max-height: 560px;
+    max-height: 620px;
     object-fit: contain;
   }
 
@@ -187,21 +292,21 @@
 
   .generated-art figcaption {
     margin-top: 12px;
-    font: 400 22px/1.5 var(--font);
+    font: 400 22px/1.5 var(--font-body);
     color: var(--text-dim);
   }
 
   /* ── Drop Cap ── */
   .content .dropcap::first-letter {
-    font: 700 128px/0.82 'KingHwa_OldSong', Georgia, serif;
+    font: 650 96px/0.86 var(--font-display);
     float: left;
     margin: 4px 16px 0 -4px;
-    color: var(--accent);
+    color: var(--text);
   }
 
   /* ── End Mark ── */
   .content::after {
-    content: '∎';
+    content: '●';
     display: block;
     text-align: right;
     font-size: 16px;
@@ -235,7 +340,7 @@
   }
 
   .footer .author-name {
-    font: 400 24px/1.5 var(--font);
+    font: 400 24px/1.5 var(--font-body);
     color: var(--text-mid);
     letter-spacing: 0.03em;
   }

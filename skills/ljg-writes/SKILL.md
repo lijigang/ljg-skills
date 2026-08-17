@@ -113,12 +113,14 @@ User: 「预测是一种选择压，它逼出对结构的理解。帮我完整�
 - 文件名：`~/Documents/notes/{时间戳}==z--{标题关键词}__write.md`。
 - 文件头：
 
-```yaml
-title:      {标题}
-date:       [{YYYY-MM-DD Day HH:MM}]
-tags:   :write:
+```markdown
+---
+title: {标题}
+date: [{YYYY-MM-DD Day HH:MM}]
+tags: write
 identifier: {YYYYMMDDTHHMMSS}
-author:     李继刚
+author: 李继刚
+---
 ```
 
 - 初稿完成后合上它，用中文读者的眼睛重写一遍；两稿逐句择优，只保存最终稿。

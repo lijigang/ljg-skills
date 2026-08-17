@@ -50,7 +50,7 @@ const legacyEmbodimentFields = [
   "命名以后回到哪一幕重跑",
   "原书依据与简化边界",
 ];
-const runnableFields = [
+const legacyRunnableFields = [
   "读者先问什么",
   "稳定对象或最小模型",
   "读者第一次会猜什么",
@@ -61,12 +61,73 @@ const runnableFields = [
   "陌生读者能怎样复述",
   "原书依据与简化边界",
 ];
+const understandingPathFields = [
+  "读者进入什么具体处境",
+  "最初最自然会怎样理解",
+  "哪个事实、事件或结果让它不够",
+  "作者增加了什么关系或条件",
+  "回看原处境，什么已经改变",
+  "新结果自然带出什么问题",
+  "贯穿全文的扶手",
+  "结尾回到哪里",
+  "陌生读者能怎样复述",
+  "原书依据与简化边界",
+];
+const wholeBookIdentityFields = [
+  "这是什么类型或形态的书",
+  "字面上跟着谁、什么对象或什么问题展开",
+  "起点、主要变化与终点",
+  "不可省略的主线",
+  "主线为什么属于同一本书",
+  "正文必须出现的整书锚点",
+  "三十秒整书复述",
+  "可迁移性反测",
+];
+const genericWholeBookAnchors = new Set([
+  "问题",
+  "关系",
+  "变化",
+  "结果",
+  "理解",
+  "判断",
+  "结论",
+  "主题",
+  "作者",
+  "本书",
+  "读者",
+  "证据",
+  "边界",
+  "方法",
+  "概念",
+]);
 const bookSelectionFields = [
+  "贯穿全书的困惑或张力",
+  "正文保留哪些必要转折",
+  "为什么这些转折足以让读者理解全书主干",
+  "哪些重要内容留在后台而不进入正文",
+  "每次转折怎样由前一结果带出下一问题",
+];
+const narrativeContinuityFields = [
+  "开篇留下的真实问题",
+  "转折链",
+  "每次换场为什么不可提前",
+  "换序测试",
+  "摘句拼接反测",
+];
+const legacyBookSelectionFields = [
   "贯穿全书的普通问题",
   "正文保留哪两到四个关系",
   "为什么这些关系足以让读者理解全书主干",
   "哪些重要内容留在后台而不进入正文",
   "各模块如何继续使用同一对象，或为什么必须换对象",
+];
+const legacyNarrativeSelectionFields = [
+  "开头用哪件具体事情",
+  "为什么它能承载贯穿张力",
+  "一个场景是否够用",
+  "若不够，前一个结果怎样产生下一个场景",
+  "标题将用哪些事件、变化或条件命名",
+  "返程后，原来的看法在哪里改变",
 ];
 
 function displayWidth(line: string): number {
@@ -80,6 +141,10 @@ function lineField(content: string, field: string): string {
 
 function substantive(value: string): boolean {
   return Boolean(value) && value !== "未找到" && !/[{}]/.test(value);
+}
+
+function parseWholeBookAnchors(value: string): string[] {
+  return [...new Set(value.split(/[｜|]/).map((anchor) => anchor.trim()).filter(Boolean))];
 }
 
 function segmentField(line: string, field: string): string {
@@ -172,9 +237,10 @@ export function validate(content: string, file: string, coverage?: string): Resu
   const backstageAccountingPatterns = [
     /讲解者[^。！？\n]{0,30}(?:依据|根据|构造|自建|搭建|简化|设计)[^。！？\n]*/g,
     /(?:不是|并非)书中(?:案例|例子|实验|原例|场景)/g,
-    /本轮[^。！？\n]*/g,
-    /(?:依据|根据|沿用|来自)[^。！？\n]{0,12}(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]*/g,
-    /(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]{0,12}(?:保存|提供|支持|记录|留下)[^。！？\n]*/g,
+    /本轮[^。！？\n]{0,24}(?:核验|核到|读取|提取|查到|验证|未核|未查|不替|未替|补写|补充)[^。！？\n]*/g,
+    /本轮(?:真实|现有|已有)?材料(?:测试|核验|读取|提取|检查|验证)[^。！？\n]*/g,
+    /(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]{0,20}(?:讲解|模型|边界|本轮|核验|材料|依据|简化|支撑范围)[^。！？\n]*/g,
+    /(?:讲解|模型|边界|本轮|核验|材料|依据|简化|支撑范围)[^。！？\n]{0,20}(?:旧稿|现有旧稿|已有旧稿)[^。！？\n]*/g,
     /不能替[^。！？\n]{0,50}(?:作证|证明|下结论)/g,
     /(?:按模型规则|模型设定|继续运行[^。！？\n]{0,20}模型|仍在[^。！？\n]{0,12}模型里)/g,
     /(?:没有|缺少)[^。！？\n]{0,20}(?:全文|原文|材料)(?:可核|可查|可验证)/g,
@@ -186,7 +252,10 @@ export function validate(content: string, file: string, coverage?: string): Resu
     errors.push(`正文含后台核验语言：${[...new Set(backstageAccountingHits)].join("、")}；把来源身份与材料状态移回 coverage，正文改写成对象已经回答什么、还需要哪些现实条件`);
   }
   const sourceStructurePatterns = [
-    /前言|序言|导言|导论|开篇|结论章|末章|章节|前部|中部|后部/g,
+    /(?:^|[。！？\s])(?:前言|序言|导言|导论|开篇|结论章|末章)(?=[，、：:。！？\s]|$)/g,
+    /(?:^|[。！？\s])(?:前言|序言|导言|导论|开篇|结论章|末章)[^。！？\n]{0,12}(?:交代|介绍|提出|说明|讨论|写到|展开)/g,
+    /(?:作者|本书|书中|原书|正文|内容|叙述|结构)[^。！？\n]{0,12}(?:前部|中部|后部|章节|开篇|结论章|末章)/g,
+    /(?:前部|中部|后部|章节)[^。！？\n]{0,12}(?:写到|讨论|介绍|提出|说明|展开|进入|给出)/g,
     /第[0-9一二三四五六七八九十百千万〇两]+(?:章|节|部|卷|篇)/g,
   ];
   const sourceStructureHits = sourceStructurePatterns.flatMap((pattern) =>
@@ -214,19 +283,23 @@ export function validate(content: string, file: string, coverage?: string): Resu
   if (longSentenceHits > 0) {
     warnings.push(`正文有 ${longSentenceHits} 句超过 90 字；朗读时可能失去当前对象，确认每句只推进一个关系`);
   }
-  const immediateNamingHits = [...narrativeBody.matchAll(/(?:这(?:就)?叫|这就是|也就是说|所谓)[^。！？\n]{0,36}/g)].length;
-  if (narrativeBody && immediateNamingHits === 0) {
-    warnings.push("正文没有可见的“结果后立即命名”信号；人工确认概念是否紧贴它所解释的动作或结果");
-  }
-
   let materialGrade = "";
-  let runnableSupport = "";
+  let understandingPathSupport = "";
   let coverageZones = 0;
   let coverageLoopFields = 0;
   let coverageConcretizationFields = 0;
   let coverageEmbodimentFields = 0;
   let coverageRunnableFields = 0;
+  let coverageUnderstandingFields = 0;
+  let coverageWholeBookIdentityFields = 0;
+  let requiredWholeBookAnchors: string[] = [];
+  let requiredWholeBookAnchorHits = 0;
+  let missingWholeBookAnchors: string[] = [];
+  let genericWholeBookAnchorHits: string[] = [];
   let coverageBookSelectionFields = 0;
+  let coverageNarrativeContinuityFields = 0;
+  let coverageLegacyNarrativeSelectionFields = 0;
+  let coverageCandidateCount = 0;
   if (!coverage) {
     errors.push("所有拆书都必须提供 --coverage 后台覆盖记录");
   } else {
@@ -239,29 +312,61 @@ export function validate(content: string, file: string, coverage?: string): Resu
     if (sourceBoundaryFields !== 2) {
       errors.push("覆盖记录必须写明主要材料与能支持到哪里");
     }
-    runnableSupport = lineField(coverage, "材料能否支撑具体运行");
-    coverageRunnableFields = runnableFields.filter((field) => substantive(lineField(coverage, field))).length;
+    const currentSupport = lineField(coverage, "材料能否支撑认识更新路径");
+    const legacyRunnableSupport = lineField(coverage, "材料能否支撑具体运行");
+    understandingPathSupport = currentSupport || legacyRunnableSupport;
+    coverageUnderstandingFields = understandingPathFields.filter((field) => substantive(lineField(coverage, field))).length;
+    coverageWholeBookIdentityFields = wholeBookIdentityFields
+      .filter((field) => substantive(lineField(coverage, field))).length;
+    requiredWholeBookAnchors = parseWholeBookAnchors(lineField(coverage, "正文必须出现的整书锚点"));
+    missingWholeBookAnchors = requiredWholeBookAnchors
+      .filter((anchor) => !narrativeBody.includes(anchor));
+    requiredWholeBookAnchorHits = requiredWholeBookAnchors.length - missingWholeBookAnchors.length;
+    genericWholeBookAnchorHits = requiredWholeBookAnchors
+      .filter((anchor) => genericWholeBookAnchors.has(anchor));
+    coverageRunnableFields = legacyRunnableFields.filter((field) => substantive(lineField(coverage, field))).length;
     coverageEmbodimentFields = legacyEmbodimentFields.filter((field) => substantive(lineField(coverage, field))).length;
-    if (substantive(runnableSupport)) {
-      if (!/^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(runnableSupport)) {
-        errors.push("“材料能否支撑具体运行”必须明确写是或否，并说明依据");
-      } else if (/^是/.test(runnableSupport) && coverageRunnableFields !== runnableFields.length) {
-        errors.push("材料声明可运行，但覆盖记录没有填完普通问题、稳定对象、首次猜测、微小动作、即时结果、命名、重跑、复述与来源边界");
-      } else if (/^否/.test(runnableSupport)) {
+    if (substantive(currentSupport)) {
+      if (!/^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(currentSupport)) {
+        errors.push("“材料能否支撑认识更新路径”必须明确写是或否，并说明依据");
+      } else if (/^是/.test(currentSupport) && coverageUnderstandingFields !== understandingPathFields.length) {
+        errors.push("材料声明能够支撑认识更新路径，但覆盖记录没有填完具体处境、自然理解、压力、新关系、回看、下一问、扶手、返程、复述与来源边界");
+      } else if (/^否/.test(currentSupport)) {
+        const message = "材料不足以支撑认识更新路径；成品应缩成局部理解或先补材料，不能用泛化场景冒充现场";
+        if (materialGrade === "完整拆书") {
+          errors.push(`完整拆书不能通过：${message}`);
+        } else {
+          warnings.push(message);
+        }
+      }
+    } else if (substantive(legacyRunnableSupport)) {
+      if (!/^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(legacyRunnableSupport)) {
+        errors.push("旧版“材料能否支撑具体运行”必须明确写是或否，并说明依据");
+      } else if (/^是/.test(legacyRunnableSupport) && coverageRunnableFields !== legacyRunnableFields.length) {
+        errors.push("旧版材料声明可运行，但读者运行门没有填完");
+      } else if (/^否/.test(legacyRunnableSupport)) {
         warnings.push("材料不足以支撑具体运行；成品应缩成局部理解或先补材料，不能用泛化场景冒充现场");
       }
+      warnings.push("覆盖记录仍使用旧版读者运行门；本次兼容通过，下次重跑时请改用认识更新门");
     } else if (coverageEmbodimentFields === legacyEmbodimentFields.length) {
-      runnableSupport = "legacy";
-      warnings.push("覆盖记录仍使用旧版现场化门；本次兼容通过，下次重跑时请改用读者运行门");
+      understandingPathSupport = "legacy";
+      warnings.push("覆盖记录仍使用旧版现场化门；本次兼容通过，下次重跑时请改用认识更新门");
     } else {
-      errors.push("覆盖记录必须填写新版读者运行门，或提供完整的旧版现场化门以便兼容读取");
+      errors.push("覆盖记录必须填写认识更新门，或提供完整的旧版读者运行门/现场化门以便兼容读取");
     }
 
     if (materialGrade === "完整拆书") {
-      const authorFields = ["问题", "对象", "方法"].filter((field) => substantive(lineField(coverage, field))).length;
-      const zones = ["question", "setup", "mechanism", "boundary"];
-      coverageZones = zones.filter((zone) => substantive(locationForZone(coverage, zone))).length;
+      const authorFields = ["作者一直在追问什么", "作者用什么材料或经历逼近", "最终改变了什么判断"]
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      const legacyAuthorFields = ["问题", "对象", "方法"]
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      const zones = ["starting-point", "pressure", "revision", "boundary"];
+      const legacyZones = ["question", "setup", "mechanism", "boundary"];
+      const currentZoneCount = zones.filter((zone) => substantive(locationForZone(coverage, zone))).length;
+      const legacyZoneCount = legacyZones.filter((zone) => substantive(locationForZone(coverage, zone))).length;
+      coverageZones = Math.max(currentZoneCount, legacyZoneCount);
       const candidates = [...coverage.matchAll(/^- \[candidate\]\s+.+$/gm)];
+      coverageCandidateCount = candidates.length;
       const candidateFields = ["名称", "位置", "解决的问题", "与其他部件的关系", "决定", "删除测试"];
       const completeCandidates = candidates.filter((candidate) =>
         candidateFields.every((field) => substantive(segmentField(candidate[0], field)))
@@ -269,19 +374,47 @@ export function validate(content: string, file: string, coverage?: string): Resu
       ).length;
       coverageLoopFields = legacyCoverageLoopFields.filter((field) => substantive(lineField(coverage, field))).length;
       coverageConcretizationFields = legacyConcretizationFields.filter((field) => substantive(lineField(coverage, field))).length;
-      coverageBookSelectionFields = bookSelectionFields.filter((field) => substantive(lineField(coverage, field))).length;
+      const currentBookSelectionFields = bookSelectionFields
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      const legacySelectionFields = legacyBookSelectionFields
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      coverageBookSelectionFields = Math.max(currentBookSelectionFields, legacySelectionFields);
+      coverageNarrativeContinuityFields = narrativeContinuityFields
+        .filter((field) => substantive(lineField(coverage, field))).length;
+      coverageLegacyNarrativeSelectionFields = legacyNarrativeSelectionFields
+        .filter((field) => substantive(lineField(coverage, field))).length;
       const challengeFields = ["当前理解", "反证", "处理"].filter((field) => substantive(lineField(coverage, field))).length;
+      const legacyFullNarrativeComplete = coverageLoopFields === legacyCoverageLoopFields.length
+        && coverageConcretizationFields === legacyConcretizationFields.length;
 
-      if (authorFields !== 3) errors.push("完整拆书的覆盖记录没有填完作者自述的问题、对象与方法");
-      if (coverageZones !== 4) errors.push("完整拆书的覆盖记录没有填完问题、对象、机制与边界四类证据的位置");
-      if (candidates.length < 5 || candidates.length > 12) {
-        errors.push(`完整拆书的覆盖记录必须有 5–12 个候选部件，当前为 ${candidates.length}`);
+      if (coverageWholeBookIdentityFields !== wholeBookIdentityFields.length) {
+        errors.push("完整拆书的覆盖记录没有填完整书身份：书的形态、字面对象、起点变化终点、必要主线、共同关系、正文锚点、三十秒复述与可迁移性反测缺一不可");
+      }
+      if (requiredWholeBookAnchors.length < 3) {
+        errors.push(`完整拆书必须声明至少 3 个正文整书锚点，当前为 ${requiredWholeBookAnchors.length}`);
+      }
+      if (genericWholeBookAnchorHits.length > 0) {
+        errors.push(`整书锚点过于通用，不能唯一指向这本书：${genericWholeBookAnchorHits.join("、")}`);
+      }
+      if (missingWholeBookAnchors.length > 0) {
+        errors.push(`这些整书锚点没有出现在正文：${missingWholeBookAnchors.join("、")}`);
+      }
+      if (authorFields !== 3 && legacyAuthorFields !== 3) {
+        errors.push("完整拆书的覆盖记录没有填完作者的追问、逼近材料与最终判断");
+      }
+      if (coverageZones !== 4) errors.push("完整拆书的覆盖记录没有填完起点、压力、改写与边界四类证据的位置");
+      if (candidates.length < 5) {
+        errors.push(`完整拆书的覆盖记录必须有至少 5 个候选部件，当前为 ${candidates.length}`);
       } else if (completeCandidates !== candidates.length) {
         errors.push("完整拆书的候选部件必须填完名称、位置、作用、关系、决定与删除测试");
       }
-      if (substantive(lineField(coverage, "材料能否支撑具体运行"))
-          && coverageBookSelectionFields !== bookSelectionFields.length) {
-        errors.push("完整拆书的覆盖记录没有填完普通问题、正文取舍、后台留存与模块对象选择");
+      if (substantive(understandingPathSupport)
+          && coverageBookSelectionFields !== bookSelectionFields.length
+          && !legacyFullNarrativeComplete) {
+        errors.push("完整拆书的覆盖记录没有填完贯穿张力、必要转折、正文取舍、后台留存与转折连接");
+      }
+      if (coverageNarrativeContinuityFields !== narrativeContinuityFields.length) {
+        errors.push("完整拆书的覆盖记录没有填完叙事连续性门：开篇真实问题、转折链、换场必要性、换序测试与摘句拼接反测缺一不可");
       }
       if (challengeFields !== 3) errors.push("完整拆书的覆盖记录没有完成当前理解、反证与处理");
     }
@@ -302,9 +435,6 @@ export function validate(content: string, file: string, coverage?: string): Resu
   }
 
   const bodyChars = [...narrativeBody.replace(/\s/g, "")].length;
-  if (bodyChars < 1000 || bodyChars > 3000) {
-    warnings.push(`正文约 ${bodyChars} 字，超出通常的 1000–3000 字范围；复杂内容应增加步骤或缩小范围，不要提高概念密度`);
-  }
 
   return {
     ok: errors.length === 0,
@@ -323,7 +453,6 @@ export function validate(content: string, file: string, coverage?: string): Resu
       outside_camera_opening_hits: outsideCameraOpeningHits,
       meta_narration_hits: metaNarrationHits.length,
       backstage_accounting_hits: backstageAccountingHits.length,
-      immediate_naming_hits: immediateNamingHits,
       dense_paragraph_hits: denseParagraphHits,
       max_paragraph_chars: maxParagraphChars,
       long_sentence_hits: longSentenceHits,
@@ -336,9 +465,21 @@ export function validate(content: string, file: string, coverage?: string): Resu
       coverage_loop_fields: coverageLoopFields,
       coverage_concretization_fields: coverageConcretizationFields,
       coverage_embodiment_fields: coverageEmbodimentFields,
-      coverage_runnable_fields: coverageRunnableFields,
+      coverage_whole_book_identity_fields: coverageWholeBookIdentityFields,
+      required_whole_book_anchor_count: requiredWholeBookAnchors.length,
+      required_whole_book_anchor_hits: requiredWholeBookAnchorHits,
+      missing_whole_book_anchors: missingWholeBookAnchors.join("｜"),
+      generic_whole_book_anchors: genericWholeBookAnchorHits.join("｜"),
+      coverage_understanding_fields: coverageUnderstandingFields,
+      coverage_runnable_fields: coverageUnderstandingFields === understandingPathFields.length
+        ? coverageUnderstandingFields
+        : coverageRunnableFields,
       coverage_book_selection_fields: coverageBookSelectionFields,
-      runnable_support: runnableSupport,
+      coverage_narrative_continuity_fields: coverageNarrativeContinuityFields,
+      coverage_candidate_count: coverageCandidateCount,
+      coverage_legacy_narrative_selection_fields: coverageLegacyNarrativeSelectionFields,
+      understanding_path_support: understandingPathSupport,
+      runnable_support: understandingPathSupport,
       format: markdownMode ? "markdown" : "org",
     },
   };
@@ -347,7 +488,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
 function main(): never {
   const args = process.argv.slice(2);
   const stdinMode = args[0] === "--stdin";
-  const file = stdinMode ? args[1] ?? "19700101T000000--stdin__book.org" : args[0];
+  const file = stdinMode ? args[1] ?? "19700101T000000--stdin__book.md" : args[0];
   const coverageFlag = args.indexOf("--coverage");
   const coveragePath = coverageFlag >= 0 ? args[coverageFlag + 1] : undefined;
 

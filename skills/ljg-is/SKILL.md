@@ -48,7 +48,7 @@ The One = 本质的最小可迁移结构式
 
 | Workflow | Trigger | File |
 |---|---|---|
-| **FindEssence** | 从目标中提炼最小状态变化并保存 Org | `Workflows/FindEssence.md` |
+| **FindEssence** | 从目标中提炼最小状态变化并保存 Markdown | `Workflows/FindEssence.md` |
 
 ## 输出契约
 

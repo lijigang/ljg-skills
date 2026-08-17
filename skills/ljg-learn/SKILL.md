@@ -46,31 +46,32 @@ Assistant: [对"熵"进行八维解剖，生成 markdown 报告]
 ### 5. 写入
 
 **格式规则（零例外）：**
-- 输出必须是纯 markdown 语法，禁止任何 markdown 语法
-- 加粗用 `*bold*`（markdown），不用 `**bold**`（markdown）
-- 分隔线用空行或 org 标题层级区分，不用 `---`（markdown 分隔符）
-- 列表用 `- item` 或 `1. item`，不用 markdown 的 `* item`（因为 `*` 在 org 中是标题）
-- 代码用 `~code~` 或 `=code=`，不用反引号
+- 输出必须是纯 Markdown 语法，禁止 Org 语法
+- 加粗用 `**bold**`（双星号）
+- 分隔线用空行或 Markdown 标题层级区分；需要分隔线时使用 `---`
+- 列表用 `- item` 或 `1. item`；标题使用 `#`
+- 代码使用反引号包裹
 
-整合为 markdown，结构：
+整合为 Markdown，结构：
 
-```yaml
+```markdown
+---
 title: 概念解剖：{概念名}
-tags: :concept:
+tags: concept
 date: [YYYY-MM-DD]
-
-* 定锚
-* 八刀
-** 历史
-** 辩证
-** 现象
-** 语言
-** 形式
-** 存在
-** 美感
-** 元反思
-* 内观
-* 压缩
+---
+# 定锚
+# 八刀
+## 历史
+## 辩证
+## 现象
+## 语言
+## 形式
+## 存在
+## 美感
+## 元反思
+# 内观
+# 压缩
 ```
 
 写入文件：

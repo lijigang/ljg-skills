@@ -51,16 +51,16 @@ bash ~/.agents/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
 脚本逻辑：
 
 1. *Setup*：检查 `$HOME/code/ljg-skills` 是否存在，不存在则 clone
-2. *Detect*：对比 `~/.agents/skills/ljg-*` vs `repo/skills/ljg-*`，列出有差异的
+2. *Detect*：以与同步完全相同的文件边界对比 `~/.agents/skills/ljg-*` vs `repo/skills/ljg-*`——按校验和识别新增、删除、内容和可执行位变化；纯时间戳、目录元数据和空目录不会单独触发发布，`.git/`、`node_modules/`、`.DS_Store` 被忽略，但普通备份文件不会被忽略
 3. *Master 推送*：
    - `git checkout master` + `git pull --rebase`
-   - 对每个有差异的 skill：`rsync -a --delete --exclude='.git'`
+   - 对每个有差异的 skill：按上述共同边界 rsync（删除目标端多出的真实文件、保留权限，不传播时间戳/所有者/群组；目录本身不进入 Git 结果）
    - bump patch version (plugin.json + marketplace.json)
    - `git add` + `git commit` + `git push origin master`
 4. *Md 推送*：
    - `git checkout md` + `git pull --rebase`
-   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，Markdown 与运行时代码中的实际文件引用全局改写；结构化 `- *标签*：` 转成 `- **标签**：`）
-   - commit 前运行残留审计：拒绝未转换的输出指令、Org 头标记和非 assets `.org` 文件
+   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，Markdown 与运行时代码中的实际文件引用全局改写；Markdown 内嵌的完整 Org 模板，以及首行就是 Org 头的无语言围栏模板，由 `MdizeEmbeddedOrg.ts` 转成带 YAML frontmatter 的 Markdown 模板，并保留原文件换行风格；结构化 `- *标签*：` 转成 `- **标签**：`；eval 输出契约与 stdin 默认格式同步切到 Markdown；`ljg-is` 的 Org/Markdown 双格式验收整句折叠为 Markdown/YAML + Denote 验收）
+   - commit 前运行残留审计：拒绝未转换的输出指令、Org 专用 lint 调用、Org 头标记、单星号加粗/Org 等宽文本等旧语法规则、非 assets `.org` 文件、eval JSON 的 Org 输出要求和运行时 Org 默认值
    - bump patch version
    - `git add` + `git commit` + `git push origin md`
 5. *收尾*：切回 `master`，让本地工作 repo 留在源分支
