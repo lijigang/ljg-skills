@@ -115,6 +115,24 @@ const narrativeContinuityFields = [
   "换序测试",
   "摘句拼接反测",
 ];
+const generatorFields = [
+  "全书生成器",
+  "输入、起点或当前状态",
+  "结果方向或终点",
+  "生成器怎样贯穿至少两个远距转折",
+  "生成器在哪些条件、范围或层级失效",
+  "正文生成器锚点",
+  "生成器是否需要在前两个一级标题内运行",
+  "是否需要视觉表示",
+];
+const frontstageFields = [
+  "名称",
+  "唯一职责",
+  "设置或起点",
+  "结果或后果",
+  "改变的关系",
+  "下一问",
+];
 const legacyBookSelectionFields = [
   "贯穿全书的普通问题",
   "正文保留哪两到四个关系",
@@ -142,6 +160,10 @@ function lineField(content: string, field: string): string {
 
 function substantive(value: string): boolean {
   return Boolean(value) && value !== "未找到" && !/[{}]/.test(value);
+}
+
+function yesNoDecision(value: string): boolean {
+  return /^(?:是|否)(?:\b|[—：:，,。\s]|$)/.test(value);
 }
 
 function parseWholeBookAnchors(value: string): string[] {
@@ -351,9 +373,30 @@ export function validate(content: string, file: string, coverage?: string): Resu
   let coverageNarrativeContinuityFields = 0;
   let coverageLegacyNarrativeSelectionFields = 0;
   let coverageCandidateCount = 0;
+  let coverageContractVersion = "legacy";
+  let coverageGeneratorGatePresent = false;
+  let generatorExists = "";
+  let coverageGeneratorFields = 0;
+  let generatorAnchorCount = 0;
+  let generatorAnchorHits = 0;
+  let generatorEarlyAnchorHits = 0;
+  let generatorEarlyDecision = "";
+  let representationRequired = "";
+  let representationRunAnchor = "";
+  let representationRunAnchorHit = false;
+  let frontstageCount = 0;
+  let frontstageCompleteCount = 0;
+  let frontstageMissingInBody: string[] = [];
+  let frontstageDuplicateResponsibilities: string[] = [];
   if (!coverage) {
     errors.push("所有拆书都必须提供 --coverage 后台覆盖记录");
   } else {
+    const declaredCoverageVersion = lineField(coverage, "覆盖合同版本");
+    coverageContractVersion = declaredCoverageVersion || "legacy";
+    if (declaredCoverageVersion && declaredCoverageVersion !== "2") {
+      errors.push(`覆盖记录版本 ${declaredCoverageVersion} 不受支持；当前版本为 2`);
+    }
+
     materialGrade = lineField(coverage, "材料等级");
     if (!validMaterialGrades.includes(materialGrade as (typeof validMaterialGrades)[number])) {
       errors.push("覆盖记录的材料等级必须是：完整拆书 / 初拆 / 假设版");
@@ -414,6 +457,80 @@ export function validate(content: string, file: string, coverage?: string): Resu
       warnings.push("覆盖记录仍使用旧版现场化门；本次兼容通过，下次重跑时请改用认识更新门");
     } else {
       errors.push("覆盖记录必须填写认识更新门，或提供完整的旧版读者运行门/现场化门以便兼容读取");
+    }
+
+    if (coverageContractVersion === "2") {
+      coverageGeneratorGatePresent = /^- 是否存在全书生成器[：:]/m.test(coverage);
+      generatorExists = lineField(coverage, "是否存在全书生成器");
+      generatorEarlyDecision = lineField(coverage, "生成器是否需要在前两个一级标题内运行");
+      representationRequired = lineField(coverage, "是否需要视觉表示");
+      representationRunAnchor = lineField(coverage, "视觉表示后用哪个载体运行");
+
+      if (!coverageGeneratorGatePresent || !yesNoDecision(generatorExists)) {
+        errors.push("覆盖记录版本 2 必须明确“是否存在全书生成器”：是或否，并说明理由");
+      }
+
+      if (!yesNoDecision(representationRequired)) {
+        errors.push("覆盖记录版本 2 必须明确“是否需要视觉表示”：是或否，并说明理由");
+      }
+
+      if (/^是/.test(generatorExists)) {
+        coverageGeneratorFields = generatorFields
+          .filter((field) => substantive(lineField(coverage, field))).length;
+        if (coverageGeneratorFields !== generatorFields.length) {
+          errors.push("解释生成器门没有填完：生成器、输入/起点、结果方向、远距转折、失效边界、正文锚点、前置判断与视觉判断缺一不可");
+        }
+
+        const generatorAnchors = parseWholeBookAnchors(lineField(coverage, "正文生成器锚点"));
+        generatorAnchorCount = generatorAnchors.length;
+        generatorAnchorHits = generatorAnchors.filter((anchor) => narrativeBody.includes(anchor)).length;
+        if (generatorAnchorCount === 0) {
+          errors.push("声明存在全书生成器时，必须提供至少 1 个正文生成器锚点");
+        } else if (generatorAnchorHits !== generatorAnchorCount) {
+          const missing = generatorAnchors.filter((anchor) => !narrativeBody.includes(anchor));
+          errors.push(`这些生成器锚点没有出现在正文：${missing.join("、")}`);
+        }
+
+        if (!yesNoDecision(generatorEarlyDecision)) {
+          errors.push("“生成器是否需要在前两个一级标题内运行”必须明确写是或否，并说明理由");
+        } else if (/^是/.test(generatorEarlyDecision)) {
+          const thirdHeadingStart = headingMatches[2]?.index ?? content.length;
+          const earlyBody = bodyStart >= 0 ? content.slice(bodyStart, thirdHeadingStart) : "";
+          generatorEarlyAnchorHits = generatorAnchors.filter((anchor) => earlyBody.includes(anchor)).length;
+          if (generatorEarlyAnchorHits !== generatorAnchorCount) {
+            errors.push("声明生成器需要前置，但正文生成器锚点没有全部出现在前两个一级标题内");
+          }
+        }
+      } else if (/^否/.test(generatorExists)) {
+        coverageGeneratorFields = generatorFields
+          .filter((field) => substantive(lineField(coverage, field))).length;
+      }
+
+      const frontstage = [...coverage.matchAll(/^- \[frontstage\]\s+.+$/gm)];
+      frontstageCount = frontstage.length;
+      const frontstageNames = frontstage.map((item) => segmentField(item[0], "名称"));
+      const frontstageResponsibilities = frontstage.map((item) => segmentField(item[0], "唯一职责"));
+      frontstageCompleteCount = frontstage.filter((item) =>
+        frontstageFields.every((field) => substantive(segmentField(item[0], field))),
+      ).length;
+      frontstageMissingInBody = frontstageNames
+        .filter(substantive)
+        .filter((name) => !narrativeBody.includes(name));
+      frontstageDuplicateResponsibilities = [...new Set(frontstageResponsibilities.filter((responsibility, index, all) =>
+        substantive(responsibility) && all.indexOf(responsibility) !== index,
+      ))];
+
+      if (/^是/.test(currentSupport) && frontstageCount === 0) {
+        errors.push("覆盖记录版本 2 必须声明至少 1 个 [frontstage] 前台载体");
+      } else if (frontstageCompleteCount !== frontstageCount) {
+        errors.push("前台载体必须填完名称、唯一职责、设置或起点、结果或后果、改变的关系与下一问");
+      }
+      if (frontstageMissingInBody.length > 0) {
+        errors.push(`这些前台载体没有出现在正文：${frontstageMissingInBody.join("、")}`);
+      }
+      if (frontstageDuplicateResponsibilities.length > 0) {
+        errors.push(`前台载体的唯一职责不能重复：${frontstageDuplicateResponsibilities.join("、")}`);
+      }
     }
 
     if (substantive(currentSupport) && materialGrade !== "完整拆书" && requiredWholeBookAnchors.length < 1) {
@@ -498,6 +615,22 @@ export function validate(content: string, file: string, coverage?: string): Resu
   if (maxDiagramWidth > 80) {
     errors.push(`ASCII 图宽度 ${maxDiagramWidth}，超过 80`);
   }
+  if (coverageContractVersion === "2" && /^是/.test(representationRequired)) {
+    if (exampleBlocks.length !== 1) {
+      errors.push(`覆盖记录声明需要视觉表示，正文必须恰好有 1 个 example 图块，当前为 ${exampleBlocks.length}`);
+    }
+    if (!substantive(representationRunAnchor)) {
+      errors.push("覆盖记录声明需要视觉表示时，必须写明图后运行载体");
+    } else if (exampleBlocks.length === 1) {
+      const blockEnd = (exampleBlocks[0].index ?? 0) + exampleBlocks[0][0].length;
+      representationRunAnchorHit = content.indexOf(representationRunAnchor, blockEnd) >= 0;
+      if (!representationRunAnchorHit) {
+        errors.push(`图后运行载体“${representationRunAnchor}”没有出现在图块之后`);
+      }
+    }
+  } else if (coverageContractVersion === "2" && /^否/.test(representationRequired) && exampleBlocks.length > 0) {
+    warnings.push("覆盖记录声明不需要视觉表示，但正文含 example 图块；确认它是否仍在减少理解负担");
+  }
 
   const bodyChars = [...narrativeBody.replace(/\s/g, "")].length;
 
@@ -551,6 +684,21 @@ export function validate(content: string, file: string, coverage?: string): Resu
       coverage_narrative_continuity_fields: coverageNarrativeContinuityFields,
       coverage_candidate_count: coverageCandidateCount,
       coverage_legacy_narrative_selection_fields: coverageLegacyNarrativeSelectionFields,
+      coverage_contract_version: coverageContractVersion,
+      coverage_generator_gate_present: coverageGeneratorGatePresent,
+      generator_exists: generatorExists,
+      coverage_generator_fields: coverageGeneratorFields,
+      generator_anchor_count: generatorAnchorCount,
+      generator_anchor_hits: generatorAnchorHits,
+      generator_early_anchor_hits: generatorEarlyAnchorHits,
+      generator_early_decision: generatorEarlyDecision,
+      representation_required: representationRequired,
+      representation_run_anchor: representationRunAnchor,
+      representation_run_anchor_hit: representationRunAnchorHit,
+      frontstage_count: frontstageCount,
+      frontstage_complete_count: frontstageCompleteCount,
+      frontstage_missing_in_body: frontstageMissingInBody.join("｜"),
+      frontstage_duplicate_responsibilities: frontstageDuplicateResponsibilities.join("｜"),
       understanding_path_support: understandingPathSupport,
       runnable_support: understandingPathSupport,
       format: markdownMode ? "markdown" : "org",

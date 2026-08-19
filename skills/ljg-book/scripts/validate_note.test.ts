@@ -46,11 +46,33 @@ ${options.opening ?? ""}${bodies}
 ${options.diagram ?? ""}${options.tail ?? ""}${essence}${options.afterEssence ?? ""}`;
 }
 
-function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书", support = "是——原书足以还原判断怎样被证据改变"): string {
+function coverage(
+  grade: "完整拆书" | "初拆" | "假设版" = "完整拆书",
+  support = "是——原书足以还原判断怎样被证据改变",
+  contract: "legacy" | "2" = "legacy",
+): string {
+  const contractVersion = contract === "2" ? "- 覆盖合同版本：2\n" : "";
+  const generatorContract = contract === "2" ? `
+## 解释生成器门
+- 是否存在全书生成器：是——理由与结论之间的缺口生成了全书后续追问
+- 全书生成器：自然点头 → 遮住结论 → 暴露理由缺口 → 等待效果证据 → 排除替代原因
+- 输入、起点或当前状态：读者看到四句话后顺势赞成加重处罚
+- 结果方向或终点：读者能够指出结论还缺哪一种证据
+- 生成器怎样贯穿至少两个远距转折：开头遮住结论发现缺口，结尾回到原句等待比较结果
+- 生成器在哪些条件、范围或层级失效：材料已经直接提供效果比较时，不再需要从理由缺口起步
+- 正文生成器锚点：理由还没有走到结论
+- 生成器是否需要在前两个一级标题内运行：是——分析书应先交付读懂后续案例所需的判断关系
+- 是否需要视觉表示：否——理由链用同一句话重跑即可看清，不依赖空间位置
+- 视觉表示后用哪个载体运行：不需要——正文直接重跑四句话
+
+## 前台载体门
+- [frontstage] 名称：四句话｜唯一职责：让自然点头真实失效｜设置或起点：前三句说问题严重，第四句主张加重处罚｜结果或后果：遮住第四句后，处罚结论失去支持｜改变的关系：问题存在与办法有效被分开｜下一问：什么证据能证明处罚有效
+- [frontstage] 名称：比较结果｜唯一职责：把效果证据放回原判断｜设置或起点：相近地区提高处罚后事故没有下降｜结果或后果：读者停止顺势赞成处罚｜改变的关系：理由缺口获得可检验的证据类型｜下一问：还有哪些替代原因
+` : "";
   const boundary = `# ljg-book 后台覆盖记录
 
 ## 材料边界
-- 材料等级：${grade}
+${contractVersion}- 材料等级：${grade}
 - 主要材料：原书全文与作者访谈
 - 能支持到：支持核心机制与边界，不延伸到作者未讨论的领域
 - 材料能否支撑认识更新路径：${support}
@@ -76,6 +98,7 @@ function coverage(grade: "完整拆书" | "初拆" | "假设版" = "完整拆书
 - 结尾回到哪里：回到群里的四句话重新判断
 - 陌生读者能怎样复述：问题严重不等于某个办法已经有效
 - 原书依据与简化边界：案例来自原书，只压缩措辞，不增加结果
+${generatorContract}
 
 ## 精神内核门
 - 作者最后只想留下什么：问题严重不等于处罚有效，理由与结论之间缺的那一步必须由比较证据补上
@@ -229,7 +252,7 @@ identifier: 20260812T120000
 
 describe("validate ljg-book note", () => {
   test("accepts the dual whole-book identity and understanding-path contract", () => {
-    const result = validate(note(), filename, coverage());
+    const result = validate(note(), filename, coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2"));
     expect(result.ok).toBe(true);
     expect(result.checks.material_grade).toBe("完整拆书");
     expect(result.checks.coverage_zones).toBe(4);
@@ -242,6 +265,17 @@ describe("validate ljg-book note", () => {
     expect(result.checks.coverage_book_selection_fields).toBe(5);
     expect(result.checks.coverage_narrative_continuity_fields).toBe(5);
     expect(result.checks.coverage_candidate_count).toBe(5);
+    expect(result.checks.coverage_generator_gate_present).toBe(true);
+    expect(result.checks.generator_exists).toContain("是");
+    expect(result.checks.coverage_generator_fields).toBe(8);
+    expect(result.checks.generator_anchor_count).toBe(1);
+    expect(result.checks.generator_anchor_hits).toBe(1);
+    expect(result.checks.generator_early_anchor_hits).toBe(1);
+    expect(result.checks.representation_required).toContain("否");
+    expect(result.checks.frontstage_count).toBe(2);
+    expect(result.checks.frontstage_complete_count).toBe(2);
+    expect(result.checks.frontstage_missing_in_body).toBe("");
+    expect(result.checks.frontstage_duplicate_responsibilities).toBe("");
     expect(result.checks.essence_heading_count).toBe(1);
     expect(result.checks.essence_is_last_heading).toBe(true);
     expect(result.checks.essence_paragraph_count).toBe(1);
@@ -494,6 +528,72 @@ describe("validate ljg-book note", () => {
     const result = validate(note(), filename, incomplete);
     expect(result.ok).toBe(false);
     expect(result.errors.join("\n")).toContain("叙事连续性门");
+  });
+
+  test("requires complete generator fields when a generator exists", () => {
+    const incomplete = coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2")
+      .replace("- 结果方向或终点：读者能够指出结论还缺哪一种证据", "- 结果方向或终点：");
+    const result = validate(note(), filename, incomplete);
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("解释生成器门没有填完");
+  });
+
+  test("accepts an explicit no-generator path without forcing a formula", () => {
+    const noGenerator = coverage("初拆", "是——原书足以还原判断怎样被证据改变", "2")
+      .replace("- 是否存在全书生成器：是——理由与结论之间的缺口生成了全书后续追问", "- 是否存在全书生成器：否——这篇叙事只逐渐照亮一个没有被解决的关系")
+      .replace("- 全书生成器：自然点头 → 遮住结论 → 暴露理由缺口 → 等待效果证据 → 排除替代原因", "- 全书生成器：")
+      .replace("- 输入、起点或当前状态：读者看到四句话后顺势赞成加重处罚", "- 输入、起点或当前状态：")
+      .replace("- 结果方向或终点：读者能够指出结论还缺哪一种证据", "- 结果方向或终点：")
+      .replace("- 生成器怎样贯穿至少两个远距转折：开头遮住结论发现缺口，结尾回到原句等待比较结果", "- 生成器怎样贯穿至少两个远距转折：")
+      .replace("- 生成器在哪些条件、范围或层级失效：材料已经直接提供效果比较时，不再需要从理由缺口起步", "- 生成器在哪些条件、范围或层级失效：")
+      .replace("- 正文生成器锚点：理由还没有走到结论", "- 正文生成器锚点：")
+      .replace("- 生成器是否需要在前两个一级标题内运行：是——分析书应先交付读懂后续案例所需的判断关系", "- 生成器是否需要在前两个一级标题内运行：否——叙事需要让关系随人物后果逐渐显形");
+    const result = validate(note(), filename, noGenerator);
+    expect(result.ok).toBe(true);
+    expect(result.checks.generator_exists).toContain("否");
+  });
+
+  test("rejects a declared generator anchor that appears too late", () => {
+    const lateNote = note({
+      firstBody: "四句话摆在小李面前。他先顺势点了头。",
+      tail: "\n理由还没有走到结论。\n",
+    });
+    const result = validate(lateNote, filename, coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2"));
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("前两个一级标题");
+  });
+
+  test("requires an elected visual and a carrier that runs after it", () => {
+    const visualCoverage = coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2")
+      .replace("- 是否需要视觉表示：否——理由链用同一句话重跑即可看清，不依赖空间位置", "- 是否需要视觉表示：是——两条曲线的中心与两端需要空间定位")
+      .replace("- 视觉表示后用哪个载体运行：不需要——正文直接重跑四句话", "- 视觉表示后用哪个载体运行：比较结果");
+    const missing = validate(note(), filename, visualCoverage);
+    const diagram = "#+begin_example\ncenter -- result -- edge\n#+end_example";
+    const withDiagram = note().replace("一份地区比较放回原来的判断。", `${diagram}\n\n一份地区比较放回原来的判断。`);
+    const present = validate(withDiagram, filename, visualCoverage);
+    const missingCarrier = validate(withDiagram, filename, visualCoverage.replace("视觉表示后用哪个载体运行：比较结果", "视觉表示后用哪个载体运行：马尾藻海"));
+    expect(missing.ok).toBe(false);
+    expect(missing.errors.join("\n")).toContain("需要视觉表示");
+    expect(present.ok).toBe(true);
+    expect(present.checks.representation_run_anchor_hit).toBe(true);
+    expect(missingCarrier.ok).toBe(false);
+    expect(missingCarrier.errors.join("\n")).toContain("图后运行载体");
+  });
+
+  test("requires complete frontstage carriers with unique responsibilities", () => {
+    const contract = coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2");
+    const incomplete = contract.replace("｜结果或后果：遮住第四句后，处罚结论失去支持", "｜结果或后果：");
+    const duplicate = contract.replace("唯一职责：把效果证据放回原判断", "唯一职责：让自然点头真实失效");
+    const missingBody = contract.replace("名称：比较结果", "名称：马尾藻海");
+    const a = validate(note(), filename, incomplete);
+    const b = validate(note(), filename, duplicate);
+    const c = validate(note(), filename, missingBody);
+    expect(a.ok).toBe(false);
+    expect(a.errors.join("\n")).toContain("前台载体必须填完");
+    expect(b.ok).toBe(false);
+    expect(b.errors.join("\n")).toContain("唯一职责不能重复");
+    expect(c.ok).toBe(false);
+    expect(c.errors.join("\n")).toContain("没有出现在正文");
   });
 
   test("allows long explanations without a length warning", () => {
