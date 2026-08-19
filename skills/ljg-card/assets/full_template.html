@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --paper: #FFFFFF;
+    --paper-deep: #F6F6F4;
+    --ink: #171717;
+    --ink-mid: #525252;
+    --ink-dim: #7A7A7A;
+    --vermilion: #A74432;
+    --rule: #E5E5E3;
+    --display: 'KingHwa_OldSong', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+    --body: 'KingHwa_OldSong', 'Songti SC', 'STSong', 'Noto Serif CJK SC', serif;
+    --mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html,
+  body {
+    width: 1080px;
+    background: var(--paper);
+  }
+
+  body {
+    color: var(--ink);
+    font-family: var(--body);
+    text-rendering: optimizeLegibility;
+  }
+
+  .full-card {
+    width: 1080px;
+    padding: 88px 92px 56px;
+    background: var(--paper);
+  }
+
+  .full-document {
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .full-document > :first-child { margin-top: 0; }
+  .full-document > :last-child { margin-bottom: 0; }
+
+  .full-document h1 {
+    max-width: 880px;
+    margin: 0 0 48px;
+    padding-bottom: 28px;
+    border-bottom: 4px solid var(--vermilion);
+    color: var(--ink);
+    font: 720 76px/1.16 var(--display);
+    letter-spacing: -0.045em;
+  }
+
+  .full-document h2 {
+    margin: 70px 0 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink);
+    font: 680 45px/1.34 var(--display);
+    letter-spacing: -0.03em;
+  }
+
+  .full-document h3 {
+    margin: 46px 0 20px;
+    color: var(--vermilion);
+    font: 650 34px/1.45 var(--display);
+    letter-spacing: -0.018em;
+  }
+
+  .full-document p {
+    margin: 0 0 30px;
+    color: var(--ink);
+    font: 400 32px/1.9 var(--body);
+    letter-spacing: 0.016em;
+  }
+
+  .full-document p.opening {
+    margin-bottom: 42px;
+    color: var(--ink);
+    font: 520 34px/1.78 var(--display);
+    letter-spacing: -0.012em;
+  }
+
+  .full-document strong {
+    color: var(--ink);
+    font-family: var(--display);
+    font-weight: 680;
+    text-decoration: underline;
+    text-decoration-color: rgba(182, 83, 63, 0.48);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 7px;
+  }
+
+  .full-document em {
+    color: var(--vermilion);
+    font-style: normal;
+  }
+
+  .full-document .full-key {
+    margin: 46px 0;
+    padding: 24px 0 24px 28px;
+    border-left: 4px solid var(--vermilion);
+    color: var(--ink);
+    font: 580 35px/1.72 var(--display);
+    letter-spacing: -0.018em;
+  }
+
+  .full-document blockquote {
+    margin: 40px 0;
+    padding: 24px 30px 24px;
+    border-left: 3px solid var(--vermilion);
+    background: var(--paper-deep);
+  }
+
+  .full-document blockquote p {
+    margin-bottom: 18px;
+    color: var(--ink-mid);
+    font-size: 31px;
+    line-height: 1.88;
+  }
+
+  .full-document blockquote > :last-child { margin-bottom: 0; }
+
+  .full-document ul,
+  .full-document ol {
+    margin: 10px 0 36px;
+    padding-left: 42px;
+  }
+
+  .full-document li {
+    margin: 0 0 14px;
+    padding-left: 8px;
+    color: var(--ink);
+    font: 400 32px/1.86 var(--body);
+  }
+
+  .full-document li::marker {
+    color: var(--vermilion);
+    font-family: var(--display);
+    font-weight: 650;
+  }
+
+  .full-document code {
+    padding: 2px 8px;
+    border: 1px solid var(--rule);
+    background: var(--paper-deep);
+    color: var(--ink);
+    font: 500 0.88em/1.45 var(--mono);
+  }
+
+  .full-document pre {
+    margin: 38px 0;
+    padding: 28px 30px;
+    border-top: 3px solid var(--ink);
+    background: var(--paper-deep);
+    color: var(--ink);
+    font: 500 24px/1.7 var(--mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .full-document pre code {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+  }
+
+  .full-document table {
+    width: 100%;
+    margin: 42px 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .full-document caption {
+    margin-bottom: 14px;
+    color: var(--ink-mid);
+    font: 500 24px/1.5 var(--display);
+    text-align: left;
+  }
+
+  .full-document th,
+  .full-document td {
+    padding: 18px 16px;
+    border-top: 1px solid var(--rule);
+    vertical-align: top;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .full-document th {
+    color: var(--ink);
+    font: 650 25px/1.5 var(--display);
+  }
+
+  .full-document td {
+    color: var(--ink-mid);
+    font: 400 26px/1.68 var(--body);
+  }
+
+  .full-document .source-figure {
+    margin: 48px 0;
+  }
+
+  .full-document .source-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 760px;
+    object-fit: contain;
+  }
+
+  .full-document figcaption {
+    margin-top: 14px;
+    color: var(--ink-dim);
+    font: 400 23px/1.58 var(--display);
+  }
+
+  .full-document .footnotes {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .full-document .footnote,
+  .full-document .footnotes p {
+    margin-bottom: 14px;
+    color: var(--ink-mid);
+    font: 400 25px/1.74 var(--body);
+  }
+
+  .full-document .section-break {
+    width: 64px;
+    height: 3px;
+    margin: 58px auto;
+    border: 0;
+    background: var(--vermilion);
+  }
+
+  .full-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 68px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .full-footer .author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .full-footer .avatar {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .full-footer .author-name {
+    color: var(--ink-mid);
+    font: 400 24px/1.4 var(--display);
+    letter-spacing: 0.03em;
+  }
+
+  .full-footer .info-source {
+    color: var(--ink-dim);
+    font: 400 21px/1.5 var(--mono);
+    letter-spacing: 0.01em;
+    text-align: right;
+  }
+
+  {{CUSTOM_CSS}}
+</style>
+</head>
+<body>
+  <article class="full-card">
+    <main class="full-document">
+      {{DOCUMENT_HTML}}
+    </main>
+    <footer class="full-footer">
+      <div class="author">
+        <img class="avatar" src="{{LOGO}}" alt="">
+        <span class="author-name">李继刚</span>
+      </div>
+      {{SOURCE_LINE}}
+    </footer>
+  </article>
+</body>
+</html>

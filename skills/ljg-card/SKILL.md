@@ -1,19 +1,20 @@
 ---
 name: ljg-card
-description: "Content caster (铸). Transforms text into PNG visuals through generated raster imagery plus precise HTML typography. Three molds: -l (default) long reading card, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '漫画', or '白板'."
+description: "Content caster (铸). Transforms text into PNG through precise HTML typography and, when the mold needs it, generated raster imagery. Four molds: -l (default) long reading card, -f source-faithful full text, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '原文排版', '全文卡片', '漫画', or '白板'."
 user_invocable: true
-version: "7.0.0"
+version: "7.0.3"
 ---
 
 # ljg-card：铸
 
-内容进去，PNG 出来。生成图负责把思想变成可见动作，HTML 负责把话说准确；模具只决定两者怎样相遇。
+内容进去，PNG 出来。生成图负责把思想变成可见动作，HTML 负责把话说准确；`-f` 只设计原文的呈现，不改动原文，也不生成新图。
 
 ## 参数
 
 | 参数 | 模具 | 尺寸 | 图像角色 |
 |---|---|---|---|
 | `-l`（默认） | 长图 · 静线叙事 | 1080 × auto | 1 个安静主场景；必要时追加至多 2 个连续视觉拍点 |
+| `-f` | 全文 · 原文排版 | 1080 × auto | 生成图固定为 0；只保真呈现原稿自带图片 |
 | `-c` | 漫画 | 1080 × auto | 缺口驱动、同案重跑的漫画分镜 |
 | `-w` | 白板 | 1080 × auto | 概念隐喻与局部手绘物件 |
 
@@ -21,7 +22,7 @@ version: "7.0.0"
 
 ## 必读顺序
 
-每次执行都必须依次 Read：
+`-l`、`-c`、`-w` 每次执行都必须依次 Read：
 
 1. `references/taste.md`
 2. `references/image-generation.md`
@@ -29,6 +30,22 @@ version: "7.0.0"
 4. 当前 HTML 模板
 
 不得跳过共享图像协议直接写提示词，也不得把一种 mode 的图像语法套给另一种。
+
+`-f` 依次 Read：
+
+1. `references/taste.md`
+2. `references/mode-full.md`
+3. `assets/full_template.html`
+
+`-f` 不生成新图；只有原稿自带图片时才补读 `references/image-generation.md` 的资产身份、来源保真与本地落盘合同。
+
+## `-f` 字体优先级
+
+`-f` 的所有编辑性文字优先使用本机已安装的 `KingHwa_OldSong`，包括 title、headline、章节标题、正文、强调、图注、表头与署名，从而保持整张长卡的字体气质统一。浏览器检测不到时，正文回退到 `Songti SC`、`STSong`、`Noto Serif CJK SC` 与 `serif`，标题类文字回退到 `PingFang SC`、`Hiragino Sans GB`、`Microsoft YaHei` 与系统 sans。不得为了制卡联网下载、临时安装或远程引用该字体。`code`、`pre` 与来源行保留等宽字体，因为字符对齐在这些位置承担语义。
+
+## `-f` 长文阅读面
+
+`-f` 通常产生超长卡片，因此使用独立于 `-l` 的白底黑字阅读面：画布固定为纯白 `#FFFFFF`，普通正文使用深中性黑 `#171717`，辅助信息只用克制的中性灰。1080px 成品的普通正文不小于 32px，行高保持 1.9，正文有效宽度约 896px；章节间距明显大于段落间距。不得把暖纸底、小号网页正文、过紧行距或大面积彩色模块带入 `-f`。
 
 ## 全局临时目录约束
 
@@ -39,15 +56,16 @@ version: "7.0.0"
 ## 共同生产线
 
 1. 读取 URL、粘贴文本或本地文件，确认标题、作者、来源与事实边界。
-2. 提炼内容判断，建立视觉母题表：判断 → 冲突 → 视觉动词 → 承载物 → 安全区。
-3. 调用当前环境的 image generation 工具，先生成一张代表图校准语义与系列风格；通过后才扩展其余图片。
-4. 将图片保存为本地 PNG/JPG，逐一核对文件、尺寸、构图、无字与来源属性。
-5. 将所有可读文字、数字、公式、标签、箭头和来源放入 HTML/CSS；图片只承担场景与隐喻。
-6. 读取对应模板，替换全部占位符。无图槽必须显式设为 `data-state="empty"`；有图槽必须提供本地路径和语义化 `alt`。
-7. 截图前等待字体与全部图片加载成功；任一图片损坏就停止。
-8. 交付前检查整图；长图再按顶部、中段、底部做重叠分段检查。
+2. `-f` 锁定来源、建立有序原文块账本，直接进入 `references/mode-full.md`；不经过提炼、视觉母题或图片生成。
+3. `-l`、`-c`、`-w` 提炼内容判断，建立视觉母题表：判断 → 冲突 → 视觉动词 → 承载物 → 安全区。
+4. `-l`、`-c`、`-w` 调用当前环境的 image generation 工具，先生成一张代表图校准语义与系列风格；通过后才扩展其余图片。
+5. 将图片保存为本地 PNG/JPG，逐一核对文件、尺寸、构图、无字与来源属性。
+6. 将所有可读文字、数字、公式、标签、箭头和来源放入 HTML/CSS；图片只承担场景与隐喻。
+7. 读取对应模板，替换全部占位符。带图槽的模板无图时必须显式设为 `data-state="empty"`；有图时必须提供本地路径和语义化 `alt`。
+8. 截图前等待字体与全部图片加载成功；任一图片损坏就停止。
+9. 交付前检查整图；长图再用重叠切片覆盖全部高度。
 
-关键生成图失败时最多做两次定向重生。仍失败就说明阻断原因，不得改用远程占位图、伪图标或矢量图悄悄兜底。
+`-l`、`-c`、`-w` 的关键生成图失败时最多做两次定向重生。仍失败就说明阻断原因，不得改用远程占位图、伪图标或矢量图悄悄兜底。
 
 ## 输入与命名
 
@@ -75,7 +93,7 @@ bunx playwright install chromium
 
 ## Footer
 
-- `-l`、`-c`、`-w`：左侧保留 logo + 李继刚；右侧用 `{{SOURCE_LINE}}` 写明确来源，没有来源则替换为空字符串。
+- `-l`、`-f`、`-c`、`-w`：左侧保留 logo + 李继刚；右侧用 `{{SOURCE_LINE}}` 写明确来源，没有来源则替换为空字符串。
 - logo 是既有品牌位图，不属于生成图，也不能拿来充当测试外的内容插图。
 
 ## mode 路由
@@ -83,12 +101,17 @@ bunx playwright install chromium
 | 参数 | mode 文件 | 模板 |
 |---|---|---|
 | `-l` | `references/mode-long.md` | `assets/long_template.html` |
+| `-f` | `references/mode-full.md` | `assets/full_template.html` |
 | `-c` | `references/mode-comic.md` | `assets/comic_template.html` |
 | `-w` | `references/mode-whiteboard.md` | `assets/whiteboard_template.html` |
 
 ## Gotchas
 
 - `-l` 的识别度来自「极简单线气质 + 漫画式可见变化 + 编辑式证据结构」。只做一张漂亮单幅会丢掉讲解，只做连续漫画会压过长文；具体路由以 `references/mode-long.md` 为准。
+- `-f` 的强调只能提升原稿中已经存在的字句：可以改变字号、字重、颜色、留白与语义标签，不能抽出一句再复制成金句，不能补写标题、导语、小结或过渡句。
+- `-f` 的全文验收看有序文本块账本，不看肉眼印象。改单字、调序、漏块或重复块都必须让 `assets/verify-full-text.ts` 失败。
+- `-f` 不能因为 `KingHwa_OldSong` 缺失而阻断，也不能悄悄改用远程字体；缺失时由本地默认字体栈自然接管。安装时则应在截图前分别确认普通正文、title 与 headline 都实际解析到 `KingHwa_OldSong`，不能只看 CSS 声明。代码与来源行的等宽字体是唯一例外。
+- `-f` 的白底黑字是长文可读性合同，不是临时配色：背景必须是 `#FFFFFF`，普通正文必须是深中性黑，正文尺寸/行高不得低于 32px/1.9。暗朱红只标记少量分隔和强调，不能与黑字争夺主体。
 - 稀疏线稿在局部裁图里清楚，放回整张长卡可能完全消失。`-l` 的代表图必须同时通过局部像素检查和整卡缩略检查；必要时只加粗轮廓，不连带更换隐喻、镜头或构图。
 - `-c` 的格数由认知因果拍点决定，不设固定范围。短内容不凑格，长内容不因模板删掉承重关系。
 - 漫画主画面负责让动作与结果可见；概念名、对白、旁白和证据分寸仍由 HTML/CSS 写准，不能让图片模型代写解释。
@@ -124,9 +147,18 @@ User: 「把这份已验收的完整笔记做成漫画 -c，不限格数」
 → 生成分格、组装 HTML，完成逐图、整图与重叠切片 QA
 ```
 
+**Example 4：原文一字不改地排成长图**
+
+```text
+User: 「这篇文稿用 -f 铸成全文卡片，原文不要动」
+→ 锁定来源与 SHA-256，把标题、段落、列表、引用、强调和脚注登记为有序原文块
+→ 不摘要、不补标题、不抽取重复金句；只用白底、深黑、KingHwa_OldSong、克制灰阶、字体层级与留白做编辑设计
+→ 全文校验器通过后截图，交付一张生成图数量为 0 的 1080px 原文长 PNG
+```
+
 ## 交付合同
 
-最终回复至少报告：PNG 绝对路径、像素尺寸、内容来源、使用的 mode、生成图数量，以及整图/分段视觉 QA 结果。若输入来自已验收 Org，先记录其路径与 SHA-256，制卡后再确认源文件哈希未变。
+最终回复至少报告：PNG 绝对路径、像素尺寸、内容来源、使用的 mode、生成图数量，以及整图/分段视觉 QA 结果。若输入来自已验收 Org，先记录其路径与 SHA-256，制卡后再确认源文件哈希未变。`-f` 还必须报告有序原文块数量与全文校验结果；生成图数量固定为 0。
 
 ## 维护自检
 
@@ -137,4 +169,4 @@ bun run audit
 bun run fixtures
 ```
 
-第一条检查共享协议、三路引用、位图槽、空槽与禁用项；第二条在 `/tmp/ljg-card-v7-fixtures/` 生成三份最小代表 HTML，随后用 `capture.ts` 实际截图并读回 PNG。
+第一条检查共享协议、四路引用、位图槽、全文忠实度合同与禁用项；第二条在 `/tmp/ljg-card-v7-fixtures/` 生成四份最小代表 HTML，运行全文校验，随后用 `capture.ts` 实际截图并读回 PNG。
