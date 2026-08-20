@@ -313,6 +313,13 @@ mdize_skill() {
       -e 's/Org 使用/Markdown 使用/g' \
       -e 's/所有生成的 Org 文件/所有生成的 Markdown 文件/g' \
       -e 's/写入 Org 后运行/写入 Markdown 后运行/g' \
+      -e 's/保存一份由论文内容命名的 Org 与后台 paper-map/保存一份由论文内容命名的 Markdown 与后台 paper-map/g' \
+      -e 's/保存同一 Org 与 paper-map/保存同一 Markdown 与 paper-map/g' \
+      -e 's/保存 Org 与 paper-map/保存 Markdown 与 paper-map/g' \
+      -e 's/Org 默认保存到/Markdown 默认保存到/g' \
+      -e 's/Denote\/consult-notes\/Org lint 与确定性 validator/Denote\/consult-notes 与确定性 validator/g' \
+      -e 's/、consult-notes 与 `org-lint`。/与 consult-notes。/g' \
+      -e 's/Org example 图块/Markdown 围栏图块/g' \
       -e 's/`#+DESCRIPTION`/`description`/g' \
       -e 's/`#+description`/`description`/g' \
       -e 's/`#+source`/`source`/g' \
@@ -415,6 +422,11 @@ mdize_skill() {
       2>/dev/null
   )
   for file in ${reference_files[@]+"${reference_files[@]}"}; do
+    # The publisher documents and enforces both sides of the conversion. Its
+    # runtime literals are rules, not generated-branch output instructions.
+    if [ "$skill_name" = "ljg-push" ]; then
+      continue
+    fi
     for r in ${renames[@]+"${renames[@]}"}; do
       sed -i '' "s/${r//./\\.}/${r%.org}.md/g" "$file"
     done
@@ -424,10 +436,18 @@ mdize_skill() {
       sed -i '' \
         -e 's/把 Org 与 coverage/把 Markdown 与 coverage/g' \
         -e 's/保存 Org 与 coverage/保存 Markdown 与 coverage/g' \
+        -e 's/保存同一 Org 与 paper-map/保存同一 Markdown 与 paper-map/g' \
+        -e 's/保存 Org 与 paper-map/保存 Markdown 与 paper-map/g' \
         -e 's/的 Org；/的 Markdown；/g' \
         -e 's/的 Org：/的 Markdown：/g' \
         "$file"
     fi
+    # Runtime-facing usage and validation messages must describe the generated
+    # branch contract while explicit Org compatibility fixtures remain intact.
+    sed -i '' \
+      -e 's/最多保留一个 Org example 图块/最多保留一个 Markdown 围栏图块/g' \
+      -e 's/<note\.org>/<note.md>/g' \
+      "$file"
     # A stdin default controls which parser the validator selects. On the md
     # branch it must default to Markdown while explicit Org fixtures remain.
     sed -E -i '' 's/(stdin__[a-z0-9-]+)\.org/\1.md/g' "$file"
@@ -439,7 +459,7 @@ mdize_skill() {
 # that would make an md-branch skill emit Org or expose Org markup.
 audit_md_skill() {
   local skill_dir="$1"
-  local skill_name org_files output_residuals markup_residuals eval_residuals runtime_default_residuals
+  local skill_name org_files output_residuals markup_residuals eval_residuals runtime_default_residuals runtime_output_residuals
   skill_name=$(basename "$skill_dir")
 
   org_files=$(find "$skill_dir" -type f -name '*.org' -not -path '*/assets/*' 2>/dev/null || true)
@@ -455,27 +475,33 @@ audit_md_skill() {
   fi
   output_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En \
-      'Defaults to a saved Org note|Produces natural, content-led Org notes|生成 Org 文件|保存(为)? (Org|org)(笔记|文件)?|存入 (Org|org)|写进 (Org|org)|写入 (Org|org) 文件|写成 org 笔记|(Org|org) 文件结构|指定的 org 路径|不入 org|Org 严格语法|org 严格语法|禁混 markdown|禁 markdown 语法|禁止任何 markdown 语法|__[a-z0-9_-]+\.org|命名按 denote[^[:cntrl:]]*\.org|生成由论文内容命名的 Org 笔记|写 Org 文件时|写 Org 时|Org 使用|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|Org lint|org-lint|文件必须是 (markdown|Markdown)，禁止 Markdown|(markdown|Markdown) 格式，禁止 (markdown|Markdown) 语法|加粗用 `\*bold\*`|代码用 `~code~`|不用反引号|`#\+(DESCRIPTION|description|source|IDENTIFIER|identifier|schema)`|(嵌入|ASCII 图)[^[:cntrl:]]*#\+begin_example|Org 的 (`)?#\+begin_example|Org example 块' \
+      'Defaults to a saved Org note|Produces natural, content-led Org notes|生成 Org 文件|保存(为)? (Org|org)(笔记|文件)?|保存(一份由[^[:cntrl:]]+|同一 )?Org 与(后台 )?paper-map|存入 (Org|org)|写进 (Org|org)|写入 (Org|org) 文件|写成 org 笔记|(Org|org) 文件结构|指定的 org 路径|不入 org|Org 默认保存到|Org 严格语法|org 严格语法|禁混 markdown|禁 markdown 语法|禁止任何 markdown 语法|__[a-z0-9_-]+\.org|命名按 denote[^[:cntrl:]]*\.org|生成由论文内容命名的 Org 笔记|写 Org 文件时|写 Org 时|Org 使用|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|Org lint|org-lint|文件必须是 (markdown|Markdown)，禁止 Markdown|(markdown|Markdown) 格式，禁止 (markdown|Markdown) 语法|加粗用 `\*bold\*`|代码用 `~code~`|不用反引号|`#\+(DESCRIPTION|description|source|IDENTIFIER|identifier|schema)`|(嵌入|ASCII 图)[^[:cntrl:]]*#\+begin_example|Org 的 (`)?#\+begin_example|Org example (块|图块)' \
       2>/dev/null || true)
   markup_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En '^[[:space:]]*#\+[A-Za-z_]+:|^[[:space:]]*#\+(begin|end)_(example|src|quote)([[:space:]]|$)|^[[:space:]]*```org[[:space:]]*$|^- \*[^*]+\*：|\[\[[^]]+\]\[[^]]+\]\]' \
       2>/dev/null || true)
   eval_residuals=$(find "$skill_dir" -type f -path '*/evals/*.json' -print0 \
-    | xargs -0 grep -En '把 Org 与 coverage|保存 Org 与 coverage|的 Org(；|：)' \
+    | xargs -0 grep -En '把 Org 与 coverage|保存 Org 与 coverage|保存(同一)? Org 与 paper-map|的 Org(；|：)' \
       2>/dev/null || true)
   runtime_default_residuals=$(find "$skill_dir" -type f -not -path '*/assets/*' \
     \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.mjs' \
        -o -name '*.cjs' -o -name '*.json' -o -name '*.sh' \) -print0 \
     | xargs -0 grep -En 'stdin__[a-z0-9-]+\.org' \
       2>/dev/null || true)
+  runtime_output_residuals=$(find "$skill_dir" -type f -not -path '*/assets/*' \
+    \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.mjs' \
+       -o -name '*.cjs' -o -name '*.json' -o -name '*.sh' \) -print0 \
+    | xargs -0 grep -En '用法：[^[:cntrl:]]*<note\.org>|最多保留一个 Org example 图块' \
+      2>/dev/null || true)
 
-  if [ -n "$org_files$output_residuals$markup_residuals$eval_residuals$runtime_default_residuals" ]; then
+  if [ -n "$org_files$output_residuals$markup_residuals$eval_residuals$runtime_default_residuals$runtime_output_residuals" ]; then
     err "markdown conversion residuals in $(basename "$skill_dir")"
     [ -n "$org_files" ] && printf '%s\n' "$org_files" >&2
     [ -n "$output_residuals" ] && printf '%s\n' "$output_residuals" >&2
     [ -n "$markup_residuals" ] && printf '%s\n' "$markup_residuals" >&2
     [ -n "$eval_residuals" ] && printf '%s\n' "$eval_residuals" >&2
     [ -n "$runtime_default_residuals" ] && printf '%s\n' "$runtime_default_residuals" >&2
+    [ -n "$runtime_output_residuals" ] && printf '%s\n' "$runtime_output_residuals" >&2
     return 1
   fi
 }
@@ -628,6 +654,12 @@ return_to_master() {
 }
 
 # === Main ===
+
+# Tests source this file to exercise the real conversion functions in an
+# isolated tree. Normal CLI execution leaves this unset and follows the release.
+if [ "${LJG_PUSH_LIBRARY_ONLY:-0}" = "1" ]; then
+  return 0 2>/dev/null || exit 0
+fi
 
 setup_repo
 cd "$SKILLS_REPO"
