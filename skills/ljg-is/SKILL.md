@@ -26,7 +26,7 @@ user_invocable: true
 
 | Workflow | Trigger | File |
 |---|---|---|
-| **UnderstandInUse** | 把「是什么」与「怎样运作」接成可辨认、可判断、可行动的 Org 解读 | `Workflows/TraceCreation.md` |
+| **UnderstandInUse** | 把「是什么」与「怎样运作」接成可辨认、可判断、可行动的 Markdown 解读 | `Workflows/TraceCreation.md` |
 
 ## 成品标准
 

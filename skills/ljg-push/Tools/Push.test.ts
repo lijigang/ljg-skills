@@ -29,6 +29,80 @@ afterEach(() => {
 });
 
 describe("ljg-push Markdown branch conversion", () => {
+  test("converts ljg-is output contracts all the way to Markdown semantics", () => {
+    const root = mkdtempSync(join(tmpdir(), "ljg-push-is-test-"));
+    temporaryRoots.push(root);
+    const localRoot = join(root, "local");
+    const repoRoot = join(root, "repo");
+    const isRoot = join(localRoot, "ljg-is");
+
+    writeFixture(
+      join(localRoot, "ljg-push", "Tools", "MdizeEmbeddedOrg.ts"),
+      readFileSync(embeddedConverterPath, "utf8"),
+    );
+    writeFixture(
+      join(isRoot, "SKILL.md"),
+      [
+        "---",
+        "name: ljg-is",
+        "---",
+        "把它接成可辨认、可判断、可行动的 Org 解读。",
+      ].join("\n"),
+    );
+    writeFixture(
+      join(isRoot, "Workflows", "TraceCreation.md"),
+      [
+        "`#+basis` 记录事实根据。",
+        "## Org 输出合同",
+        "schema 固定为 `ljg-is-v5`，标签包含 `:is:act:`。",
+        "- `#+definition` 记录定义。",
+        "- `#+operation` 记录运作。",
+        "- `#+recognition` 记录认知修正。",
+        "- `#+guidance` 记录行动判断。",
+        "- `#+falsifier` 记录反证。",
+        'bun ValidateNote.ts "<Org 文件路径>"',
+        "不要把 Org 的后台检查重新复制成聊天列表。",
+      ].join("\n"),
+    );
+    writeFixture(
+      join(isRoot, "Template.org"),
+      "#+title: 理解：测试\n#+schema: ljg-is-v5\n* 测试标题\n正文。\n",
+    );
+
+    const command = [
+      'task_push_path="$1"',
+      'task_local_root="$2"',
+      'task_repo_root="$3"',
+      "set --",
+      "export LJG_PUSH_LIBRARY_ONLY=1",
+      'source "$task_push_path"',
+      'SKILLS_LOCAL="$task_local_root"',
+      'SKILLS_REPO="$task_repo_root"',
+      'mkdir -p "$SKILLS_REPO/skills"',
+      'sync_skill "ljg-is" 1',
+      'audit_md_skill "$SKILLS_REPO/skills/ljg-is"',
+    ].join("\n");
+    const result = Bun.spawnSync(
+      ["bash", "-c", command, "bash", pushPath, localRoot, repoRoot],
+      { stdout: "pipe", stderr: "pipe" },
+    );
+    const stderr = new TextDecoder().decode(result.stderr);
+    expect(result.exitCode, stderr).toBe(0);
+
+    const generatedRoot = join(repoRoot, "skills", "ljg-is");
+    const skill = readFileSync(join(generatedRoot, "SKILL.md"), "utf8");
+    const workflow = readFileSync(
+      join(generatedRoot, "Workflows", "TraceCreation.md"),
+      "utf8",
+    );
+    expect(skill).toContain("Markdown 解读");
+    expect(workflow).toContain("## Markdown 输出合同");
+    expect(workflow).toContain("tags 同时包含 `is` 与 `act`");
+    expect(workflow).toContain('"<Markdown 文件路径>"');
+    expect(workflow).toContain("Markdown 的后台检查");
+    expect(workflow).not.toMatch(/`#\+(definition|operation|recognition|guidance|basis|falsifier)`/);
+  });
+
   test("converts paper output contracts while retaining explicit Org input fixtures", () => {
     const root = mkdtempSync(join(tmpdir(), "ljg-push-test-"));
     temporaryRoots.push(root);

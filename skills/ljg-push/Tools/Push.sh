@@ -320,10 +320,20 @@ mdize_skill() {
       -e 's/Denote\/consult-notes\/Org lint 与确定性 validator/Denote\/consult-notes 与确定性 validator/g' \
       -e 's/、consult-notes 与 `org-lint`。/与 consult-notes。/g' \
       -e 's/Org example 图块/Markdown 围栏图块/g' \
+      -e 's/Org 解读/Markdown 解读/g' \
+      -e 's/Org 输出合同/Markdown 输出合同/g' \
+      -e 's/<Org 文件路径>/<Markdown 文件路径>/g' \
+      -e 's/Org 的后台检查/Markdown 的后台检查/g' \
       -e 's/`#+DESCRIPTION`/`description`/g' \
       -e 's/`#+description`/`description`/g' \
       -e 's/`#+source`/`source`/g' \
       -e 's/`#+IDENTIFIER`/`identifier`/g' \
+      -e 's/`#+definition`/`definition`/g' \
+      -e 's/`#+operation`/`operation`/g' \
+      -e 's/`#+recognition`/`recognition`/g' \
+      -e 's/`#+guidance`/`guidance`/g' \
+      -e 's/`#+basis`/`basis`/g' \
+      -e 's/`#+falsifier`/`falsifier`/g' \
       -e 's/Org 的 `#+begin_example` \/ `#+end_example`/Markdown 围栏代码块/g' \
       -e 's/Org 的 #+begin_example \/ #+end_example/Markdown 围栏代码块/g' \
       -e 's/Org example 块/Markdown 围栏代码块/g' \
@@ -361,6 +371,7 @@ mdize_skill() {
         -e 's/Org 笔记/Markdown 笔记/g' \
         -e 's/Denote\/Org/Denote\/Markdown/g' \
         -e 's/`#+schema: ljg-is-v2`/`schema: ljg-is-v2`/g' \
+        -e 's/标签包含 `:is:act:`/tags 同时包含 `is` 与 `act`/g' \
         "$file"
     fi
     if [ "$skill_name" = "ljg-invest" ]; then
@@ -475,7 +486,7 @@ audit_md_skill() {
   fi
   output_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En \
-      'Defaults to a saved Org note|Produces natural, content-led Org notes|生成 Org 文件|保存(为)? (Org|org)(笔记|文件)?|保存(一份由[^[:cntrl:]]+|同一 )?Org 与(后台 )?paper-map|存入 (Org|org)|写进 (Org|org)|写入 (Org|org) 文件|写成 org 笔记|(Org|org) 文件结构|指定的 org 路径|不入 org|Org 默认保存到|Org 严格语法|org 严格语法|禁混 markdown|禁 markdown 语法|禁止任何 markdown 语法|__[a-z0-9_-]+\.org|命名按 denote[^[:cntrl:]]*\.org|生成由论文内容命名的 Org 笔记|写 Org 文件时|写 Org 时|Org 使用|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|Org lint|org-lint|文件必须是 (markdown|Markdown)，禁止 Markdown|(markdown|Markdown) 格式，禁止 (markdown|Markdown) 语法|加粗用 `\*bold\*`|代码用 `~code~`|不用反引号|`#\+(DESCRIPTION|description|source|IDENTIFIER|identifier|schema)`|(嵌入|ASCII 图)[^[:cntrl:]]*#\+begin_example|Org 的 (`)?#\+begin_example|Org example (块|图块)' \
+      'Defaults to a saved Org note|Produces natural, content-led Org notes|生成 Org 文件|保存(为)? (Org|org)(笔记|文件)?|保存(一份由[^[:cntrl:]]+|同一 )?Org 与(后台 )?paper-map|存入 (Org|org)|写进 (Org|org)|写入 (Org|org) 文件|写成 org 笔记|(Org|org) 文件结构|指定的 org 路径|不入 org|Org 默认保存到|Org 严格语法|org 严格语法|Org 解读|Org 输出合同|Org 的后台检查|<Org 文件路径>|标签包含 `:[^`]+:`|禁混 markdown|禁 markdown 语法|禁止任何 markdown 语法|__[a-z0-9_-]+\.org|命名按 denote[^[:cntrl:]]*\.org|生成由论文内容命名的 Org 笔记|写 Org 文件时|写 Org 时|Org 使用|所有生成的 Org 文件|Org 文件统一保存|写入 Org 后运行|Org lint|org-lint|文件必须是 (markdown|Markdown)，禁止 Markdown|(markdown|Markdown) 格式，禁止 (markdown|Markdown) 语法|加粗用 `\*bold\*`|代码用 `~code~`|不用反引号|`#\+(DESCRIPTION|description|source|IDENTIFIER|identifier|schema|definition|operation|recognition|guidance|basis|falsifier)`|(嵌入|ASCII 图)[^[:cntrl:]]*#\+begin_example|Org 的 (`)?#\+begin_example|Org example (块|图块)' \
       2>/dev/null || true)
   markup_residuals=$(find "$skill_dir" -type f -name '*.md' -not -path '*/assets/*' -print0 \
     | xargs -0 grep -En '^[[:space:]]*#\+[A-Za-z_]+:|^[[:space:]]*#\+(begin|end)_(example|src|quote)([[:space:]]|$)|^[[:space:]]*```org[[:space:]]*$|^- \*[^*]+\*：|\[\[[^]]+\]\[[^]]+\]\]' \

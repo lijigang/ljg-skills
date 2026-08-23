@@ -59,7 +59,7 @@ bash ~/.agents/skills/ljg-push/Tools/Push.sh [--dry-run|--force]
    - `git add` + `git commit` + `git push origin master`
 4. *Md 推送*：
    - `git checkout md` + `git pull --rebase`
-   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，Markdown 与运行时代码中的实际文件引用全局改写；Markdown 内嵌的完整 Org 模板，以及首行就是 Org 头的无语言围栏模板，由 `MdizeEmbeddedOrg.ts` 转成带 YAML frontmatter 的 Markdown 模板，并保留原文件换行风格；结构化 `- *标签*：` 转成 `- **标签**：`；eval 输出契约与 stdin 默认格式同步切到 Markdown；`ljg-is` 的 Org/Markdown 双格式验收整句折叠为 Markdown/YAML + Denote 验收）
+   - 对每个有差异的 skill：rsync + 应用 markdown 化（`mdize_skill` 函数——含 org 文件本体转换：`orgfile_to_md` 转 YAML 头/`#` 标题后删 .org，Markdown 与运行时代码中的实际文件引用全局改写；Markdown 内嵌的完整 Org 模板，以及首行就是 Org 头的无语言围栏模板，由 `MdizeEmbeddedOrg.ts` 转成带 YAML frontmatter 的 Markdown 模板，并保留原文件换行风格；结构化 `- *标签*：` 转成 `- **标签**：`；eval 输出契约与 stdin 默认格式同步切到 Markdown；`ljg-is` 的输出标题、路径称谓、元数据名、tags 与验收合同同步切到 Markdown/YAML + Denote）
    - commit 前运行残留审计：拒绝未转换的输出指令、Org 专用 lint 调用、Org 头标记、单星号加粗/Org 等宽文本等旧语法规则、非 assets `.org` 文件、eval JSON 的 Org 输出要求和运行时 Org 默认值
    - bump patch version
    - `git add` + `git commit` + `git push origin md`
