@@ -189,7 +189,7 @@ function v5ErrorsFor(content: string, path = v5OrgPath): string[] {
 describe("ValidateNote v5 usable-understanding contract", () => {
   test("template combines definition, operation, recognition and guidance", async () => {
     const template = await Bun.file(new URL("../Template.md", import.meta.url)).text();
-    expect(template).toContain("#+schema: ljg-is-v5");
+    expect(template).toMatch(/^(?:#\+schema:|schema:) ljg-is-v5$/m);
     expect(template).toContain("#+definition:");
     expect(template).toContain("#+operation:");
     expect(template).toContain("#+recognition:");
