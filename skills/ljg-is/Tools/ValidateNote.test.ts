@@ -190,13 +190,17 @@ describe("ValidateNote v5 usable-understanding contract", () => {
   test("template combines definition, operation, recognition and guidance", async () => {
     const template = await Bun.file(new URL("../Template.md", import.meta.url)).text();
     expect(template).toMatch(/^(?:#\+schema:|schema:) ljg-is-v5$/m);
-    expect(template).toContain("#+definition:");
-    expect(template).toContain("#+operation:");
-    expect(template).toContain("#+recognition:");
-    expect(template).toContain("#+guidance:");
-    expect(template).toContain("#+basis:");
-    expect(template).toContain("#+falsifier:");
-    expect(template).not.toMatch(/^\* (?:是什么|如何运作|认知改变|行动指导)$/mu);
+    for (const key of [
+      "definition",
+      "operation",
+      "recognition",
+      "guidance",
+      "basis",
+      "falsifier",
+    ]) {
+      expect(template).toMatch(new RegExp(`^(?:#\\+${key}:|${key}:)`, "m"));
+    }
+    expect(template).not.toMatch(/^(?:\*|#) (?:是什么|如何运作|认知改变|行动指导)$/mu);
   });
 
   test("accepts a complete v5 Org note that ends with a usable judgment", () => {
