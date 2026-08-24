@@ -22,7 +22,7 @@
 5. `References/LayoutGrammar.md`
 6. `References/InputSchema.md`
 
-借用前两个技能的语言与理解标准，不执行它们各自的 Org 落盘步骤。本工作流的成品是 classic JSON、HTML、PNG 与 manifest。
+借用前两个技能的语言与理解标准，不执行它们各自的 Org 落盘步骤。本工作流在 `/tmp` 生成 classic JSON、HTML、候选 PNG、manifest 与复验切片，最终只交付通过验收的 PNG。
 
 ## Step 2 — 锁定原文
 
@@ -75,17 +75,29 @@
 - 媒介：水墨或淡矿物色，暖纸底，可有细微纸纹。
 - 禁止：文字、书法、标题、印章、水印、边框、高饱和、拥挤场景、无法核验的历史细节。
 
-使用内置 `image_gen` 后，把选中的 PNG 复制进本次输出目录的 `assets/`。生成失败或工具不可用时，不阻断正文：省略 `heroImage` 与 `heroAlt`，继续渲染，并在交付中说明无图原因。不得用远程图片 URL、占位图或临时目录路径蒙混。
+使用内置 `image_gen` 后，把选中的 PNG 复制进本次独占 `/tmp` 工作区的 `assets/`。生成失败或工具不可用时，不阻断正文：省略 `heroImage` 与 `heroAlt`，继续渲染，并在交付中说明无图原因。不得用远程图片 URL 或占位图蒙混；配图必须是工作区内真实存在、能嵌入 HTML 并参与 manifest 哈希校验的本地文件。
 
-## Step 5 — 生成 classic JSON
+## Step 5 — 建立隔离工作区并生成 classic JSON
 
-按 `References/InputSchema.md` 写入：
+每次运行建立一个新的独占工作区。不要复用上一轮目录，也不要在仓库、笔记目录、当前工作目录或 Downloads 中生成过程文件。
 
-```text
-~/Documents/notes/outputs/ljg-classic/{书名}-{章节}/{timestamp}--classic-{书名}-{章节}.json
+```bash
+run_dir="$(mktemp -d /tmp/ljg-classic.XXXXXX)"
+mkdir -p "$run_dir/assets" "$run_dir/qa-slices"
 ```
 
-若用户明确要求“重做、修改、重跑”且已有同源 spec，原地覆盖该 spec、HTML、PNG 和 manifest，不制造平行版本。
+按 `References/InputSchema.md` 把以下过程文件全部写入 `$run_dir`：
+
+```text
+$run_dir/{timestamp}--classic-{safe-name}.json
+$run_dir/{timestamp}--classic-{safe-name}.html
+$run_dir/{timestamp}--classic-{safe-name}.candidate.png
+$run_dir/{timestamp}--classic-{safe-name}.candidate.manifest.json
+$run_dir/assets/{safe-name}-意旨图.png
+$run_dir/qa-slices/*.png
+```
+
+`{safe-name}` 由书名与章节构成，并移除路径分隔符与控制字符。即使用户要求“重做、修改、重跑”，也新建本轮工作区；只有最终交付路径可在用户明确要求时覆盖。
 
 `original` 保存锁定后的完整底本；不得省略。渲染器会将所有 token 的 `text` 顺序拼接，并与它逐字比对。
 
@@ -97,8 +109,8 @@
 | 不要配图、纯文字 | 省略 `heroImage` + `heroAlt` | 保持纯文字长图 |
 | 默认、长图、一张图 | `--width 1080` | 标准阅读宽度 |
 | 指定宽度 | `--width <像素>` | 仅在 720–1600 范围内采用 |
-| 指定 PNG 路径 | `--output <path>` | 使用用户目标路径 |
-| 保留指定 HTML | `--html <path>` | 写入可复验 HTML |
+| 指定最终 PNG 路径 | 交付阶段复制到 `<path>` | 本次显式目标覆盖默认 `$HOME/Downloads/` |
+| 保留指定 HTML | 验收后复制 HTML 到 `<path>` | 未明确要求时 HTML 只留在 `/tmp` |
 
 ## Step 6 — 渲染
 
@@ -106,11 +118,11 @@
 
 ```bash
 bun Tools/RenderClassic.ts \
-  --input "<classic.json>" \
-  --output "<classic.png>" \
-  --html "<classic.html>" \
+  --input "$run_dir/<classic.json>" \
+  --output "$run_dir/<classic.candidate.png>" \
+  --html "$run_dir/<classic.html>" \
   --width 1080 \
-  --slices-dir "<qa-slices-dir>"
+  --slices-dir "$run_dir/qa-slices"
 ```
 
 首次缺依赖时只用：
@@ -128,9 +140,9 @@ bunx playwright install chromium
 
 ```bash
 bun Tools/ValidateClassic.ts \
-  --input "<classic.json>" \
-  --png "<classic.png>" \
-  --manifest "<classic.manifest.json>"
+  --input "$run_dir/<classic.json>" \
+  --png "$run_dir/<classic.candidate.png>" \
+  --manifest "$run_dir/<classic.candidate.manifest.json>"
 ```
 
 再做视觉读回：
@@ -152,6 +164,16 @@ bun Tools/ValidateClassic.ts \
 - 章节解读中不得出现「解读边界」。
 - 文件哈希、DOM 计数与 manifest 一致。
 
-## Step 8 — 交付
+## Step 7.5 — 交付已验收 PNG
 
-最终报告：PNG 绝对路径、像素尺寸、原文 token/注解覆盖、章节解读字数、视觉读回结论。JSON、HTML、manifest 作为复验附件列出，但把 PNG 放在第一位。
+只有 Step 7 的硬门和整图、重叠切片目视读回全部通过后，才创建最终交付：
+
+1. 默认目标是 `$HOME/Downloads/{safe-name}.png`；用户显式指定另一最终 PNG 路径时采用该路径。
+2. 若默认目标已存在且用户没有明确要求覆盖，使用 `$HOME/Downloads/{safe-name}-{timestamp}.png`，不得静默覆盖。
+3. 将候选 PNG 复制到最终路径；JSON、HTML、manifest、意旨图与 QA 切片仍留在 `$run_dir`。
+4. 对候选 PNG 与最终 PNG 分别运行 `shasum -a 256`，两者必须一致；再读回最终 PNG 的真实像素尺寸。哈希或尺寸不一致即交付失败。
+5. 不自动删除 `$run_dir`。它是本次复验附件的临时容器，由系统临时目录生命周期管理；不得把它冒充长期成品目录。
+
+## Step 8 — 报告
+
+最终报告：Downloads 中最终 PNG 的绝对路径、像素尺寸、原文 token/注解覆盖、章节解读字数、视觉读回结论，以及候选/最终 PNG 的 SHA-256 一致性。把 PNG 放在第一位；随后列出 `$run_dir` 及其中的 JSON、HTML、manifest 作为临时复验附件。

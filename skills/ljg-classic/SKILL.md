@@ -2,12 +2,12 @@
 name: ljg-classic
 description: "古文逐字注解、组合排版、章节意旨图与全章解读生成器。把原文、字词注、句义注、无字顶部配图和章节解读排成一张可读的长 PNG。USE WHEN 用户调用 ljg-classic OR 要求给文言文、古诗文、经史子集做逐字注解、彩色夹注、章节解读、古文讲义图、章节配图。NOT FOR 只翻译一句古文、只写现代文章或通用内容卡片。"
 user_invocable: true
-version: "1.1.0"
+version: "1.1.1"
 ---
 
 # ljg-classic：古文笺
 
-原文是主干，注解贴着字词生长，章节解读把整章重新接成一个能运行的判断。最终交付一张标明书名与章节的 PNG 长图。
+原文是主干，注解贴着字词生长，章节解读把整章重新接成一个能运行的判断。最终交付一张标明书名与章节的 PNG 长图到 `$HOME/Downloads/`；生成与复验过程留在独占 `/tmp` 工作区。
 
 ## Workflow Notification
 
@@ -32,7 +32,8 @@ Running the **AnnotateAndRender** workflow in the **ljg-classic** skill to annot
 - 青色解释字词与语法，朱色解释整句动作，赭色只标异文与不确定处；章节解读使用暖纸深墨，不用蓝色长正文。
 - 解读继承 `ljg-plain` 的直白中文和 `ljg-writes` 的「条件—机制—结果、迁移、边界」，但不显示「解读边界」等写作脚手架。
 - 默认调用内置 `image_gen` 生成一幅无字、低干扰的章节意旨图，放在章节标题与原文之间；图像不可用时继续生成无图版本并说明。
-- 默认输出 `1080 × auto` 单张长 PNG，同时保留 JSON、HTML 与 manifest 供复验。
+- 每次运行先建立独占 `/tmp/ljg-classic-*` 工作区；JSON、HTML、manifest、意旨图、候选 PNG 与重叠 QA 切片都只放在该工作区。
+- 候选 PNG 完成硬验收后，才复制到 `$HOME/Downloads/` 作为最终卡片；用户显式指定另一最终路径时以本次指令为准。未经明确要求不覆盖同名文件。
 
 ## Gotchas
 
@@ -43,6 +44,7 @@ Running the **AnnotateAndRender** workflow in the **ljg-classic** skill to annot
 - 边界要自然写进文章，不另起「解读边界」「应用边界」「迁移测试」之类的方法标题；这些词会让读者从内容中跳回写作后台。
 - 顶部配图负责压缩母题，不负责复述情节。禁止图中文字、书法、印章、水印与高饱和宗教奇观；画面细节太满会抢走原文的第一阅读权。
 - PNG 文件存在不算完成。必须核对真实尺寸、标题章节、注解覆盖、页面底部、整图与长图切片。
+- 不直接渲染到 Downloads。先在 `/tmp` 验收候选 PNG，再复制最终卡片，并读回候选与交付文件的 SHA-256 一致性。
 - 图像宽度固定不代表字号固定。文字量增加时先增高页面和调整断行，不能把正文字号压到难读。
 - 标点不能作为可独立换行的单元。句末标点与闭引号跟住前一原文 token；段首引号跟住后一 token，避免孤行。
 
@@ -54,7 +56,7 @@ Running the **AnnotateAndRender** workflow in the **ljg-classic** skill to annot
 User: 「/ljg-classic 《道德经》第十六章，逐字注解并讲透」
 → 锁定书名、章节与底本
 → 逐段生成字词注、句义注和全章解读
-→ 输出一张带书名章节的 1080px 长 PNG
+→ 在独占 `/tmp` 工作区完成验收，只把带书名章节的 1080px 长 PNG 交付到 `$HOME/Downloads/`
 ```
 
 **Example 2：用户提供原文**
@@ -63,7 +65,7 @@ User: 「/ljg-classic 《道德经》第十六章，逐字注解并讲透」
 User: 「把这段《论语·学而》做成文言文夹注图，最后写完整解读」
 → 原文逐片段覆盖，通假与语法另行标色
 → 解读用直白中文跑通条件、机制和结果
-→ 保留 JSON、HTML、PNG 与验收 manifest
+→ JSON、HTML、manifest、配图和 QA 切片保留在 `/tmp`；最终 PNG 交付到 `$HOME/Downloads/`
 ```
 
 **Example 3：只翻译一句**
