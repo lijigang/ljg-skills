@@ -2,7 +2,7 @@
 name: ljg-card
 description: "Content caster (铸). Transforms text into PNG through precise HTML typography and, when the mold needs it, generated raster imagery. Four molds: -l (default) long reading card, -f source-faithful full text, -c comic, -w whiteboard. USE WHEN user says '铸', 'cast', '做成图', '做成卡片', '做成海报', '原文排版', '全文卡片', '漫画', or '白板'."
 user_invocable: true
-version: "7.0.3"
+version: "7.3.0"
 ---
 
 # ljg-card：铸
@@ -16,7 +16,7 @@ version: "7.0.3"
 | `-l`（默认） | 长图 · 静线叙事 | 1080 × auto | 1 个安静主场景；必要时追加至多 2 个连续视觉拍点 |
 | `-f` | 全文 · 原文排版 | 1080 × auto | 生成图固定为 0；只保真呈现原稿自带图片 |
 | `-c` | 漫画 | 1080 × auto | 缺口驱动、同案重跑的漫画分镜 |
-| `-w` | 白板 | 1080 × auto | 概念隐喻与局部手绘物件 |
+| `-w` | 白板 · 纵向论证 | 1080 × auto | 嵌入承重推理节点的局部手绘动作；不设顶部主视觉 |
 
 未给参数时使用 `-l`。
 
@@ -57,15 +57,15 @@ version: "7.0.3"
 
 1. 读取 URL、粘贴文本或本地文件，确认标题、作者、来源与事实边界。
 2. `-f` 锁定来源、建立有序原文块账本，直接进入 `references/mode-full.md`；不经过提炼、视觉母题或图片生成。
-3. `-l`、`-c`、`-w` 提炼内容判断，建立视觉母题表：判断 → 冲突 → 视觉动词 → 承载物 → 安全区。
-4. `-l`、`-c`、`-w` 调用当前环境的 image generation 工具，先生成一张代表图校准语义与系列风格；通过后才扩展其余图片。
+3. `-l`、`-c` 提炼内容判断，建立视觉母题表：判断 → 冲突 → 视觉动词 → 承载物 → 安全区。`-w` 先把此次输入保存为精确来源快照，再运行 `assets/prepare-whiteboard-source.ts` 建立逐段来源清单；必须让论证账本覆盖这份独立清单，才可决定哪些承重步骤需要视觉化。不能从一句摘要直接进入版式。`-w` 的生成图预算为 0–4 幅。
+4. `-l`、`-c` 调用当前环境的 image generation 工具，先生成一张代表图校准语义与系列风格；`-w` 的资产预算大于 0 时才做同样校准，0 幅是合法结果。
 5. 将图片保存为本地 PNG/JPG，逐一核对文件、尺寸、构图、无字与来源属性。
 6. 将所有可读文字、数字、公式、标签、箭头和来源放入 HTML/CSS；图片只承担场景与隐喻。
-7. 读取对应模板，替换全部占位符。带图槽的模板无图时必须显式设为 `data-state="empty"`；有图时必须提供本地路径和语义化 `alt`。
+7. 读取对应模板，替换全部占位符。`-l`、`-c` 的顶部图槽无图时必须显式设为 `data-state="empty"`；有图时必须提供本地路径和语义化 `alt`。`-w` 没有顶部图槽：把最终论证账本写入 `{{LOGIC_LEDGER_JSON}}`，每幅生成图只在对应步骤内部出现，并用 `data-source-claim` 回指该步骤 ID。
 8. 截图前等待字体与全部图片加载成功；任一图片损坏就停止。
 9. 交付前检查整图；长图再用重叠切片覆盖全部高度。
 
-`-l`、`-c`、`-w` 的关键生成图失败时最多做两次定向重生。仍失败就说明阻断原因，不得改用远程占位图、伪图标或矢量图悄悄兜底。
+`-l`、`-c`、`-w` 已判定为必要的关键生成图失败时最多做两次定向重生。仍失败就说明阻断原因，不得改用远程占位图、伪图标或矢量图悄悄兜底；`-w` 不能把失败图悄悄改写成「本来就不需要图」。
 
 ## 输入与命名
 
@@ -81,6 +81,15 @@ version: "7.0.3"
 ```bash
 bun assets/capture.ts <html> <png> <width> <height> [fullpage]
 ```
+
+`-w` 截图前必须先从精确来源快照生成独立清单，并把二者一起交给截图门禁：
+
+```bash
+bun assets/prepare-whiteboard-source.ts /tmp/<task>/source.txt /tmp/<task>/whiteboard-source-inventory.json
+bun assets/capture.ts <html> <png> 1080 1600 fullpage /tmp/<task>/whiteboard-source-inventory.json /tmp/<task>/source.txt
+```
+
+来源清单必须直接由本次输入生成，不能由论证账本反推；否则账本漏掉的段落也会一起消失，完整性校验失去意义。
 
 依赖缺失时：
 
@@ -117,6 +126,12 @@ bunx playwright install chromium
 - 漫画主画面负责让动作与结果可见；概念名、对白、旁白和证据分寸仍由 HTML/CSS 写准，不能让图片模型代写解释。
 - 同案重跑要求角色、道具与空间连续。每格换一套隐喻会切断前后比较，即使单格都好看也不成立。
 - `object-fit: cover` 可能只裁坏一格。逐资产检查后仍要扫描所有分格的脸、手、关键道具与动作点，再检查最终 DOM、整图和重叠切片。
+- `-w` 的母结构不是五选一 topology，而是一条从问题下潜到边界的 `.reasoning-spine`。chain、branch、timeline、matrix、radial 是可以嵌入主干的局部结构；真实文章允许先递进、再分叉、再汇合，不能为了选一种图形而删除推理。
+- `-w` 在任何视觉决策之前建立论证账本：每个源章节必须映射到承重步骤，或登记具体省略理由；每个步骤与关系都绑定账本 ID。固定节点数不能证明完整，账本与 DOM 一致才是门禁。
+- `-w` 的主干不断，不等于每一层都要出声。普通延续、解释与递进使用静默关系；只有矛盾、问题改写、分支、回收或边界真正改变阅读方向时，才显示一条完整过渡句。不要用「继续追问」「再向前一步」之类旁白替代原文中的具体未解压力。
+- `-w` 的生成图不得成为正文之前的 hero。图像只嵌入它所解释的步骤；删图后若推理仍完整，0 幅是正确结果。
+- `-w` 的静默关系只在账本和真实 `.logic-relation` DOM 中保留端点，不显示箭头或文案；可见转折的箭头不能用 `::before`/`::after`，必须使用 `.relation-stem` 与 `.relation-arrowhead` 真实元素，并用唯一的 `.transition-sentence` 承担整句过渡。
+- `-w` 不联网取字体。拉丁手写字体不会提供中文字形，中文最终会无声回退；模板使用本地楷体/中文 Sans 字栈，字体差异不得改变节点层级或几何验收。
 
 ## Examples
 
@@ -166,7 +181,8 @@ User: 「这篇文稿用 -f 铸成全文卡片，原文不要动」
 
 ```bash
 bun run audit
+bun test
 bun run fixtures
 ```
 
-第一条检查共享协议、四路引用、位图槽、全文忠实度合同与禁用项；第二条在 `/tmp/ljg-card-v7-fixtures/` 生成四份最小代表 HTML，运行全文校验，随后用 `capture.ts` 实际截图并读回 PNG。
+第一条检查共享协议、四路引用、位图槽、白板来源对账、全文忠实度合同与禁用项；第二条运行纯函数与反例测试；第三条在 `/tmp/ljg-card-v7-fixtures/` 生成代表 HTML，运行全文与白板来源校验，随后用 `capture.ts` 实际截图并读回 PNG。

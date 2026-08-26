@@ -2,7 +2,7 @@
   "scripts": {
     "audit": "bun assets/audit.ts",
     "fixtures": "bun assets/build-fixtures.ts",
-    "test": "bun test assets/verify-full-text.test.ts"
+    "test": "bun test assets"
   },
   "dependencies": {
     "playwright": "^1.58.2"

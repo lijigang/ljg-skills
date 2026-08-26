@@ -106,13 +106,159 @@ for (const term of [
   requireThat(longMode.includes(term), `long-mode contract missing: ${term}`);
 }
 
-for (const name of ["long", "comic", "whiteboard"]) {
+for (const name of ["long", "comic"]) {
   const body = await text(join(root, "assets", `${name}_template.html`));
   requireThat(body.includes(`generated-visual--${name}`), `mode class missing: ${name}`);
   requireThat(body.includes('data-state="{{IMAGE_STATE}}"'), `image state slot missing: ${name}`);
   requireThat(body.includes('src="{{IMAGE_SRC}}"'), `image source slot missing: ${name}`);
   requireThat(body.includes('alt="{{IMAGE_ALT}}"'), `image alt slot missing: ${name}`);
   requireThat(body.includes('[data-state="empty"]'), `empty image hiding missing: ${name}`);
+}
+
+const whiteboardMode = await text(join(root, "references", "mode-whiteboard.md"));
+for (const term of [
+  "`0–4`",
+  "论证账本",
+  "source_sections",
+  "must_render",
+  ".reasoning-spine",
+  "data-logic-shape",
+  "data-step-id",
+  "data-source-refs",
+  "data-from",
+  "data-to",
+  "branch-return",
+  "没有顶部 hero 图槽",
+  "data-source-claim",
+  "prepare-whiteboard-source.ts",
+  "精确来源快照",
+  "独立清单",
+  "visibility: implicit",
+  "visibility: visible",
+  "`residue`",
+  "transition-sentence",
+  "流水式衔接的删除测试",
+  "relation-arrowhead",
+  '`question`',
+  '`conclusion`',
+  '`boundary`',
+]) {
+  requireThat(whiteboardMode.includes(term), `whiteboard mode contract missing: ${term}`);
+}
+
+const whiteboardTemplate = await text(join(root, "assets", "whiteboard_template.html"));
+for (const primitive of [
+  'data-card-mode="whiteboard"',
+  'id="whiteboard-logic-ledger"',
+  'type="application/json"',
+  "{{LOGIC_LEDGER_JSON}}",
+  "{{CONTENT_HTML}}",
+  ".whiteboard-content",
+  ".whiteboard-header",
+  ".whiteboard-title",
+  ".whiteboard-question",
+  ".whiteboard-boundary",
+  ".reasoning-spine",
+  ".spine-rail",
+  ".logic-step",
+  ".step-depth",
+  ".step-role",
+  ".step-claim",
+  ".step-support",
+  ".step-residue",
+  ".logic-relation",
+  ".relation-rail",
+  ".relation-arrowhead",
+  ".transition-copy",
+  ".transition-sentence",
+  ".local-shape",
+  ".local-chain",
+  ".branch-grid",
+  ".branch-path",
+  ".branch-return",
+  ".timeline-track",
+  ".matrix-frame",
+  ".matrix-axis-x",
+  ".matrix-axis-y",
+  ".matrix-grid",
+  ".radial-grid",
+  ".radial-center",
+  ".generated-art--whiteboard",
+]) {
+  requireThat(whiteboardTemplate.includes(primitive), `whiteboard CSS/DOM surface missing: ${primitive}`);
+}
+for (const retired of [
+  "generated-visual--whiteboard",
+  "{{IMAGE_STATE}}",
+  "{{IMAGE_SRC}}",
+  "{{IMAGE_ALT}}",
+  "{{IMAGE_CLAIM}}",
+]) {
+  requireThat(!whiteboardTemplate.includes(retired), `whiteboard template retained global hero surface: ${retired}`);
+}
+for (const retired of [
+  ".step-why-next",
+  ".relation-copy",
+  ".relation-label",
+  ".logic-why",
+]) {
+  requireThat(!whiteboardTemplate.includes(retired), `whiteboard template retained retired transition surface: ${retired}`);
+  requireThat(!whiteboardMode.includes(retired), `whiteboard mode retained retired transition surface: ${retired}`);
+}
+for (const forbidden of [
+  "@import",
+  "http://",
+  "https://",
+  "linear-gradient",
+  "radial-gradient",
+  "box-shadow",
+  "::before",
+  "::after",
+]) {
+  requireThat(!whiteboardTemplate.includes(forbidden), `whiteboard template forbidden surface: ${forbidden}`);
+}
+
+const capture = await text(join(root, "assets", "capture.ts"));
+for (const contract of [
+  "findUnresolvedPlaceholders",
+  "MAX_FULLPAGE_HEIGHT",
+  "validateWhiteboardSnapshot",
+  "WHITEBOARD_STEP_ROLES",
+  "WHITEBOARD_LOCAL_SHAPES",
+  "WHITEBOARD_RELATION_KINDS",
+  "WHITEBOARD_RELATION_VISIBILITIES",
+  "data-card-mode",
+  "whiteboard-logic-ledger",
+  "reasoning-spine",
+  "data-step-id",
+  "dataset.sourceRefs",
+  "data-relation-id",
+  "dataset.from",
+  "dataset.to",
+  "dataset.kind",
+  "dataset.visibility",
+  "relation-arrowhead",
+  "transition-sentence",
+  "whiteboard-boundary",
+  "Ledger/DOM step mismatch",
+  "Relation endpoint not found",
+  "must keep bridge empty",
+  "requires one bridge sentence",
+  "duplicates the visible transition",
+  "must remain visually and accessibly silent",
+  "must return",
+  "data-source-claim",
+  "Generated whiteboard assets exceed 4",
+  "Whiteboard source inventory is missing or invalid",
+  "Whiteboard source snapshot SHA-256 differs from source inventory",
+  "Whiteboard logic ledger SHA-256 differs from source inventory",
+  "Source inventory/logic ledger section mismatch",
+  "sourceBytesSha256",
+  "Horizontal overflow",
+  "Clipped content",
+  "Full-page height",
+]) {
+  requireThat(capture.includes(contract), `capture whiteboard gate missing: ${contract}`);
 }
 
 const fullMode = await text(join(root, "references", "mode-full.md"));
@@ -275,11 +421,37 @@ for (const primitive of [
   "title_platform_fonts",
   "headline_platform_fonts",
   "Installed KingHwa_OldSong did not unify body, title, and headline",
+  "whiteboard-font-readback",
+  "Whiteboard title or visible transition did not resolve to local Kaiti SC",
+  "Whiteboard body did not resolve to local PingFang SC",
 ]) {
   requireThat(fixtureBuilder.includes(primitive), `full fixture does not exercise: ${primitive}`);
 }
 for (const envName of ["LJG_CARD_FIXTURE_DIR", "LJG_CARD_FIXTURE_IMAGE"]) {
   requireThat(fixtureBuilder.includes(envName), `fixture override missing: ${envName}`);
+}
+for (const fixtureContract of [
+  "runExpectFailure",
+  "prepare-whiteboard-source.ts",
+  "whiteboard-source-inventory.json",
+  "whiteboard-source.txt",
+  "compositeSteps",
+  'data-logic-shape="chain"',
+  'data-logic-shape="branch"',
+  'data-logic-shape="timeline"',
+  'data-logic-shape="matrix"',
+  'data-logic-shape="radial"',
+  "whiteboard-invalid-placeholder",
+  "whiteboard-invalid-summary-collapse",
+  "whiteboard-invalid-source-anchor",
+  "whiteboard-invalid-relation-endpoint",
+  "whiteboard-invalid-branch-return",
+  "whiteboard-invalid-implicit-copy",
+  "whiteboard-invalid-duplicate-transition",
+  "whiteboard-invalid-overflow",
+  "whiteboard-invalid-height",
+]) {
+  requireThat(fixtureBuilder.includes(fixtureContract), `whiteboard fixture contract missing: ${fixtureContract}`);
 }
 
 const verifier = await text(join(root, "assets", "verify-full-text.ts"));
@@ -304,6 +476,47 @@ for (const mutation of [
 ]) {
   requireThat(verifierTest.includes(mutation), `full verifier test missing: ${mutation}`);
 }
+
+const captureTest = await text(join(root, "assets", "capture.test.ts"));
+for (const contract of [
+  "whiteboard reasoning-spine contract",
+  "reasoning roles and composable local shapes",
+  "load-bearing ledger step is absent",
+  "silently drops a source paragraph",
+  "dangling relation endpoint",
+  "converged branch without a real return",
+  "silent continuation without manufactured transition copy",
+  "copy or arrows on an implicit relation",
+  "visible turn without one complete bridge surface",
+  "duplicate transition copy in both residue and relation bridge",
+  "retired ledger version",
+  "unresolved placeholders",
+  "full-page safety ceiling",
+]) {
+  requireThat(captureTest.includes(contract), `whiteboard capture test missing: ${contract}`);
+}
+
+const whiteboardSourceBuilder = await text(join(root, "assets", "prepare-whiteboard-source.ts"));
+for (const contract of [
+  "buildWhiteboardSourceInventory",
+  "source_sha256",
+  "section_count",
+  "text_sha256",
+  "Whiteboard source contains no readable paragraphs",
+]) {
+  requireThat(whiteboardSourceBuilder.includes(contract), `whiteboard source inventory gate missing: ${contract}`);
+}
+
+const whiteboardSourceTest = await text(join(root, "assets", "prepare-whiteboard-source.test.ts"));
+for (const contract of [
+  "every non-empty source paragraph in order",
+  "exact source bytes",
+  "source without readable paragraphs",
+]) {
+  requireThat(whiteboardSourceTest.includes(contract), `whiteboard source inventory test missing: ${contract}`);
+}
+const packageJson = await text(join(root, "package.json"));
+requireThat(packageJson.includes('"test": "bun test assets"'), "package test script does not include whiteboard tests");
 
 const routes = [...skill.matchAll(/`((?:references|assets)\/[A-Za-z0-9._-]+)`/g)].map(match => match[1]);
 for (const route of routes) {
