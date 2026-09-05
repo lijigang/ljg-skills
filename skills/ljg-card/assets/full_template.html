@@ -51,37 +51,39 @@
     padding-bottom: 28px;
     border-bottom: 4px solid var(--vermilion);
     color: var(--ink);
-    font: 720 76px/1.16 var(--display);
-    letter-spacing: -0.045em;
+    font: 720 80px/1.25 var(--display);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   .full-document h2 {
-    margin: 70px 0 26px;
+    margin: 84px 0 32px;
     padding-top: 22px;
     border-top: 1px solid var(--rule);
     color: var(--ink);
-    font: 680 45px/1.34 var(--display);
+    font: 680 54px/1.4 var(--display);
     letter-spacing: -0.03em;
   }
 
   .full-document h3 {
-    margin: 46px 0 20px;
+    margin: 60px 0 26px;
     color: var(--vermilion);
-    font: 650 34px/1.45 var(--display);
+    font: 650 44px/1.5 var(--display);
     letter-spacing: -0.018em;
   }
 
   .full-document p {
-    margin: 0 0 30px;
+    margin: 0 0 36px;
     color: var(--ink);
-    font: 400 32px/1.9 var(--body);
-    letter-spacing: 0.016em;
+    font: 400 40px/1.9 var(--body);
+    letter-spacing: 0.01em;
+    text-wrap: pretty;
   }
 
   .full-document p.opening {
     margin-bottom: 42px;
     color: var(--ink);
-    font: 520 34px/1.78 var(--display);
+    font: 520 44px/1.9 var(--display);
     letter-spacing: -0.012em;
   }
 
@@ -105,7 +107,7 @@
     padding: 24px 0 24px 28px;
     border-left: 4px solid var(--vermilion);
     color: var(--ink);
-    font: 580 35px/1.72 var(--display);
+    font: 580 44px/1.9 var(--display);
     letter-spacing: -0.018em;
   }
 
@@ -119,8 +121,8 @@
   .full-document blockquote p {
     margin-bottom: 18px;
     color: var(--ink-mid);
-    font-size: 31px;
-    line-height: 1.88;
+    font-size: 40px;
+    line-height: 1.9;
   }
 
   .full-document blockquote > :last-child { margin-bottom: 0; }
@@ -132,10 +134,10 @@
   }
 
   .full-document li {
-    margin: 0 0 14px;
+    margin: 0 0 20px;
     padding-left: 8px;
     color: var(--ink);
-    font: 400 32px/1.86 var(--body);
+    font: 400 40px/1.9 var(--body);
   }
 
   .full-document li::marker {
@@ -158,7 +160,7 @@
     border-top: 3px solid var(--ink);
     background: var(--paper-deep);
     color: var(--ink);
-    font: 500 24px/1.7 var(--mono);
+    font: 500 32px/1.7 var(--mono);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
@@ -181,7 +183,7 @@
   .full-document caption {
     margin-bottom: 14px;
     color: var(--ink-mid);
-    font: 500 24px/1.5 var(--display);
+    font: 500 30px/1.7 var(--display);
     text-align: left;
   }
 
@@ -196,12 +198,12 @@
 
   .full-document th {
     color: var(--ink);
-    font: 650 25px/1.5 var(--display);
+    font: 650 34px/1.7 var(--display);
   }
 
   .full-document td {
     color: var(--ink-mid);
-    font: 400 26px/1.68 var(--body);
+    font: 400 34px/1.75 var(--body);
   }
 
   .full-document .source-figure {
@@ -219,7 +221,7 @@
   .full-document figcaption {
     margin-top: 14px;
     color: var(--ink-dim);
-    font: 400 23px/1.58 var(--display);
+    font: 400 30px/1.7 var(--display);
   }
 
   .full-document .footnotes {
@@ -232,7 +234,7 @@
   .full-document .footnotes p {
     margin-bottom: 14px;
     color: var(--ink-mid);
-    font: 400 25px/1.74 var(--body);
+    font: 400 32px/1.75 var(--body);
   }
 
   .full-document .section-break {
@@ -269,15 +271,17 @@
 
   .full-footer .author-name {
     color: var(--ink-mid);
-    font: 400 24px/1.4 var(--display);
+    font: 400 28px/1.5 var(--display);
     letter-spacing: 0.03em;
   }
 
   .full-footer .info-source {
     color: var(--ink-dim);
-    font: 400 21px/1.5 var(--mono);
+    font: 400 26px/1.6 var(--mono);
     letter-spacing: 0.01em;
     text-align: right;
+    max-width: 58%;
+    overflow-wrap: anywhere;
   }
 
   {{CUSTOM_CSS}}

@@ -29,6 +29,51 @@ afterEach(() => {
 });
 
 describe("ljg-push Markdown branch conversion", () => {
+  test("converts revised book and paper delivery checks without changing Org input support", () => {
+    const root = mkdtempSync(join(tmpdir(), "ljg-push-delivery-test-"));
+    temporaryRoots.push(root);
+    const localRoot = join(root, "local");
+    const repoRoot = join(root, "repo");
+    writeFixture(join(localRoot, "ljg-push", "Tools", "MdizeEmbeddedOrg.ts"), readFileSync(embeddedConverterPath, "utf8"));
+    const bookText = [
+      "- 用真实 Emacs 读回成品：确认 identifier、文件名、Denote 与 consult-notes，并实际运行 `org-lint`。如实报告 lint 结果；验证器不可用时明确延期，不把未执行写成通过。",
+      "保存以后，用真实 Emacs 读回，并实际运行 `org-lint`。现有 Emacs 服务不可用时，可以使用能加载本机 Denote、consult、consult-notes 与 Org 的批处理 Emacs；验证器不可用时明确延期。",
+      "接受 Org 输入。",
+    ].join("\n");
+    writeFixture(join(localRoot, "ljg-book", "SKILL.md"), bookText);
+    writeFixture(join(localRoot, "ljg-paper", "SKILL.md"), "| 只有论文标题 | 读取原文 | Org 笔记和 paper-map |\n接受 Org 输入。\n");
+    writeFixture(join(localRoot, "ljg-paper", "references", "paper-map.md"), "本字段指 Org example 图，表格另在案例记录中说明。\n");
+    writeFixture(join(localRoot, "ljg-paper", "references", "template.org"), "#+title: 测试\n\n* 正文\n{交付前：用真实 Emacs 检查 Denote 与 org-lint，再完成独立阅读检查。任何未通过或无法执行的项目都如实报告。}\n");
+    writeFixture(join(localRoot, "ljg-paper", "evals", "evals.json"), JSON.stringify({ expected: "不要求生成 Org 或 paper-map", input: "接受 Org 输入" }));
+    const command = [
+      'task_push_path="$1"', 'task_local_root="$2"', 'task_repo_root="$3"',
+      "set --", "export LJG_PUSH_LIBRARY_ONLY=1", 'source "$task_push_path"',
+      'SKILLS_LOCAL="$task_local_root"', 'SKILLS_REPO="$task_repo_root"',
+      'mkdir -p "$SKILLS_REPO/skills"',
+      'for name in ljg-book ljg-paper; do sync_skill "$name" 1; audit_md_skill "$SKILLS_REPO/skills/$name"; done',
+    ].join("\n");
+    const result = Bun.spawnSync(["bash", "-c", command, "bash", pushPath, localRoot, repoRoot], { stdout: "pipe", stderr: "pipe" });
+    expect(result.exitCode, new TextDecoder().decode(result.stderr)).toBe(0);
+    const generated = (skill: string, path: string) => readFileSync(join(repoRoot, "skills", skill, path), "utf8");
+    const book = generated("ljg-book", "SKILL.md");
+    expect(book).not.toContain("org-lint");
+    expect(book).not.toContain("lint 结果");
+    expect(book).not.toContain("与 Org 的批处理");
+    expect(book).toContain("Denote 与 consult-notes");
+    expect(book).toContain("如实报告检查结果");
+    expect(book).toContain("验证器不可用时明确延期");
+    expect(book).toContain("接受 Org 输入");
+    expect(generated("ljg-paper", "SKILL.md")).toContain("Markdown 笔记和 paper-map");
+    expect(generated("ljg-paper", "references/paper-map.md")).toContain("Markdown 围栏图");
+    const template = generated("ljg-paper", "references/template.md");
+    expect(template).not.toContain("org-lint");
+    expect(template).toContain("检查 Denote");
+    expect(template).toContain("任何未通过或无法执行的项目都如实报告");
+    expect(JSON.parse(generated("ljg-paper", "evals/evals.json"))).toEqual({ expected: "不要求生成 Markdown 或 paper-map", input: "接受 Org 输入" });
+    expect(readFileSync(join(localRoot, "ljg-book", "SKILL.md"), "utf8")).toBe(bookText);
+    expect(existsSync(join(localRoot, "ljg-paper", "references/template.org"))).toBe(true);
+  });
+
   test("converts ljg-is output contracts all the way to Markdown semantics", () => {
     const root = mkdtempSync(join(tmpdir(), "ljg-push-is-test-"));
     temporaryRoots.push(root);

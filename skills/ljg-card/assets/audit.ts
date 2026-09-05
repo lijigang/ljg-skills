@@ -61,7 +61,7 @@ for (const term of [
   "白底黑字",
   "#FFFFFF",
   "#171717",
-  "不小于 32px",
+  "不小于 40px",
   "行高保持 1.9",
   "有效宽度约 896px",
 ]) {
@@ -276,7 +276,7 @@ for (const term of [
   "白底黑字",
   "#FFFFFF",
   "#171717",
-  "32px",
+  "40px",
   "1.9",
   "15:1",
   "暗朱红",
@@ -358,10 +358,10 @@ for (const token of ["#FFFFFF", "#F6F6F4", "#171717", "#525252", "#7A7A7A", "#E5
   requireThat(fullTemplate.includes(token), `full taste token missing: ${token}`);
 }
 for (const contract of [
-  "font: 400 32px/1.9 var(--body);",
+  "font: 400 40px/1.9 var(--body);",
   "padding: 88px 92px 56px;",
-  "font: 400 32px/1.86 var(--body);",
-  "font: 400 25px/1.74 var(--body);",
+  "font-size: 40px;",
+  "font: 400 32px/1.75 var(--body);",
 ]) {
   requireThat(fullTemplate.includes(contract), `full readability CSS missing: ${contract}`);
 }

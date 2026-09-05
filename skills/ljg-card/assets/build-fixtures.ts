@@ -679,7 +679,7 @@ for (const report of [preferredFontReport, fallbackFontReport]) {
   if (metrics.text_color !== "rgb(23, 23, 23)") {
     throw new Error("Full-text body is not deep neutral black");
   }
-  if (metrics.font_size_px < 32 || metrics.line_height_ratio < 1.9) {
+  if (metrics.font_size_px < 40 || metrics.line_height_ratio < 1.9) {
     throw new Error("Full-text body size or line-height fell below the reading threshold");
   }
   if (metrics.document_width_px < 890 || metrics.document_width_px > 900) {

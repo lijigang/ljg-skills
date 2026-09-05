@@ -316,10 +316,12 @@ mdize_skill() {
       -e 's/保存一份由论文内容命名的 Org 与后台 paper-map/保存一份由论文内容命名的 Markdown 与后台 paper-map/g' \
       -e 's/保存同一 Org 与 paper-map/保存同一 Markdown 与 paper-map/g' \
       -e 's/保存 Org 与 paper-map/保存 Markdown 与 paper-map/g' \
+      -e 's/Org 笔记和 paper-map/Markdown 笔记和 paper-map/g' \
       -e 's/Org 默认保存到/Markdown 默认保存到/g' \
       -e 's/Denote\/consult-notes\/Org lint 与确定性 validator/Denote\/consult-notes 与确定性 validator/g' \
       -e 's/、consult-notes 与 `org-lint`。/与 consult-notes。/g' \
       -e 's/Org example 图块/Markdown 围栏图块/g' \
+      -e 's/Org example 图/Markdown 围栏图/g' \
       -e 's/Org 解读/Markdown 解读/g' \
       -e 's/Org 输出合同/Markdown 输出合同/g' \
       -e 's/<Org 文件路径>/<Markdown 文件路径>/g' \
@@ -365,6 +367,10 @@ mdize_skill() {
       -e 's/真实 Emacs 负责 Denote、consult-notes 与 Org lint/真实 Emacs 负责 Denote 与 consult-notes/g' \
       -e 's/，并实际运行 `org-lint`。保留真实 lint 结果，不把未执行或非阻断提示说成零问题。/。/g' \
       -e 's/，并实际运行 `org-lint`。若正在运行的 Emacs 服务不可用，就使用能加载本机 Denote、consult、consult-notes 与 Org 的批处理 Emacs；/。若正在运行的 Emacs 服务不可用，就使用能加载本机 Denote、consult 与 consult-notes 的批处理 Emacs；/g' \
+      -e 's/，并实际运行 `org-lint`。如实报告 lint 结果；/。如实报告检查结果；/g' \
+      -e 's/，并实际运行 `org-lint`。/。/g' \
+      -e 's/Denote、consult、consult-notes 与 Org 的批处理 Emacs/Denote、consult 与 consult-notes 的批处理 Emacs/g' \
+      -e 's/检查 Denote 与 org-lint/检查 Denote/g' \
       "$file"
     if [ "$skill_name" = "ljg-is" ]; then
       sed -i '' \
@@ -449,6 +455,7 @@ mdize_skill() {
         -e 's/保存 Org 与 coverage/保存 Markdown 与 coverage/g' \
         -e 's/保存同一 Org 与 paper-map/保存同一 Markdown 与 paper-map/g' \
         -e 's/保存 Org 与 paper-map/保存 Markdown 与 paper-map/g' \
+        -e 's/不要求生成 Org 或 paper-map/不要求生成 Markdown 或 paper-map/g' \
         -e 's/的 Org；/的 Markdown；/g' \
         -e 's/的 Org：/的 Markdown：/g' \
         "$file"
