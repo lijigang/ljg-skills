@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
 import { validate } from "./validate_note";
 
@@ -309,25 +310,25 @@ describe("validate ljg-book note", () => {
     });
   }
 
-  test("rejects fewer than two top headings", () => {
-    const result = validate(note({ headings: ["四句话摆在眼前，你会不会点头"] }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("至少需要 2 个");
+  test("accepts one body heading without imposing a chapter count", () => {
+    const result = validate(note({ headings: ["四句话摆在眼前，你会不会点头"], tail: "比较结果还需要进一步检查。" }), filename, coverage());
+    expect(result.ok).toBe(true);
+    expect(result.checks.top_headings).toBe(1);
   });
 
-  test("rejects old fixed or generic headings", () => {
+  test("accepts ordinary headings without semantic forbidden words", () => {
     const result = validate(note({ headings: ["走进这个问题", "问题"] }), filename, coverage());
-    expect(result.ok).toBe(false);
-    expect(result.errors.join("\n")).toContain("旧框架或空泛标签");
+    expect(result.ok).toBe(true);
+    expect(result.errors).toEqual([]);
   });
 
   test("requires a substantive final essence section", () => {
     const missing = validate(note({ omitEssence: true }), filename, coverage());
-    const empty = validate(note({ essenceBody: "要多思考。" }), filename, coverage());
+    const empty = validate(note({ essenceBody: "" }), filename, coverage());
     expect(missing.ok).toBe(false);
     expect(missing.errors.join("\n")).toContain("最后必须有一级标题");
     expect(empty.ok).toBe(false);
-    expect(empty.errors.join("\n")).toContain("主题词或口号");
+    expect(empty.errors.join("\n")).toContain("不能为空");
   });
 
   test("requires the essence section to be last and rejects category lists", () => {
@@ -356,21 +357,21 @@ describe("validate ljg-book note", () => {
     expect(result.errors.join("\n")).toContain("只写一个自然段");
   });
 
-  test("warns when the essence section stops being concise", () => {
+  test("records essence length without assessing concision", () => {
     const longEssence = `四句话和处罚之间的关系需要反复检查，${"比较结果必须真正补上理由与结论之间缺失的联系，".repeat(6)}否则问题再严重也不能证明办法有效。`;
     const result = validate(note({ essenceBody: longEssence }), filename, coverage());
     expect(result.ok).toBe(true);
     expect(result.checks.essence_chars).toBeGreaterThan(160);
     expect(result.checks.essence_chars).toBeLessThanOrEqual(220);
-    expect(result.warnings.join("\n")).toContain("可能还不够精练");
+    expect(result.warnings.join("\n")).not.toContain("可能还不够精练");
   });
 
-  test("rejects an essence section that grows into another summary", () => {
+  test("does not infer a second summary from essence length", () => {
     const bloated = `四句话和处罚之间的关系需要反复检查，${"比较结果必须真正补上理由与结论之间缺失的联系，".repeat(12)}否则问题再严重也不能证明办法有效。`;
     const result = validate(note({ essenceBody: bloated }), filename, coverage());
-    expect(result.ok).toBe(false);
+    expect(result.ok).toBe(true);
     expect(result.checks.essence_chars).toBeGreaterThan(220);
-    expect(result.errors.join("\n")).toContain("变成另一份摘要");
+    expect(result.errors.join("\n")).not.toContain("变成另一份摘要");
   });
 
   test("requires the spiritual-core coverage and an explicit title decision", () => {
@@ -405,11 +406,11 @@ describe("validate ljg-book note", () => {
     expect(result.errors.join("\n")).toContain("x/R/f/E");
   });
 
-  for (const label of ["前言先交代了问题。", "作者在第3章给出例子。", "这些章节依次展开。"] as const) {
-    test(`rejects source-structure prose: ${label}`, () => {
+  for (const label of ["第一章说明这段历史如何开始。", "前言先交代了问题。", "作者在第3章给出例子。", "这些章节依次展开。"] as const) {
+    test(`allows source-structure prose: ${label}`, () => {
       const result = validate(note({ firstBody: label }), filename, coverage());
-      expect(result.ok).toBe(false);
-      expect(result.errors.join("\n")).toContain("来源结构标签");
+      expect(result.ok).toBe(true);
+      expect(result.errors.join("\n")).not.toContain("来源结构标签");
     });
   }
 
@@ -417,7 +418,7 @@ describe("validate ljg-book note", () => {
     test(`allows ordinary spatial use of source-structure words: ${sentence}`, () => {
       const result = validate(note({ firstBody: sentence }), filename, coverage());
       expect(result.ok).toBe(true);
-      expect(result.checks.source_structure_hits).toBe(0);
+      expect(result.checks.source_structure_hits).toBe("not_assessed");
     });
   }
 
@@ -563,7 +564,7 @@ describe("validate ljg-book note", () => {
     expect(result.errors.join("\n")).toContain("前两个一级标题");
   });
 
-  test("requires an elected visual and a carrier that runs after it", () => {
+  test("requires an elected visual without treating carrier presence as semantic proof", () => {
     const visualCoverage = coverage("完整拆书", "是——原书足以还原判断怎样被证据改变", "2")
       .replace("- 是否需要视觉表示：否——理由链用同一句话重跑即可看清，不依赖空间位置", "- 是否需要视觉表示：是——两条曲线的中心与两端需要空间定位")
       .replace("- 视觉表示后用哪个载体运行：不需要——正文直接重跑四句话", "- 视觉表示后用哪个载体运行：比较结果");
@@ -575,9 +576,9 @@ describe("validate ljg-book note", () => {
     expect(missing.ok).toBe(false);
     expect(missing.errors.join("\n")).toContain("需要视觉表示");
     expect(present.ok).toBe(true);
-    expect(present.checks.representation_run_anchor_hit).toBe(true);
-    expect(missingCarrier.ok).toBe(false);
-    expect(missingCarrier.errors.join("\n")).toContain("图后运行载体");
+    expect(present.semantic_assessment).toBe("not_performed");
+    expect(missingCarrier.ok).toBe(true);
+    expect(missingCarrier.semantic_assessment).toBe("not_performed");
   });
 
   test("requires complete frontstage carriers with unique responsibilities", () => {
@@ -616,18 +617,18 @@ describe("validate ljg-book note", () => {
   });
 
   for (const opening of ["书中给出一段手机论证。", "叙述者带着儿子骑摩托车远行。"] as const) {
-    test(`warns when the opening camera stays outside: ${opening}`, () => {
+    test(`does not infer opening quality from attribution: ${opening}`, () => {
       const result = validate(note({ firstBody: opening }), filename, coverage());
       expect(result.ok).toBe(true);
-      expect(result.checks.outside_camera_opening_hits).toBe(1);
+      expect(result.warnings).toEqual([]);
     });
   }
 
-  test("warns when backstage stage directions or controlled comparisons leak", () => {
+  test("does not infer prose quality from stage phrasing or controlled comparisons", () => {
     const stage = validate(note({ firstBody: "小李读完四句话。这一步汇集了全书对证据的盘问。" }), filename, coverage());
     const comparison = validate(note({ firstBody: "小李先点头。保留同一组数字，只改变表达方式，选择随即翻转。" }), filename, coverage());
-    expect(stage.checks.meta_narration_hits).toBe(1);
-    expect(comparison.checks.meta_narration_hits).toBe(1);
+    expect(stage.warnings).toEqual([]);
+    expect(comparison.warnings).toEqual([]);
   });
 
   test("rejects backstage evidence accounting inside the explanation", () => {
@@ -639,12 +640,12 @@ describe("validate ljg-book note", () => {
     expect(result.errors.join("\n")).toContain("后台核验语言");
   });
 
-  test("rejects recurring model-management phrases from the reported note", () => {
+  test("rejects explicit current-run accounting only", () => {
     const result = validate(note({
       firstBody: "继续运行同一讲解模型。按模型规则，纸条被重新折起。旧稿保存的边界没有变，本轮不替它补参数。模型设定到这里结束。",
     }), filename, coverage());
     expect(result.ok).toBe(false);
-    expect(result.checks.backstage_accounting_hits).toBeGreaterThanOrEqual(4);
+    expect(result.checks.backstage_accounting_hits).toBe(1);
   });
 
   test("allows ordinary historical use of 本轮", () => {
@@ -677,8 +678,8 @@ describe("validate ljg-book note", () => {
 
   test("recognizes an immersive opening without requiring a naming formula", () => {
     const result = validate(note(), filename, coverage());
-    expect(result.checks.outside_camera_opening_hits).toBe(0);
-    expect(result.checks.meta_narration_hits).toBe(0);
+    expect(result.checks.outside_camera_opening_hits).toBe("not_assessed");
+    expect(result.checks.meta_narration_hits).toBe("not_assessed");
   });
 
   test("accepts delayed naming when the understanding path remains concrete", () => {
@@ -706,12 +707,13 @@ describe("validate ljg-book note", () => {
     expect(result.ok).toBe(true);
   });
 
-  test("warns on an overloaded paragraph and sentence", () => {
+  test("records paragraph and sentence lengths without inferring overload", () => {
     const dense = "小李看着同一组数字，" + "一个关系又带出另一个关系，".repeat(24) + "这就是概念拥挤。";
     const result = validate(note({ firstBody: dense }), filename, coverage());
     expect(result.ok).toBe(true);
     expect(result.checks.dense_paragraph_hits).toBeGreaterThan(0);
     expect(result.checks.long_sentence_hits).toBeGreaterThan(0);
+    expect(result.warnings).toEqual([]);
   });
 
   test("rejects an over-wide ASCII diagram", () => {
@@ -720,4 +722,279 @@ describe("validate ljg-book note", () => {
     expect(result.ok).toBe(false);
     expect(result.errors.join("\n")).toContain("超过 80");
   });
+});
+
+// Independent v3 fixtures deliberately contain none of the legacy scene fields.
+function v3Coverage(options: { partial?: boolean; unsupported?: boolean; generator?: boolean; visual?: boolean } = {}): string {
+  const partial = options.partial ?? false;
+  const unsupported = options.unsupported ?? false;
+  const base = `# 覆盖记录
+- 覆盖合同版本：3
+- 材料等级：${partial ? "初拆" : "完整拆书"}
+- 主要材料：fixtures/source-book.txt 的已读范围
+- 能支持到：${unsupported ? "仅目录与开头；全书理解未确定" : "全书关系与已标位置"}
+- 材料能否支撑认识更新路径：${unsupported ? "否——只有开头" : "是——已读全书"}
+- 这是什么类型或形态的书：${unsupported ? "未确定" : "以论证为主的书"}
+- 核心理解：${unsupported ? "未确定" : "理由还没有走到结论"}
+- 正文必须出现的整书锚点：${partial ? "四句话" : "四句话｜处罚｜比较结果"}
+`;
+  if (unsupported) return base;
+  return `${base}
+- 起点、主要变化与终点：从四句话的自然点头，到理由缺口递归到效果证据的前提
+- 各部分怎样相连：下一问回查上一判断所依赖的前提
+- 作者最想纠正或保留什么：主张的力度必须与证据相称
+- [thread] 名称：四句话｜起点：顺势相信处罚有效｜关键推进：逐次查问前提自身还依赖什么｜前后变化：从点头到等待比较结果｜换场理由：前提成为下一次待证主张｜依据与边界：fixtures/source-book.txt:1-90，只压缩原文
+- 是否存在全书生成器：${options.generator ? "是——递归检查前提" : "否——无需共同公式"}
+${options.generator ? `- 全书生成器：把前提变成下一轮待证主张
+- 生成器怎样贯穿至少两个远距转折：开头检查处罚，结尾检查比较本身
+- 生成器在哪些条件、范围或层级失效：基础证据仍有暂时接受的边界
+` : ""}- 是否需要视觉表示：${options.visual ? "是——需要排列比较关系" : "否——文字已经够用"}
+${options.visual ? "- 使用图表的位置与目的：第二部分显示两次检查的关系\n" : ""}
+- [starting-point] 位置：source:1
+- [pressure] 位置：source:20
+- [revision] 位置：source:50
+- [boundary] 位置：source:90
+- 反证与取舍：保留反例，限制主张范围
+- 整书复述与关系重建：从结论倒查理由，理由的前提又成待证判断
+- 阅读断点与修订：原来跳过效果比较，现补上为什么需要比较
+- 遮住末节后能否理解作者关切：是——正文两次回查已可看出
+- 正文中哪两个相隔较远的转折共同托住它：四句话的缺口与比较结果的反查
+${partial ? "" : Array.from({length: 5}, (_, index) => `- [candidate] 名称：部件${index + 1}｜位置：source:${index + 1}｜解决的问题：当前前提是什么｜与其他部件的关系：前后递归｜决定：保留｜删除测试：会跳过前提`).join("\n")}
+`;
+}
+
+function replaceField(record: string, field: string, value: string): string {
+  const escaped = field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return record.replace(new RegExp(`^- ${escaped}[：:][^\\n]*$`, "m"), `- ${field}：${value}`);
+}
+
+function orgToMarkdown(content: string): string {
+  const names: Record<string, string> = { TITLE: "title", SUBTITLE: "subtitle", DESCRIPTION: "description", DATE: "date", FILETAGS: "tags", IDENTIFIER: "identifier" };
+  return content.replace(/^#\+(TITLE|SUBTITLE|DESCRIPTION|DATE|FILETAGS|IDENTIFIER):/gm, (_, name: string) => `${names[name]}:`)
+    .replace(/^\* /gm, "# ").replace(/^#\+begin_example$/gmi, "```text").replace(/^#\+end_example$/gmi, "```");
+}
+
+describe("coverage v3 structure and record integrity", () => {
+  test("accepts premise recursion as one thread performing multiple functions", () => {
+    const record = v3Coverage({generator: true});
+    const result = validate(note(), filename, record);
+    expect(result.errors).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(result.checks.coverage_contract_version).toBe("3");
+    expect(result.checks.thread_count).toBe(1);
+    expect(result.checks.coverage_generator_fields).toBe(3);
+    expect(result.checks.coverage_understanding_fields).toBe(0);
+    expect(result.semantic_assessment).toBe("not_performed");
+    expect(result.assessment_scope).toBe("结构与记录完整性；不证明来源准确、阅读连续或理解效果");
+  });
+
+  test("accepts multiple literary threads with overlapping functions and no shared generator", () => {
+    let record = v3Coverage();
+    record = replaceField(record, "这是什么类型或形态的书", "交错叙述的文学作品");
+    record += "\n- [thread] 名称：处罚｜起点：人物被判定｜关键推进：审判改变自我认识｜前后变化：从他人评价回到自问｜换场理由：另一人物承受同样评判｜依据与边界：source:20-60，未解决冲突\n";
+    const result = validate(note(), filename, record);
+    expect(result.ok).toBe(true);
+    expect(result.checks.thread_count).toBe(2);
+    expect(result.checks.generator_exists).toContain("否");
+  });
+
+  for (const field of ["主要材料", "能支持到", "材料能否支撑认识更新路径", "这是什么类型或形态的书", "起点、主要变化与终点", "核心理解", "各部分怎样相连", "作者最想纠正或保留什么", "正文必须出现的整书锚点", "反证与取舍", "整书复述与关系重建", "阅读断点与修订", "遮住末节后能否理解作者关切", "正文中哪两个相隔较远的转折共同托住它"]) {
+    test(`rejects missing new-contract field ${field} directly`, () => {
+      expect(validate(note(), filename, replaceField(v3Coverage(), field, "")).ok).toBe(false);
+    });
+  }
+
+  test("reads the combined start/change/end field as one exact template key", () => {
+    const record = replaceField(v3Coverage(), "起点、主要变化与终点", "") + "\n- 起点：有起点\n- 主要变化与终点：有变化终点\n";
+    expect(validate(note(), filename, record).errors.join("\n")).toContain("起点、主要变化与终点");
+  });
+
+  test("requires declared generator boundaries as one exact field", () => {
+    const record = replaceField(v3Coverage({generator: true}), "生成器在哪些条件、范围或层级失效", "");
+    expect(validate(note(), filename, record).errors.join("\n")).toContain("生成器在哪些条件、范围或层级失效");
+  });
+
+  test("requires complete thread fields and names in the narrative", () => {
+    const absent = v3Coverage().replace(/^- \[thread\].*$/m, "");
+    const incomplete = v3Coverage().replace("｜关键推进：逐次查问前提自身还依赖什么", "｜关键推进：");
+    const missingName = v3Coverage().replace("[thread] 名称：四句话", "[thread] 名称：失踪人物");
+    for (const record of [absent, incomplete, missingName]) expect(validate(note(), filename, record).ok).toBe(false);
+  });
+
+  test("requires source positions, candidate completeness and five complete-book candidates", () => {
+    for (const record of [
+      v3Coverage().replace("[pressure] 位置：source:20", "[pressure] 位置："),
+      v3Coverage().replace(/^- \[candidate\].*$/m, ""),
+      v3Coverage().replace("名称：部件1", "名称："),
+      v3Coverage().replace("决定：保留", "决定：猜测"),
+    ]) expect(validate(note(), filename, record).ok).toBe(false);
+  });
+
+  test("rejects absent anchors in both full and partial records", () => {
+    for (const partial of [true, false]) {
+      const record = replaceField(v3Coverage({partial}), "正文必须出现的整书锚点", "四句话｜处罚｜未出现的对象");
+      expect(validate(note(), filename, record).errors.join("\n")).toContain("没有出现在正文");
+    }
+    expect(validate(note(), filename, replaceField(v3Coverage(), "正文必须出现的整书锚点", "四句话")).ok).toBe(false);
+  });
+
+  test("allows unsupported partial understanding to remain undetermined without fabricated scenes", () => {
+    const record = v3Coverage({partial: true, unsupported: true});
+    const result = validate(note(), filename, record);
+    expect(result.ok).toBe(true);
+    expect(result.checks.thread_count).toBe(0);
+    expect(result.checks.coverage_zones).toBe(0);
+    expect(result.semantic_assessment).toBe("not_performed");
+    expect(validate(note(), filename, replaceField(record, "核心理解", "")).ok).toBe(false);
+    expect(validate(note(), filename, replaceField(record, "材料等级", "完整拆书")).ok).toBe(false);
+  });
+
+  test("accepts normal structure statements and author attribution without style warnings", () => {
+    const result = validate(note({firstBody: "第一章提出四句话。作者指出，处罚的理由需要比较结果才能成立。"}), filename, v3Coverage());
+    expect(result.ok).toBe(true);
+    expect(result.warnings).toEqual([]);
+  });
+
+  for (const format of ["org", "markdown"]) {
+    test(`accepts multiple diagrams and a real ${format} table`, () => {
+      const diagram = "#+begin_example\nA --> B\n#+end_example\n\n#+begin_example\nB --> C\n#+end_example\n\n";
+      const table = format === "org" ? "| 对象 | 结果 |\n|------+------|\n| A | B |\n" : "| 对象 | 结果 |\n| --- | --- |\n| A | B |\n";
+      let content = note({diagram: diagram + table});
+      if (format === "markdown") content = orgToMarkdown(content);
+      const result = validate(content, filename.replace(/org$/, format === "org" ? "org" : "md"), v3Coverage({visual: true}));
+      expect(result.errors).toEqual([]);
+      expect(result.checks.example_blocks).toBe(2);
+      expect(result.checks.table_blocks).toBe(1);
+      expect(result.semantic_assessment).toBe("not_performed");
+    });
+    test(`accepts a ${format} table as the only visual`, () => {
+      const table = format === "org" ? "| 对象 | 结果 |\n| A | B |\n" : "| 对象 | 结果 |\n| --- | --- |\n| A | B |\n";
+      let content = note({diagram: table});
+      if (format === "markdown") content = orgToMarkdown(content);
+      const result = validate(content, filename.replace(/org$/, format === "org" ? "org" : "md"), v3Coverage({visual: true}));
+      expect(result.ok).toBe(true);
+      expect(result.checks.example_blocks).toBe(0);
+      expect(result.checks.table_blocks).toBe(1);
+    });
+  }
+
+  test("requires an actual visual and its recorded purpose, not just a carrier keyword", () => {
+    expect(validate(note(), filename, v3Coverage({visual: true})).errors.join("\n")).toContain("实际 example 图块或表格");
+    const diagramNote = note({diagram: "#+begin_example\nA --> B\n#+end_example\n"});
+    expect(validate(diagramNote, filename, replaceField(v3Coverage({visual: true}), "使用图表的位置与目的", "")).ok).toBe(false);
+    const result = validate(diagramNote, filename, v3Coverage({visual: true}));
+    expect(result.ok).toBe(true);
+    expect(result.semantic_assessment).toBe("not_performed");
+  });
+
+  test("rejects over-wide non-first diagrams and wide tables", () => {
+    const diagram = `#+begin_example\nA --> B\n#+end_example\n\n#+begin_example\n${"中".repeat(41)}\n#+end_example\n`;
+    expect(validate(note({diagram}), filename, v3Coverage()).errors.join("\n")).toContain("第 2 个 ASCII 图宽度 82，超过 80");
+    const table = `| ${"中".repeat(41)} |\n| A |\n`;
+    expect(validate(note({diagram: table}), filename, v3Coverage()).errors.join("\n")).toContain("表格宽度");
+  });
+
+  test("still checks identifiers and required note metadata on v3", () => {
+    expect(validate(note({identifier: "20260812T120001"}), filename, v3Coverage()).ok).toBe(false);
+    expect(validate(note({description: ""}), filename, v3Coverage()).ok).toBe(false);
+  });
+});
+
+describe("visual record edge cases", () => {
+  test("does not count an empty example as an actual diagram", () => {
+    const result = validate(note({diagram: "#+begin_example\n\n#+end_example\n"}), filename, v3Coverage({visual: true}));
+    expect(result.ok).toBe(false);
+    expect(result.checks.example_blocks).toBe(0);
+  });
+  test("does not count a table quoted inside unrelated Markdown code as a rendered table", () => {
+    const content = orgToMarkdown(note({diagram: "```javascript\n| A | B |\n| --- | --- |\n| C | D |\n```\n"}));
+    const result = validate(content, filename.replace(/org$/, "md"), v3Coverage({visual: true}));
+    expect(result.ok).toBe(false);
+    expect(result.checks.table_blocks).toBe(0);
+  });
+  test("handles more than one diagram and flags a wide later diagram in Markdown", () => {
+    const diagram = `#+begin_example\nA --> B\n#+end_example\n\n#+begin_example\n${"x".repeat(81)}\n#+end_example\n`;
+    const result = validate(orgToMarkdown(note({diagram})), filename.replace(/org$/, "md"), v3Coverage());
+    expect(result.errors.join("\n")).toContain("第 2 个 ASCII 图宽度 81，超过 80");
+  });
+});
+
+describe("coverage version dispatch", () => {
+  test("accepts legacy both explicitly and without a version", () => {
+    for (const prefix of ["", "- 覆盖合同版本：legacy\n"]) {
+      expect(validate(note(), filename, prefix + legacyCoverage()).ok).toBe(true);
+    }
+  });
+  test("rejects an unknown contract instead of silently treating it as legacy", () => {
+    const result = validate(note(), filename, "- 覆盖合同版本：99\n" + legacyCoverage());
+    expect(result.ok).toBe(false);
+    expect(result.errors.join("\n")).toContain("不受支持");
+  });
+});
+
+describe("live coverage template contract", () => {
+  test("validates a filled copy of the actual v3 template without legacy field synthesis", () => {
+    const template = readFileSync(new URL("../references/coverage-map.md", import.meta.url), "utf8");
+    const values: Record<string, string> = {
+      "覆盖合同版本": "3", "材料等级": "完整拆书", "材料能否支撑认识更新路径": "是——全书已读",
+      "是否存在全书生成器": "是——递归检查证据前提", "是否需要视觉表示": "否——文字足够",
+      "正文必须出现的整书锚点": "四句话｜处罚｜比较结果",
+    };
+    const filled = template.split("\n").map((line) => {
+      if (line.startsWith("- [thread]")) return "- [thread] 名称：四句话｜起点：点头｜关键推进：查前提｜前后变化：等待证据｜换场理由：前提仍待证｜依据与边界：source:1-90";
+      if (line.startsWith("- [candidate]")) return "- [candidate] 名称：候选｜位置：source:1｜解决的问题：理由缺什么｜与其他部件的关系：递归｜决定：保留｜删除测试：关系断开";
+      if (/^- \[(?:starting-point|pressure|revision|boundary)\]/.test(line)) return line.replace("位置：", "位置：source:1").replace("证据：", "证据：原文内容");
+      return line.replace(/^- ([^：]+)：.*$/, (_, key: string) => `- ${key}：${values[key] ?? "按全书已读内容记录"}`);
+    }).join("\n");
+    const result = validate(note(), filename, filled);
+    expect(result.errors).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(result.checks.coverage_whole_book_identity_fields).toBe(6);
+    expect(result.checks.thread_complete_count).toBe(1);
+    expect(result.semantic_assessment).toBe("not_performed");
+  });
+  test("supported partial records need not invent four full-book evidence zones", () => {
+    const record = v3Coverage({partial: true}).replace(/^- \[(?:pressure|revision|boundary)\].*$/gm, "");
+    const result = validate(note(), filename, record);
+    expect(result.errors).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(result.checks.coverage_zones).toBe(1);
+  });
+});
+
+test("declared partial evidence still needs its recorded location", () => {
+  const record = v3Coverage({partial: true}).replace("[pressure] 位置：source:20", "[pressure] 位置：");
+  expect(validate(note(), filename, record).errors.join("\n")).toContain("已声明的来源证据必须写明位置");
+});
+
+describe("body existence without stylistic heading gates", () => {
+  test("allows a simple partial note with one normally named section", () => {
+    const result = validate(note({headings: ["问题"], firstBody: "四句话提出的问题，目前只能从开头确认。"}), filename, v3Coverage({partial: true, unsupported: true}));
+    expect(result.ok).toBe(true);
+  });
+  test("rejects a note with only the final section", () => {
+    const result = validate(note({headings: []}), filename, v3Coverage({partial: true, unsupported: true}));
+    expect(result.errors.join("\n")).toContain("至少需要 1 个正文一级标题");
+    expect(result.errors.join("\n")).toContain("必须有非空正文");
+  });
+  test("rejects an empty body before the final section", () => {
+    const result = validate(note({headings: ["问题"], firstBody: ""}), filename, v3Coverage({partial: true, unsupported: true}));
+    expect(result.errors.join("\n")).toContain("必须有非空正文");
+  });
+  test("rejects generic words passed as v3 source anchors", () => {
+    const record = replaceField(v3Coverage(), "正文必须出现的整书锚点", "关系｜问题｜方法");
+    const result = validate(note({tail: "关系、问题、方法。"}), filename, record);
+    expect(result.errors.join("\n")).toContain("整书锚点过于通用");
+  });
+});
+
+test("reports removed style checks as not assessed even when chapter and author language is present", () => {
+  const result = validate(note({firstBody: "第一章给出四句话。作者指出，处罚的理由还需要比较结果支持。"}), filename, v3Coverage());
+  expect(result.ok).toBe(true);
+  for (const key of ["generic_heading_hits", "source_structure_hits", "outside_camera_opening_hits", "meta_narration_hits"]) {
+    expect(result.checks[key]).toBe("not_assessed");
+  }
+  expect(typeof result.checks.max_paragraph_chars).toBe("number");
+  expect(typeof result.checks.max_sentence_chars).toBe("number");
+  expect(result.semantic_assessment).toBe("not_performed");
 });

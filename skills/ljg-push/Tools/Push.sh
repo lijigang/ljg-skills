@@ -184,7 +184,20 @@ bump_version() {
 orgfile_to_md() {
   local src="$1" dst="$2"
   awk '
-    BEGIN { inhdr = -1 }   # -1 not started, 1 inside header, 0 closed
+    BEGIN { inhdr = -1; inexample = 0 }   # -1 not started, 1 inside header, 0 closed
+    tolower($0) ~ /^#\+begin_example([ \t]|$)/ && !inexample {
+      if (inhdr == 1) { print "---" }
+      inhdr = 0
+      inexample = 1
+      print "```text"
+      next
+    }
+    tolower($0) ~ /^#\+end_example([ \t]|$)/ && inexample {
+      inexample = 0
+      print "```"
+      next
+    }
+    inexample { print; next }
     /^#\+[A-Za-z_]+:/ && inhdr != 0 {
       if (inhdr == -1) { print "---"; inhdr = 1 }
       line = $0
@@ -458,6 +471,7 @@ mdize_skill() {
         -e 's/不要求生成 Org 或 paper-map/不要求生成 Markdown 或 paper-map/g' \
         -e 's/的 Org；/的 Markdown；/g' \
         -e 's/的 Org：/的 Markdown：/g' \
+        -e 's/Org[[:space:]]*及[[:space:]]*coverage/Markdown 及 coverage/g' \
         "$file"
     fi
     # Runtime-facing usage and validation messages must describe the generated
@@ -499,7 +513,7 @@ audit_md_skill() {
     | xargs -0 grep -En '^[[:space:]]*#\+[A-Za-z_]+:|^[[:space:]]*#\+(begin|end)_(example|src|quote)([[:space:]]|$)|^[[:space:]]*```org[[:space:]]*$|^- \*[^*]+\*：|\[\[[^]]+\]\[[^]]+\]\]' \
       2>/dev/null || true)
   eval_residuals=$(find "$skill_dir" -type f -path '*/evals/*.json' -print0 \
-    | xargs -0 grep -En '把 Org 与 coverage|保存 Org 与 coverage|保存(同一)? Org 与 paper-map|的 Org(；|：)' \
+    | xargs -0 grep -En '把 Org 与 coverage|保存 Org 与 coverage|保存(同一)? Org 与 paper-map|的 Org(；|：)|Org[[:space:]]*及[[:space:]]*coverage' \
       2>/dev/null || true)
   runtime_default_residuals=$(find "$skill_dir" -type f -not -path '*/assets/*' \
     \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.mjs' \

@@ -58,6 +58,8 @@ REPO_URL="git@github.com:lijigang/ljg-skills.git"
 
 md 分支同步时自动转换（2026-06-12 起含 org 文件本体）：
 
+Org 文件中的 `#+begin_example` / `#+end_example` 图块转为 `text` 围栏，保留块内文字，不将其中的星号或井号误当标题和注释。标记兼容大小写。
+
 - *org 文件本体*：skill 内每个 `.org` 文件（assets/ 除外）转成同名 `.md` 并删除原件——org 头块→YAML frontmatter（含 `---` 围栏，`filetags`→`tags`）、`*` 标题→`#` 标题（层级保留）、`#+ATTR_*` 行删除、`[[file:x]]`→`![](x)`、`#+begin_src`→``` 围栏。Markdown 与运行时文本文件（如 `.ts` / `.js` / `.json` / `.sh`）里对实际被改名文件的引用同步改写
 - *Markdown 内嵌的完整 Org 示例*：` ```org ` 模板，以及首行就是 `#+key:` 的无语言围栏模板，都会转为 ` ```markdown `；连续头块变为带 `---` 的 YAML frontmatter，标题、链接、强调、等宽文本与分隔线随模板一起转换；原文件使用纯 CRLF 时保留其换行风格
 - 文件扩展引用：`__qa.org` → `__qa.md`、`__paper.org` → `__paper.md` 等（denote 命名约定）

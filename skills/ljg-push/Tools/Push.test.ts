@@ -29,6 +29,32 @@ afterEach(() => {
 });
 
 describe("ljg-push Markdown branch conversion", () => {
+  test("converts standalone Org example blocks while preserving their literal diagram text and references", () => {
+    const root = mkdtempSync(join(tmpdir(), "ljg-push-example-test-"));
+    temporaryRoots.push(root);
+    const localRoot = join(root, "local");
+    const repoRoot = join(root, "repo");
+    writeFixture(join(localRoot, "ljg-push", "Tools", "MdizeEmbeddedOrg.ts"), readFileSync(embeddedConverterPath, "utf8"));
+    const diagram = "* literal node\n  A --> B\n# literal comment";
+    writeFixture(join(localRoot, "ljg-book", "evals", "reading.org"),
+      "#+title: Reading\n\n* Diagram\n#+BEGIN_EXAMPLE\n" + diagram + "\n#+END_EXAMPLE\n\n* After\nText\n");
+    writeFixture(join(localRoot, "ljg-book", "evals", "pair.json"), JSON.stringify({ files: ["reading.org"], expected_output: "形成来源有界的Org及coverage；接受 Org 输入。" }));
+    const result = Bun.spawnSync(["bash", "-c", [
+      'task_push_path="$1"', 'task_local_root="$2"', 'task_repo_root="$3"',
+      "set --", "export LJG_PUSH_LIBRARY_ONLY=1", 'source "$task_push_path"',
+      'SKILLS_LOCAL="$task_local_root"', 'SKILLS_REPO="$task_repo_root"',
+      'mkdir -p "$SKILLS_REPO/skills"', 'sync_skill ljg-book 1',
+      'audit_md_skill "$SKILLS_REPO/skills/ljg-book"',
+    ].join("\n"), "bash", pushPath, localRoot, repoRoot], { stdout: "pipe", stderr: "pipe" });
+    expect(result.exitCode, new TextDecoder().decode(result.stderr)).toBe(0);
+    const generated = join(repoRoot, "skills", "ljg-book", "evals");
+    expect(readFileSync(join(generated, "reading.md"), "utf8")).toBe(
+      "---\ntitle: Reading\n---\n\n# Diagram\n```text\n" + diagram + "\n```\n\n# After\nText\n");
+    expect(JSON.parse(readFileSync(join(generated, "pair.json"), "utf8"))).toEqual({ files: ["reading.md"], expected_output: "形成来源有界的Markdown 及 coverage；接受 Org 输入。" });
+    expect(existsSync(join(generated, "reading.org"))).toBe(false);
+    expect(readFileSync(join(localRoot, "ljg-book", "evals", "reading.org"), "utf8")).toContain("#+BEGIN_EXAMPLE");
+  });
+
   test("converts revised book and paper delivery checks without changing Org input support", () => {
     const root = mkdtempSync(join(tmpdir(), "ljg-push-delivery-test-"));
     temporaryRoots.push(root);
