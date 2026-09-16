@@ -104,5 +104,5 @@ rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.agents/skills/"
 | **ljg-relationship** | 关系分析 — 五层结构诊断 + 精神分析，通过对话引导帮用户"看见"关系真实结构 |
 | **ljg-roundtable** | 圆桌讨论 — 一个议题一场圆桌：真实人物逐轮交锋，每轮收一张 ASCII 结构图，散场全文存档 |
 | **ljg-structure** | 母题结构风洞 — 从表层问题找到反复出现的母题，提炼可迁移结构，用 ASCII 图说明关系并设计最小可逆实验 |
-| **ljg-present** | Unix 极简演讲 — 保真呈现 outline；默认石墨黑与琥珀色，内嵌等宽字体、原生 Chart 与 Unicode 字符图，单文件离线 HTML，支持翻页器 |
+| **ljg-present** | Unix 演讲设计 — 保真排版 / 授权讲稿提炼；按语义选择五类版式，中文与 Unicode 连线分层，默认暗色，单文件离线 HTML，支持讲稿层与翻页器 |
 | **ljg-push** | 推送引擎 — 把本地 `~/.agents/skills/ljg-*` 一键同步到 github repo（master + md 双分支）|
