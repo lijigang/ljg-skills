@@ -5,21 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{TITLE}}</title>
 <style>
+  /* BEGIN DECK FONTS */
+  /* END DECK FONTS */
   :root {
     --c-black: #1A1A1A;
     --c-red: #E63956;
     --c-yellow: #FFD400;
     --c-white: #FFFFFF;
     --c-gold: #FFE082;
-    --hacker-void: #07110D;
-    --hacker-paper: #EAF4EC;
-    --hacker-signal: #00C46A;
-    --hacker-dark-bg: #06110D;
-    --hacker-dark-deep: #020806;
-    --hacker-dark-panel: #0A1A13;
-    --hacker-dark-fg: #CFE1D5;
-    --hacker-dark-muted: #8FA398;
-    --hacker-dark-signal: #25E981;
+    --hacker-void: #18191C;
+    --hacker-paper: #F2F0EB;
+    --hacker-signal: #D7AF74;
+    --hacker-dark-bg: #18191C;
+    --hacker-dark-deep: #101113;
+    --hacker-dark-panel: #212226;
+    --hacker-dark-fg: #E8E5DF;
+    --hacker-dark-muted: #99958E;
+    --hacker-dark-signal: #D7AF74;
+    --font-mono: "Deck Mono", "IBM Plex Mono", "Source Han Sans CN", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", monospace;
     --footer-h: clamp(42px, 7vh, 72px);
     --stage-inline: clamp(30px, 7vw, 112px);
     --title-signal-w: clamp(72px, 9vw, 148px);
@@ -206,17 +209,18 @@
   }
   .pre-title {
     margin-bottom: .7em;
-    font: 650 clamp(12px, 1.6vmin, 22px) "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+    font: 650 clamp(12px, 1.6vmin, 22px) var(--font-mono);
     letter-spacing: .08em;
   }
   .pre-wrap pre {
-    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, monospace;
+    font-family: var(--font-mono);
     font-size: clamp(22px, 3.8vmin, 70px);
     font-weight: 650;
     line-height: 1.12;
     letter-spacing: 0;
     white-space: pre;
   }
+  .slide[data-pre-kind="unicode-diagram"] .pre-wrap pre { line-height: 1; font-weight: 400; font-variant-ligatures: none; }
   .slide[data-pre-density="dense"] .pre-wrap pre { font-size: clamp(18px, 3vmin, 52px); }
   .slide[data-pre-density="x-dense"] .pre-wrap pre { font-size: clamp(15.5px, 2.5vmin, 42px); }
   .slide[data-pre-density="dense"] { --stage-inline: clamp(28px, 4vw, 64px); }
@@ -235,12 +239,12 @@
     padding: .34em .54em;
     color: var(--acc-fg);
     background: var(--acc-bg);
-    font: 760 clamp(16px, 2.3vmin, 34px) "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+    font: 760 clamp(16px, 2.3vmin, 34px) var(--font-mono);
     letter-spacing: .08em;
   }
   table { width: 100%; border-collapse: collapse; font-size: clamp(30px, 5.2vmin, 82px); line-height: 1.08; letter-spacing: -.025em; }
   th, td { padding: .38em .46em; text-align: left; border-bottom: 1px solid currentColor; }
-  th { color: var(--acc-fg); background: var(--acc-bg); font-size: .72em; letter-spacing: .02em; }
+  th { color: var(--acc-fg); background: var(--acc-bg); font-size: max(32px, .9em); letter-spacing: .02em; }
 
   .math {
     display: inline-block;
@@ -263,7 +267,7 @@
     z-index: 30;
     pointer-events: none;
     color: var(--fg);
-    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, monospace;
+    font-family: var(--font-mono);
     font-size: clamp(11px, 1.15vmin, 15px);
     font-weight: 650;
     letter-spacing: .12em;
@@ -272,158 +276,78 @@
   .meta-footer { position: absolute; right: clamp(22px, 4vw, 64px); bottom: clamp(13px, 2.4vh, 27px); }
   body[data-current="emphasis"] .deck-footer { color: var(--acc-fg); }
 
-  body[data-theme="hacker"] .slide,
-  body[data-theme="cyber"] .slide {
-    background:
-      radial-gradient(circle at 50% 47%, rgba(0,196,106,.07), transparent 34%),
-      var(--hacker-paper);
+  /* Unix editorial: a flat field, readable type, functional rules. */
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: -.015em;
+    font-variant-ligatures: none;
   }
-  body[data-theme="hacker"] .slide::before,
-  body[data-theme="cyber"] .slide::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-      repeating-linear-gradient(0deg, transparent 0 5px, rgba(7,17,13,.025) 5px 6px),
-      repeating-linear-gradient(90deg, rgba(7,17,13,.04) 0 1px, transparent 1px 8vw),
-      repeating-linear-gradient(0deg, rgba(7,17,13,.035) 0 1px, transparent 1px 10vh);
-    -webkit-mask-image: radial-gradient(circle at center, rgba(7,17,13,.34), transparent 78%);
-    mask-image: radial-gradient(circle at center, rgba(7,17,13,.34), transparent 78%);
+  body:is([data-theme="hacker"], [data-theme="cyber"]) { --hl: #825B25; }
+  body:is([data-theme="hacker"], [data-theme="cyber"]) .slide:is([data-cover="true"], [data-emphasis="true"]) { --hl: var(--hacker-signal); }
+  body[data-theme="hacker-dark"] .slide { color: var(--hacker-dark-fg); background: var(--hacker-dark-bg); }
+  body[data-theme="hacker-dark"] .slide:is([data-cover="true"], [data-emphasis="true"]) { background: var(--hacker-dark-deep); }
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) .slide[data-cover="true"] .cover-signal {
+    display: block; flex: 0 0 4px; width: clamp(42px, 6vw, 100px); height: 4px;
+    margin: .24em auto 0; background: var(--hl);
   }
-  body[data-theme="hacker"] .slide::after,
-  body[data-theme="cyber"] .slide::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: clamp(22px, 5vh, 66px);
-    width: min(58vw, 920px);
-    height: clamp(5px, .55vmin, 9px);
-    transform: translateX(-50%);
-    z-index: -1;
-    background: linear-gradient(to right, var(--hacker-signal) 0 18%, transparent 18% 24%, var(--hacker-signal) 24% 76%, transparent 76% 82%, var(--hacker-signal) 82% 100%);
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) .slide[data-composition="sequence"] .line {
+    border: 0; border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    background: none; padding: .26em 0;
   }
-  body[data-theme="hacker"] .slide[data-cover="true"],
-  body[data-theme="hacker"] .slide[data-emphasis="true"],
-  body[data-theme="cyber"] .slide[data-cover="true"],
-  body[data-theme="cyber"] .slide[data-emphasis="true"] {
-    color: var(--hacker-paper);
-    background: radial-gradient(circle at 50% 47%, rgba(0,196,106,.15), transparent 36%), var(--hacker-void);
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) .slide[data-composition="sequence"] .line:last-child { border-bottom: 0; }
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) .slide[data-quote="true"] .lines {
+    background: none; border-top: 2px solid var(--hl); border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    font-weight: 500; line-height: 1.3;
   }
-  body[data-theme="hacker"] .slide[data-cover="true"]::before,
-  body[data-theme="hacker"] .slide[data-emphasis="true"]::before,
-  body[data-theme="cyber"] .slide[data-cover="true"]::before,
-  body[data-theme="cyber"] .slide[data-emphasis="true"]::before {
-    background:
-      repeating-linear-gradient(0deg, transparent 0 5px, rgba(234,244,236,.025) 5px 6px),
-      repeating-linear-gradient(90deg, rgba(0,196,106,.07) 0 1px, transparent 1px 8vw),
-      repeating-linear-gradient(0deg, rgba(0,196,106,.055) 0 1px, transparent 1px 10vh);
+  body:is([data-theme="hacker"], [data-theme="cyber"]) .pre-wrap { color: var(--hacker-paper); background: var(--hacker-void); border-color: var(--hacker-signal); }
+  body[data-theme="hacker-dark"] .pre-wrap { color: var(--hacker-dark-fg); background: var(--hacker-dark-deep); border-color: var(--hacker-dark-muted); }
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) th {
+    color: var(--hl); background: transparent; border-bottom: 2px solid var(--hl);
   }
-  body[data-theme="hacker"] .slide[data-cover="true"] .lines::after,
-  body[data-theme="cyber"] .slide[data-cover="true"] .lines::after {
-    content: "";
-    display: block;
-    width: clamp(58px, 8vw, 128px);
-    height: clamp(6px, .75vmin, 11px);
-    margin: .18em auto 0;
-    background: var(--hacker-signal);
-  }
-  body[data-theme="hacker"] .slide[data-line-count="2"] .line,
-  body[data-theme="hacker"] .slide[data-line-count="3"] .line,
-  body[data-theme="hacker"] .slide[data-line-count="4"] .line,
-  body[data-theme="cyber"] .slide[data-line-count="2"] .line,
-  body[data-theme="cyber"] .slide[data-line-count="3"] .line,
-  body[data-theme="cyber"] .slide[data-line-count="4"] .line {
-    border: 1px solid rgba(7,17,13,.20);
-    border-top: clamp(3px, .38vmin, 6px) solid var(--hacker-signal);
-    background: linear-gradient(90deg, transparent, rgba(0,196,106,.08), transparent) top center / 70% 2px no-repeat, rgba(7,17,13,.028);
-  }
-  body[data-theme="hacker"] .pre-wrap,
-  body[data-theme="cyber"] .pre-wrap {
-    color: var(--hacker-paper);
-    background: var(--hacker-void);
-    border-color: rgba(0,196,106,.5);
-    border-top: clamp(6px, .7vmin, 11px) solid var(--hacker-signal);
-  }
-  body[data-theme="hacker"] .table-caption,
-  body[data-theme="cyber"] .table-caption { color: var(--hacker-void); background: var(--hacker-signal); }
-  body[data-theme="hacker"] th,
-  body[data-theme="cyber"] th { color: var(--hacker-paper); background: var(--hacker-void); }
-
-  body[data-theme="hacker-dark"] .slide {
-    color: var(--hacker-dark-fg);
-    background: var(--hacker-dark-bg);
-  }
-  body[data-theme="hacker-dark"] .slide::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-      repeating-linear-gradient(90deg, rgba(37,233,129,.035) 0 1px, transparent 1px 8vw),
-      repeating-linear-gradient(0deg, rgba(207,225,213,.025) 0 1px, transparent 1px 10vh),
-      linear-gradient(180deg, rgba(37,233,129,.025), transparent 34%);
-    -webkit-mask-image: radial-gradient(circle at center, rgba(255,255,255,.62), transparent 82%);
-    mask-image: radial-gradient(circle at center, rgba(255,255,255,.62), transparent 82%);
-  }
-  body[data-theme="hacker-dark"] .slide::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: clamp(22px, 5vh, 66px);
-    width: min(58vw, 920px);
-    height: clamp(4px, .45vmin, 7px);
-    transform: translateX(-50%);
-    z-index: -1;
-    background: linear-gradient(to right, var(--hacker-dark-signal) 0 15%, transparent 15% 22%, rgba(37,233,129,.58) 22% 78%, transparent 78% 85%, var(--hacker-dark-signal) 85% 100%);
-  }
-  body[data-theme="hacker-dark"] .slide[data-cover="true"],
-  body[data-theme="hacker-dark"] .slide[data-emphasis="true"] {
-    color: var(--hacker-dark-fg);
-    background: var(--hacker-dark-deep);
-  }
-  body[data-theme="hacker-dark"] .slide[data-cover="true"]::before,
-  body[data-theme="hacker-dark"] .slide[data-emphasis="true"]::before {
-    background:
-      repeating-linear-gradient(90deg, rgba(37,233,129,.05) 0 1px, transparent 1px 8vw),
-      repeating-linear-gradient(0deg, rgba(207,225,213,.025) 0 1px, transparent 1px 10vh);
-  }
-  body[data-theme="hacker-dark"] .slide[data-cover="true"] .lines::after {
-    content: "";
-    display: block;
-    width: clamp(58px, 8vw, 128px);
-    height: clamp(5px, .65vmin, 9px);
-    margin: .18em auto 0;
-    background: var(--hacker-dark-signal);
-  }
-  body[data-theme="hacker-dark"] .slide[data-line-count="2"] .line,
-  body[data-theme="hacker-dark"] .slide[data-line-count="3"] .line,
-  body[data-theme="hacker-dark"] .slide[data-line-count="4"] .line {
-    border: 1px solid rgba(37,233,129,.22);
-    border-top: clamp(3px, .38vmin, 6px) solid var(--hacker-dark-signal);
-    background: var(--hacker-dark-panel);
-  }
-  body[data-theme="hacker-dark"] .slide[data-quote="true"] .lines {
-    background: rgba(10,26,19,.76);
-    border-bottom-color: rgba(207,225,213,.34);
-  }
-  body[data-theme="hacker-dark"] .pre-wrap {
-    color: var(--hacker-dark-fg);
-    background: var(--hacker-dark-deep);
-    border-color: rgba(37,233,129,.38);
-    border-top: clamp(6px, .7vmin, 11px) solid var(--hacker-dark-signal);
-  }
-  body[data-theme="hacker-dark"] .table-caption,
-  body[data-theme="hacker-dark"] th {
-    color: var(--hacker-dark-deep);
-    background: var(--hacker-dark-signal);
-  }
-  body[data-theme="hacker-dark"] th,
-  body[data-theme="hacker-dark"] td { border-bottom-color: rgba(207,225,213,.24); }
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) td { border-bottom-color: color-mix(in srgb, currentColor 24%, transparent); }
+  body:is([data-theme="hacker"], [data-theme="cyber"], [data-theme="hacker-dark"]) .table-caption { color: var(--fg); background: transparent; padding: 0; letter-spacing: 0; }
   body[data-theme="hacker-dark"] .deck-footer { color: var(--hacker-dark-muted); }
-  body[data-theme="hacker-dark"][data-current="emphasis"] .deck-footer { color: var(--hacker-dark-muted); }
+  .chart-wrap { width: min(82vw, 1480px); letter-spacing: -.02em; }
+  .chart-title { font-size: clamp(42px, 6.6vmin, 92px); line-height: 1.18; font-weight: 700; text-align: left; text-wrap: balance; }
+  .chart-body { margin-top: clamp(24px, 4vmin, 56px); }
+  .chart-note, .chart-axis { font-size: clamp(20px, 3.3vmin, 42px); line-height: 1.35; font-weight: 500; }
+  .chart-note { margin-top: 1em; }
+  .chart-axis { margin-bottom: .6em; }
+  .chart-body, .chart-note { text-align: left; }
+  .chart-wrap [data-highlight="true"] { --mark: var(--hl); }
+  .chart-wrap { --mark: var(--fg); }
+  .chart-label, .chart-value { font-size: clamp(28px, 4.6vmin, 64px); line-height: 1.25; font-weight: 550; }
+  .chart-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.04em; white-space: nowrap; }
+  .bar-rows { display: grid; gap: clamp(16px, 2.5vmin, 36px); }
+  .bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; color: var(--mark); }
+  .bar-track { position: relative; height: clamp(10px, 1.8vmin, 24px); margin-top: .5em; }
+  .bar-zero { position: absolute; top: -5px; bottom: -5px; left: var(--zero); border-left: 1px solid currentColor; opacity: .4; }
+  .bar-mark { position: absolute; height: 100%; left: var(--start); width: var(--length); background: var(--mark); }
+  .bar-row[data-zero="true"] .bar-mark { width: 2px; }
+  .relation-grid { display: grid; grid-template-columns: repeat(var(--items), minmax(0, 1fr)); gap: clamp(22px, 4vmin, 64px); }
+  .relation-item { position: relative; min-width: 0; padding-top: .8em; border-top: 1px solid var(--mark); }
+  .relation-item .chart-label { color: var(--mark); font-size: clamp(30px, 5.2vmin, 72px); font-weight: 650; }
+  .relation-text { margin-top: .7em; font-size: clamp(28px, 4.3vmin, 60px); font-weight: 450; line-height: 1.5; white-space: pre-wrap; overflow-wrap: break-word; }
+  [data-chart-kind="flow"] .flow-arrow { position: absolute; top: -.6em; right: -1.2em; font-size: clamp(28px, 4.3vmin, 60px); color: var(--fg); }
+  .chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-svg text { fill: currentColor; font-size: 32px; font-weight: 550; letter-spacing: 0; }
+  .chart-svg .plot-line { fill: none; stroke: currentColor; stroke-width: 3; }
+  .chart-svg .plot-axis { stroke: currentColor; stroke-opacity: .35; stroke-width: 1; }
+  .chart-svg .plot-point { fill: var(--bg); stroke: currentColor; stroke-width: 3; }
+  .chart-svg .plot-point[data-highlight="true"] { fill: var(--hl); stroke: var(--hl); }
+  .chart-data { display: none; }
+  @media (max-aspect-ratio: 1/1) {
+    .meta-footer { left: 50%; right: auto; bottom: 48px; transform: translateX(-50%); max-width: 82vw; text-align: center; font-size: 10px; letter-spacing: .08em; }
+    .chart-title { font-size: clamp(28px, 7vw, 52px); }
+    .chart-label, .chart-value, .relation-item .chart-label { font-size: clamp(20px, 5vw, 36px); }
+    .relation-text, .chart-note, .chart-axis { font-size: clamp(17px, 4.4vw, 28px); }
+    .relation-grid { grid-template-columns: 1fr; gap: 24px; }
+    [data-chart-kind="flow"] .flow-arrow { top: auto; bottom: -1.2em; right: 0; font-size: 20px; transform: rotate(90deg); }
+    .chart-svg { display: none; }
+    .chart-data { display: grid; gap: .8em; list-style: none; }
+    .chart-data li { display: flex; justify-content: space-between; gap: 1em; border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent); padding-bottom: .5em; }
+  }
 
   /* Cover and title pages inherit one stable centered stage axis. */
   body[data-theme] .slide[data-cover="true"] .lines {
@@ -498,7 +422,7 @@
   }
 </style>
 </head>
-<body data-template-version="4.5.0" data-theme="{{THEME}}">
+<body data-template-version="4.7.1" data-theme="{{THEME}}">
 <main class="stage" id="stage"></main>
 <footer class="deck-footer">
   <div class="pager" id="pager">01 / 01</div>
@@ -624,10 +548,108 @@
     const lineCount = slide?.lines?.length ?? 0;
     if (slide?.cover) return "identity";
     if (slide?.emphasis || slide?.title) return "chapter";
+    if (slide?.chart) return "chart";
     if (slide?.table || slide?.pre != null) return "evidence";
     if (slide?.quote) return "quotation";
     if (slide?.semanticGroup === "list-run" || (lineCount >= 2 && lineCount <= 4)) return "sequence";
     return "statement";
+  }
+
+  // Text is assigned via textContent, including SVG labels. No author-supplied markup.
+  function chartElement(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = String(text);
+    return node;
+  }
+
+  function renderChart(chart) {
+    const figure = chartElement("figure", "chart-wrap fit-box");
+    figure.appendChild(chartElement("figcaption", "chart-title", chart.title));
+    const content = chartElement("div", "chart-body");
+    const items = chart.items;
+    const formatted = item => String(item.value) + (chart.unit || "");
+    if (chart.kind === "bar") {
+      content.classList.add("bar-rows");
+      const low = Math.min(0, ...items.map(item => item.value));
+      const high = Math.max(0, ...items.map(item => item.value));
+      const span = high - low || 1;
+      const zero = -low / span * 100;
+      items.forEach(item => {
+        const row = chartElement("div", "bar-row");
+        row.dataset.highlight = String(item.emphasis === true);
+        row.dataset.zero = String(item.value === 0);
+        const head = chartElement("div", "bar-head");
+        head.append(chartElement("span", "chart-label", item.label), chartElement("span", "chart-value", formatted(item)));
+        const track = chartElement("div", "bar-track");
+        track.setAttribute("aria-hidden", "true");
+        track.style.setProperty("--zero", zero + "%");
+        track.style.setProperty("--start", (Math.min(0, item.value) - low) / span * 100 + "%");
+        track.style.setProperty("--length", Math.abs(item.value) / span * 100 + "%");
+        track.append(chartElement("div", "bar-zero"), chartElement("div", "bar-mark"));
+        row.append(head, track); content.appendChild(row);
+      });
+    } else if (chart.kind === "line") {
+      if (chart.xLabel || chart.yLabel || chart.unit) content.appendChild(chartElement("div", "chart-axis", [chart.xLabel, chart.yLabel, chart.unit].filter(Boolean).join(" · ")));
+      const palette = getComputedStyle(body);
+      const chartInk = palette.getPropertyValue("--fg").trim();
+      const chartPaper = palette.getPropertyValue("--bg").trim();
+      const chartSignal = palette.getPropertyValue("--hl").trim();
+      const svgNode = (tag, attrs = {}, text) => {
+        const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        Object.entries(attrs).forEach(([name, value]) => node.setAttribute(name, String(value)));
+        if (tag === "text") {
+          node.setAttribute("fill", chartInk);
+          node.setAttribute("font-size", "32");
+          node.setAttribute("font-family", palette.fontFamily);
+        }
+        if (text != null) node.textContent = String(text);
+        return node;
+      };
+      const svg = svgNode("svg", {viewBox: "0 0 960 380", class: "chart-svg", role: "img"});
+      svg.append(svgNode("title", {}, chart.title), svgNode("desc", {}, items.map(item => item.label + ": " + formatted(item)).join("; ")));
+      const low = Math.min(0, ...items.map(item => item.value));
+      const high = Math.max(0, ...items.map(item => item.value));
+      const span = high - low || 1;
+      const xLow = items[0].x, xSpan = items[items.length - 1].x - xLow;
+      const px = item => 60 + (item.x - xLow) / xSpan * 840;
+      const py = item => 292 - (item.value - low) / span * 240;
+      const baseline = 292 - (0 - low) / span * 240;
+      svg.appendChild(svgNode("line", {x1: 60, y1: baseline, x2: 900, y2: baseline, class: "plot-axis", stroke: chartInk, "stroke-opacity": .35, "stroke-width": 1}));
+      svg.appendChild(svgNode("polyline", {points: items.map(item => px(item) + "," + py(item)).join(" "), class: "plot-line", fill: "none", stroke: chartInk, "stroke-width": 3}));
+      items.forEach(item => {
+        svg.appendChild(svgNode("circle", {cx: px(item), cy: py(item), r: item.emphasis ? 7 : 5, class: "plot-point", fill: item.emphasis ? chartSignal : chartPaper, stroke: item.emphasis ? chartSignal : chartInk, "stroke-width": 3, "data-highlight": String(item.emphasis === true)}));
+        svg.appendChild(svgNode("text", {x: px(item), y: py(item) - 18, "text-anchor": "middle"}, formatted(item)));
+        svg.appendChild(svgNode("text", {x: px(item), y: 350, "text-anchor": "middle"}, item.label));
+      });
+      content.appendChild(svg);
+      const data = chartElement("ul", "chart-data");
+      data.setAttribute("aria-label", chart.title);
+      items.forEach(item => {
+        const row = chartElement("li");
+        row.append(chartElement("span", "chart-label", item.label === String(item.x) ? item.label : item.label + " · " + item.x), chartElement("span", "chart-value", formatted(item)));
+        data.appendChild(row);
+      });
+      content.appendChild(data);
+    } else {
+      content.classList.add("relation-grid");
+      content.style.setProperty("--items", items.length);
+      items.forEach((item, itemIndex) => {
+        const part = chartElement("div", "relation-item");
+        part.dataset.highlight = String(item.emphasis === true);
+        part.appendChild(chartElement("div", "chart-label", item.label));
+        if (item.text != null) part.appendChild(chartElement("div", "relation-text", item.text));
+        if (chart.kind === "flow" && itemIndex < items.length - 1) {
+          const arrow = chartElement("span", "flow-arrow", "→");
+          arrow.setAttribute("aria-hidden", "true");
+          part.appendChild(arrow);
+        }
+        content.appendChild(part);
+      });
+    }
+    figure.appendChild(content);
+    if (chart.note) figure.appendChild(chartElement("div", "chart-note", chart.note));
+    return figure;
   }
 
   SLIDES.forEach((slide) => {
@@ -643,7 +665,13 @@
     element.dataset.sourceIds = (slide.sourceIds || []).join(",");
     if (slide.sourceParts?.length) element.dataset.sourceParts = JSON.stringify(slide.sourceParts);
 
-    if (slide.pre != null) {
+    if (slide.derivedFrom?.length) element.dataset.derivedFrom = slide.derivedFrom.join(",");
+
+    if (slide.chart) {
+      element.dataset.chartKind = slide.chart.kind;
+      element.appendChild(renderChart(slide.chart));
+    } else if (slide.pre != null) {
+      if (/[\u2500-\u257f]/u.test(String(slide.pre))) element.dataset.preKind = "unicode-diagram";
       const preLines = String(slide.pre).split("\n");
       const preRows = preLines.length;
       const preCols = Math.max(0, ...preLines.map((line) => Array.from(line).length));
@@ -726,6 +754,12 @@
         }).join("");
         lines.appendChild(node);
       });
+      if (slide.cover && ["hacker", "hacker-dark", "cyber"].includes(body.dataset.theme)) {
+        const signal = document.createElement("div");
+        signal.className = "cover-signal";
+        signal.setAttribute("aria-hidden", "true");
+        lines.appendChild(signal);
+      }
       element.appendChild(lines);
       if (lines.querySelector(".math-display")) element.dataset.math = "display";
     }
@@ -837,6 +871,8 @@
       semanticAtom: slides[index]?.dataset.semanticAtom,
       semanticGroup: slides[index]?.dataset.semanticGroup,
       composition: slides[index]?.dataset.composition,
+      chartKind: slides[index]?.dataset.chartKind,
+      derivedFrom: slides[index]?.dataset.derivedFrom,
       fitScale: slides[index]?.dataset.fitScale,
       fits: slides[index]?.dataset.fits
     }),

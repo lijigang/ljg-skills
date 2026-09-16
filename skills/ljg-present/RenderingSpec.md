@@ -14,6 +14,7 @@ Manifest 顺序就是原稿顺序：
 4. quote
 5. table caption / table
 6. example / fenced code
+7. 原生 chart 块（按 ChartSpec；以上是元素类型清单，实际 ID 顺序按原文出现顺序）
 
 生成后按 slides 的首次 `sourceIds` 引用去重，必须与 manifest 顺序一致。没有源元素可以静默消失。
 
@@ -73,7 +74,7 @@ Chrome 规则：
 ```jsonc
 {
   "preTitle": "optional",
-  "pre": "ASCII / code，逐字符保留",
+  "pre": "Unicode diagram / source ASCII / code，逐字符保留",
   "sourceIds": ["SRC-002"]
 }
 ```
@@ -99,6 +100,8 @@ Chrome 规则：
 
 审计按 sourceId 首次出现顺序比对 manifest，并用 `index / total / joinBefore` 重建原始可见文本。同源续页必须连续、编号完整；`allSourcesReferencedOnce` 只作统计，`allSourcesReferenced` 与 `continuationsValid` 才是门槛。
 
+图表字段、来源追踪与四种关系的 schema 见 `ChartSpec.md`。原生 chart 消费 sourceIds；补充图只使用 derivedFrom，不替代任何源元素。
+
 ### 3.1 Minimal Composition Grammar
 
 页面类型描述源结构，composition 描述这一页在舞台上完成的唯一语义动作。两者不可混成可随机选择的模板。生成器先建立 composition manifest，模板再从既有字段确定性推导 `data-composition`；RAW_SLIDES 不接受作者手写的 style variant。
@@ -109,6 +112,7 @@ Chrome 规则：
 |---|---|---|
 | `identity` | `cover:true` | 标题尺度 |
 | `chapter` | `emphasis:true` 或 `title:true` | 深浅色场或居中短信号线 |
+| `chart` | `chart` | 有依据的图题与关系主体 |
 | `evidence` | `table` 或 `pre` | 表格 / 字符块自身结构 |
 | `quotation` | `quote:true` | 上下边界形成引用场 |
 | `sequence` | `semanticGroup:"list-run"` 或 2–4 行普通文字 | 单轴纵向节奏 |
@@ -116,36 +120,30 @@ Chrome 规则：
 
 「一页一意」不是一句一页。一个比较、递进或 3–4 项同层列表可以共同完成一个动作；两个无关判断不能因「放得下」而共页。拆分只能发生在原有句界、行界或结构边界，跨页仍按 `sourceParts` 逐字重建。
 
-每页只允许一个主视觉动作。全局 theme 的色场、静态网格或信号轨属于共同舞台，不授权页面再叠加图片、图标、侧栏或第二套装饰框。角色只决定阅读结构，不改变源文字，也不产生随机版式变体。
+每页只允许一个主视觉动作。全局 theme 只提供平面色场和字体语法。Chart 图题与主体共同表达一种关系，允许语义需要的流程/比较局部分栏；不叠加图片、图标、侧栏或第二套装饰框。角色只决定阅读结构，不改变源文字，也不产生随机版式变体。
 
-空间预算：普通 line-based 主块宽度 `≤82vw`，cover `≤84vw`；左右 stage padding 对称，内容中心仍在 `47–53%W`。达到宽度或字号边界时先拆页，不能把内容区扩到满版，也不能把既有投影字号门槛下调。25% 缩略图中，`identity/chapter/statement` 必须保留单一文字焦点，`sequence/quotation` 必须读成一个组合块，`evidence` 必须只有一个主表格或 pre；footer 与装饰不能成为第二焦点。
+空间预算：普通 line-based 主块宽度 `≤82vw`，cover `≤84vw`；左右 stage padding 对称，内容中心仍在 `47–53%W`。达到宽度或字号边界时先拆页，不能把内容区扩到满版，也不能把既有投影字号门槛下调。25% 缩略图中，`identity/chapter/statement` 必须保留单一文字焦点，`sequence/quotation` 必须读成一个组合块，`evidence` 必须只有一个主表格或 pre，`chart` 只有一个关系主体；footer 与装饰不能成为第二焦点。
 
 ## 4. Theme Grammar
 
-一篇演示只使用一个 theme。
+一篇演示只使用一个 theme。显式参数 > filetags > 默认 hacker-dark；旧主题参数保持可用。具体设计理由见 DesignSystem。
 
 | theme | regular | cover / emphasis | hl |
 |---|---|---|---|
 | black | 黑底白字 | 红底白字 | 红 |
 | red | 红底白字 | 黑底白字 | 金 |
 | yellow | 黄底黑字 | 黑底白字 | 红 |
-| hacker | `#EAF4EC` 纸面 / `#07110D` 字 | `#07110D` 场 / `#EAF4EC` 字 | `#00C46A` |
-| hacker-dark | `#06110D` 场 / `#CFE1D5` 字 | `#020806` 深场 / `#CFE1D5` 字 | `#25E981` |
+| hacker | `#F2F0EB` 纸面 / `#18191C` 字 | `#18191C` 场 / `#F2F0EB` 字 | 浅底 `#825B25` / 暗场 `#D7AF74` |
+| hacker-dark | `#18191C` 场 / `#E8E5DF` 字 | `#101113` 深场 / `#E8E5DF` 字 | `#D7AF74` |
 
 Hacker 的生成语法：
 
-- 居中横向信号轨建立结构；左右 padding、装饰和文字共用同一中轴。
-- 静态细网格只作为纸面刻度，不做全屏 HUD。
-- 硬边、居中短信号和表格标签可使用 signal green。
-- ASCII/pre 使用深色硬边面板。
-- 无阴影漂浮、无 Matrix 雨、无闪烁、无 glow 堆叠。
-
-`hacker-dark` 追加约束：
-
-- 所有页面都保持暗场；普通页 `#06110D`，cover/emphasis 使用更深的 `#020806`，不能退回浅色纸面。
-- 正文使用柔和灰绿 `#CFE1D5`，与普通页背景对比度必须 `≥9:1`；不用纯白制造眩光。
-- 2–4 行卡片使用 `#0A1A13` 面板；信号绿只用于卡片顶边、结构轨、强调与表头标签。
-- 静态网格可以存在，但不得加入 glow、shadow、CRT、Matrix rain、闪烁光标或任何 animation/transition。
+- 纯色场、清晰黑体中文、等宽英文与数值、细规则线。没有全页装饰轨道、背景纹理或伪终端外壳。
+- 封面与章节保留中轴和局部短信号；列表用分隔与距离组成一个组，不用面板卡片阵列。
+- 浅底强调字用深琥珀；暗底正文用暖白；信号色承担唯一重点。
+- Unicode 图 / 源 ASCII / code 的 pre 可以有一个硬边暗面板。表格使用必要横线、宽列距和同轴数值。
+- hacker-dark 全篇暗场，普通页 #18191C、cover/emphasis #101113，正文 #E8E5DF，对比度 ≥9:1。
+- 不使用阴影、氛围渐变、扫描线、网格、CRT、Matrix rain、闪烁或视觉动效。
 
 ## 5. Text Length and Multi-line Density
 
@@ -224,7 +222,9 @@ CSS 顺序：单行 `data-len` 规则在前，多行规则在后。多行 `.line
 
 普通非 table/pre 文本页 `fitScale < 0.80` 视为可读性失败：先拆页，再考虑缩字。语义原子的目标是保持完整单行，验收改看最终有效字号 `computed font-size × fitScale ≥56px`；此时低于 `0.80` 的比例本身不构成失败。`fits=true` 只代表不越界，不能代替投影字号门槛。
 
-pre/ASCII 的有效字号按物理行数验收：`≤16` 行 `≥22px`、`17–24` 行 `≥18px`、`25–28` 行 `≥15.5px`。面板整体居中、字符内部左对齐；超过 28 行或低于门槛时人工拆图，不机械截断字符画。
+pre/字符图的有效字号按物理行数验收：`≤16` 行 `≥22px`、`17–24` 行 `≥18px`、`25–28` 行 `≥15.5px`。面板整体居中、字符内部左对齐；超过 28 行或低于门槛时人工拆图，不机械截断字符画。
+
+Unicode 线框 pre 自动获得 `data-pre-kind="unicode-diagram"`，字体沿用内嵌等宽栈，`line-height:1`、`letter-spacing:0`、常规字重，避免纵向线段被行距截断。CSS 只改变排版；`pre.textContent` 始终等于输入。新生成图遵循 ChartSpec 的 Unicode 默认与来源追踪。
 
 ## 8. Offline Math
 
@@ -266,7 +266,7 @@ pre/ASCII 的有效字号按物理行数验收：`≤16` 行 `≥22px`、`17–2
 
 ## 10. Verification
 
-静态验证同时拒绝资源标签、`@import`、CSS `url(...)` 与 `image-set(...)`，确保单文件真正离线：
+只交付一个 HTML。静态验证允许内联 SVG、PNG/JPEG/WebP data URI 和 font/ttf/otf/woff/woff2 data URI，拒绝远程/相对资源、`@import` 与 `image-set(...)`。本地图片和字体先由 Tools/EmbedAssets.ts 内嵌；不能交付 ZIP 或外部 assets 目录。
 
 ```bash
 bun Tools/ValidateDeck.ts <html> --theme <theme>
@@ -275,7 +275,7 @@ bun Tools/ValidateDeck.ts <html> --theme <theme>
 视觉验证：使用 Interceptor 的隔离测试 context，至少检查：
 
 - cover
-- 最终 DOM 中每页恰有一个 `data-composition`，并与 composition manifest 一致；六种实际出现的角色各抽查至少一页
+- 最终 DOM 中每页恰有一个 `data-composition`，并与 composition manifest 一致；七种实际出现的角色各抽查至少一页
 - 一级 emphasis 与二级 title 的空间节奏；三者保持同一水平中轴
 - 普通单行页
 - 所有 `data-semantic-atom=true` 页：每条 `.line` 的 Range rect 行数为 1，有效字号达到对应投影门槛
@@ -283,11 +283,12 @@ bun Tools/ValidateDeck.ts <html> --theme <theme>
 - 最长单段页
 - 2/3/4 行中密度最高的页面
 - 最大表格
-- 最大 ASCII/pre
+- 最大 pre / Unicode 字符图：检查线段接缝、中文列对齐、箭头和字体缺字；源 ASCII / code 另检逐字符保真
+- 每种 chart（图题/标签/数值/说明有效字号、直接标注、原数据、真实坐标、手机数据读法）
 - 每一种公式
 - landscape 与 portrait 各一种尺寸
 - 25% 缩略图或等效 contact sheet：每页只有一个明显焦点，footer、装饰和次级区不与主内容竞争；普通文字主块 `≤82%W`，cover `≤84%W`
 
-真实浏览器逐页采集 computed style 与边界：除 table/pre 内部外，文字必须 `text-align:center`；内容中心落在 `47–53%W`；普通非 table/pre 页 `fitScale ≥0.80` 且零越界；语义原子改验最终有效字号 `≥56px` 且视觉行数为 1；其余字号满足本规范的投影门槛。table/pre 以各自的结构与密度门槛验收。
+真实浏览器逐页采集 computed style 与边界：除 chart/table/pre 内部外，文字必须 `text-align:center`；内容中心落在 `47–53%W`；普通非 chart/table/pre 页 `fitScale ≥0.80` 且零越界；语义原子改验最终有效字号 `≥56px` 且视觉行数为 1；其余字号满足本规范的投影门槛。chart/table/pre 以各自的结构与密度门槛验收。Chart 必须同时测 SVG 缩放后的实际字号，不能只读 CSS 的 32px。
 
 Interceptor 不可用时，保留静态证据并明确标记 deferred；不要用其他浏览器自动化或主浏览器替代。

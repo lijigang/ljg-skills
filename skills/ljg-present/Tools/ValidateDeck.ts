@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 
 import { resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 
-const VERSION = "4.5.0";
+const VERSION = "4.7.1";
 
 const HELP = `ValidateDeck ${VERSION}
 
@@ -15,9 +16,10 @@ Checks:
   template version and JavaScript syntax
   stable centered stage axis, finite composition grammar, whitespace budget, header/footer contract
   semantic-atom Takahashi typography, CJK tail guard, grouped rows and measured fit guard
+  chart data, single-series numeric geometry and source provenance
   offline math guards and presentation key map
-  zero motion and zero external resources
-  Hacker theme grammar when --theme hacker or --theme hacker-dark
+  zero motion; embedded raster images/fonts and zero external resources
+  flat Hacker theme grammar when --theme hacker or --theme hacker-dark
 `;
 
 type Check = { id: string; pass: boolean; detail: string };
@@ -59,7 +61,11 @@ function materializeTemplate(html: string, theme = "hacker") {
     { quote: true, lines: [{ indent: 0, chunks: [{ t: "人 → 人 + Agents" }] }], sourceIds: ["SRC-014"] },
     { semanticGroup: "list-run", lines: [{ indent: 0, chunks: [{ t: "System 0: 本能" }] }, { indent: 0, chunks: [{ t: "System 1: 快思考" }] }, { indent: 0, chunks: [{ t: "System 2: 慢思考" }] }], sourceIds: ["SRC-015", "SRC-016", "SRC-017"] },
     { table: { caption: "无表头", header: false, rows: [["能量", "太阳能"], ["组织", "国家"]] }, sourceIds: ["SRC-018"] },
-    { pre: "+---+\n|AI |\n+---+", sourceIds: ["SRC-019"] }
+    { pre: "+---+\n|AI |\n+---+", sourceIds: ["SRC-019"] },
+    { chart: { kind: "bar", title: "收支", unit: "元", items: [{ label: "支出", value: -2 }, { label: "结余", value: 0 }, { label: "收入", value: 3, emphasis: true }] }, sourceIds: ["SRC-020"] },
+    { chart: { kind: "line", title: "增长", xLabel: "时间", items: [{ label: "首日", x: 1, value: 3 }, { label: "末日", x: 5, value: 6 }] }, sourceIds: ["SRC-021"] },
+    { chart: { kind: "flow", title: "处理", items: [{ label: "输入" }, { label: "输出", text: "完成" }] }, sourceIds: ["SRC-022"] },
+    { chart: { kind: "compare", title: "选择", items: [{ label: "A", text: "简单" }, { label: "B", text: "完整" }] }, sourceIds: ["SRC-023"] }
   ];
   return html
     .replaceAll("{{TITLE}}", () => "Fixture Deck")
@@ -78,10 +84,22 @@ function chooseLayout(weights: number[]) {
   return "single";
 }
 
+function splitSelectors(selectors: string): string[] {
+  const parts: string[] = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < selectors.length; i += 1) {
+    if (selectors[i] === "(" || selectors[i] === "[") depth += 1;
+    else if (selectors[i] === ")" || selectors[i] === "]") depth -= 1;
+    else if (selectors[i] === "," && depth === 0) { parts.push(selectors.slice(start, i).trim()); start = i + 1; }
+  }
+  parts.push(selectors.slice(start).trim());
+  return parts;
+}
+
 function ruleBodies(style: string, exactSelector: string) {
   const bodies: string[] = [];
   for (const match of style.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selectors = match[1].split(",").map((value) => value.trim());
+    const selectors = splitSelectors(match[1]);
     if (selectors.includes(exactSelector)) bodies.push(match[2]);
   }
   return bodies;
@@ -100,12 +118,209 @@ function contrastRatio(foreground: string, background: string) {
   return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function sourceIds(value: unknown): value is string[] {
+  return Array.isArray(value) && value.length > 0
+    && value.every((id) => typeof id === "string" && id.trim().length > 0)
+    && new Set(value).size === value.length;
+}
+
+function chartDataErrors(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return ["RAW_SLIDES must be an array"];
+  const errors: string[] = [];
+  for (const [index, value] of raw.entries()) {
+    if (!isRecord(value) || !("chart" in value)) continue;
+    const fail = (message: string) => errors.push(`slide ${index + 1}: ${message}`);
+    const chart = value.chart;
+    if (!isRecord(chart)) { fail("chart must be an object"); continue; }
+    const kind = chart.kind;
+    if (!["bar", "line", "flow", "compare"].includes(String(kind))) fail("unsupported chart kind");
+    if (typeof chart.title !== "string" || !chart.title.trim()) fail("chart title is required");
+    for (const key of ["unit", "xLabel", "yLabel", "note"]) {
+      if (key in chart && typeof chart[key] !== "string") fail(`${key} must be a string`);
+    }
+    if (kind !== "line" && ("xLabel" in chart || "yLabel" in chart)) fail("xLabel and yLabel are only valid for line charts");
+    if (kind !== "bar" && kind !== "line" && "unit" in chart) fail("unit is only valid for bar and line charts");
+    const chartKeys = new Set(["kind", "title", "items", "unit", "xLabel", "yLabel", "note"]);
+    if (Object.keys(chart).some((key) => !chartKeys.has(key))) fail("chart contains an unsupported field");
+    const conflicts = ["pre", "preTitle", "table", "lines", "cover", "title", "emphasis", "quote", "sourceParts"];
+    if (conflicts.some((key) => key in value)) fail("chart cannot share a slide with another content type or continuation");
+    const native = "sourceIds" in value;
+    const derived = "derivedFrom" in value;
+    if (native === derived || !sourceIds(value[native ? "sourceIds" : "derivedFrom"])) {
+      fail("exactly one non-empty sourceIds or derivedFrom array is required");
+    } else if (derived) {
+      const previous = raw[index - 1];
+      const previousIds = isRecord(previous) && !previous.chart && Array.isArray(previous.sourceIds) ? previous.sourceIds : [];
+      if (!(value.derivedFrom as string[]).every((id) => previousIds.includes(id))) {
+        fail("derived chart must immediately follow the source slide named by derivedFrom");
+      }
+    }
+    if (!Array.isArray(chart.items)) { fail("chart items must be an array"); continue; }
+    const maxItems = kind === "flow" ? 4 : kind === "compare" ? 2 : 6;
+    if (chart.items.length < 2 || chart.items.length > maxItems) fail(`chart requires 2..${maxItems} items`);
+    if (chart.items.filter((item) => isRecord(item) && item.emphasis === true).length > 1) fail("only one item may be emphasized");
+    let previousX = -Infinity;
+    for (const [itemIndex, item] of chart.items.entries()) {
+      if (!isRecord(item)) { fail(`item ${itemIndex + 1} must be an object`); continue; }
+      if (typeof item.label !== "string" || !item.label.trim()) fail(`item ${itemIndex + 1} needs a non-empty label`);
+      if ("emphasis" in item && typeof item.emphasis !== "boolean") fail(`item ${itemIndex + 1} emphasis must be boolean`);
+      const itemKeys = new Set(["label", "emphasis", ...(kind === "bar" ? ["value"] : kind === "line" ? ["x", "value"] : ["text"])]);
+      if (Object.keys(item).some((key) => !itemKeys.has(key))) fail(`item ${itemIndex + 1} contains an unsupported field`);
+      if (kind === "bar" || kind === "line") {
+        if (typeof item.value !== "number" || !Number.isFinite(item.value)) fail(`item ${itemIndex + 1} value must be finite`);
+      }
+      if (kind === "line") {
+        if (typeof item.x !== "number" || !Number.isFinite(item.x) || item.x <= previousX) fail(`item ${itemIndex + 1} x must be finite and strictly increasing`);
+        if (typeof item.x === "number") previousX = item.x;
+      }
+      if (kind === "compare" && (typeof item.text !== "string" || !item.text.trim())) fail(`item ${itemIndex + 1} comparison text is required`);
+      if (kind === "flow" && "text" in item && typeof item.text !== "string") fail(`item ${itemIndex + 1} flow text must be a string`);
+    }
+  }
+  return errors;
+}
+
+function isEmbeddedAsset(uri: string, family: "font" | "image"): boolean {
+  const match = uri.match(/^data:([^;,]+);base64,([A-Za-z0-9+/]+={0,2})$/);
+  if (!match || match[2].length % 4 !== 0) return false;
+  const mime = match[1].toLowerCase();
+  const bytes = Buffer.from(match[2], "base64");
+  if (!bytes.length || bytes.toString("base64") !== match[2]) return false;
+  const start = bytes.subarray(0, 4).toString("latin1");
+  if (family === "font") {
+    return (mime === "font/ttf" && (start === "\x00\x01\x00\x00" || start === "true"))
+      || (mime === "font/otf" && start === "OTTO")
+      || (mime === "font/woff" && start === "wOFF")
+      || (mime === "font/woff2" && start === "wOF2");
+  }
+  return (mime === "image/png" && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])))
+    || (mime === "image/jpeg" && bytes.length >= 3 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
+    || (mime === "image/webp" && start === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP");
+}
+
+function offlineViolations(html: string, style: string, script: string): string[] {
+  // Inspect markup separately so literal source text and the SVG namespace are not mistaken for dependencies.
+  const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, (tag) => tag.match(/^<script\b[^>]*>/i)?.[0] || "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, "");
+  const violations: string[] = [];
+  if ([...html.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>/gi)].length !== 1) violations.push("deck must contain exactly one inline runtime script");
+  if (/<(?:link|iframe|video|audio|source|object|embed|foreignObject)\b/i.test(markup)) violations.push("resource or embedded-content tag");
+  if (/<script\b[^>]*\bsrc\s*=/i.test(markup)) violations.push("external script");
+  if (/<[a-z][^>]*\bon[a-z]+\s*=/i.test(markup)) violations.push("inline event handler");
+  for (const match of markup.matchAll(/<([a-z][a-z0-9:-]*)\b([^>]*)>/gi)) {
+    const tag = match[1].toLowerCase();
+    const attributes = [...match[2].matchAll(/(?:^|\s)([a-z][a-z0-9:-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi)]
+      .map((attribute) => ({ name: attribute[1].toLowerCase(), value: attribute[2] ?? attribute[3] ?? attribute[4] ?? "" }));
+    const rasterReferences = attributes.filter(({ name }) => tag === "img" ? name === "src" : tag === "image" && ["href", "xlink:href"].includes(name));
+    if (["img", "image"].includes(tag) && (!rasterReferences.length || !rasterReferences.every(({ value }) => isEmbeddedAsset(value, "image")))) violations.push("image must embed PNG, JPEG or WEBP with a matching data MIME and signature");
+    for (const attribute of attributes) {
+      if (["srcset", "poster"].includes(attribute.name)) violations.push("unsupported resource attribute");
+      if (!["href", "xlink:href", "src"].includes(attribute.name)) continue;
+      if (rasterReferences.includes(attribute)) continue;
+      if (!attribute.value.startsWith("#")) violations.push("non-local resource reference");
+    }
+  }
+  const inlineStyles = [...markup.matchAll(/\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)].map((match) => match[1] ?? match[2] ?? "").join("\n");
+  const css = `${style}\n${inlineStyles}`;
+  if (/@import\b|\bimage-set\s*\(/i.test(css)) violations.push("CSS dependency");
+  const fontFaces = [...css.matchAll(/@font-face\s*\{[^}]*\}/gi)].map((match) => ({ start: match.index!, end: match.index! + match[0].length }));
+  for (const match of css.matchAll(/\burl\s*\(\s*([^)]+)\)/gi)) {
+    const raw = match[1].trim();
+    const uri = raw.startsWith('"') || raw.startsWith("'") ? (raw.at(-1) === raw[0] ? raw.slice(1, -1) : "") : raw;
+    const fontFace = fontFaces.find((range) => match.index! > range.start && match.index! < range.end);
+    const descriptor = fontFace && [...css.slice(fontFace.start, match.index!).matchAll(/[;{]\s*([a-z-]+)\s*:/gi)].at(-1)?.[1].toLowerCase();
+    const isFontSource = descriptor === "src";
+    if (!isFontSource || !isEmbeddedAsset(uri, "font")) violations.push("CSS URL must be an embedded TTF, OTF, WOFF or WOFF2 font source");
+  }
+  if (/\b(?:fetch|importScripts)\s*\(|\bnew\s+(?:XMLHttpRequest|WebSocket|EventSource|Worker)\s*\(|\bimport\s*\(/.test(script)) violations.push("script network dependency");
+  if (/createElement(?:NS)?\(\s*(?:[^,]+,\s*)?["'](?:img|image|script|iframe|link|object|embed|foreignObject)["']/i.test(script)) violations.push("script resource element");
+  return violations;
+}
+
+function rawSlidesFrom(script: string): unknown {
+  const match = script.match(/\bconst\s+RAW_SLIDES\s*=\s*([\s\S]*?);\s*(?:\n|$)/);
+  if (!match) throw new Error("RAW_SLIDES JSON assignment not found");
+  return JSON.parse(match[1]);
+}
+
+// A deliberately small DOM fixture tests geometry and text safety, not browser layout.
+class ChartFixtureNode {
+  tagName: string;
+  className = "";
+  textContent = "";
+  children: ChartFixtureNode[] = [];
+  dataset: Record<string, string> = {};
+  attributes: Record<string, string> = {};
+  properties: Record<string, string> = {};
+  constructor(tag: string) { this.tagName = tag; }
+  classList = { add: (...names: string[]) => { this.className = [this.className, ...names].filter(Boolean).join(" "); } };
+  style = { setProperty: (name: string, value: unknown) => { this.properties[name] = String(value); } };
+  setAttribute(name: string, value: string) { this.attributes[name] = value; if (name === "class") this.className = value; }
+  append(...nodes: ChartFixtureNode[]) { this.children.push(...nodes); }
+  appendChild(node: ChartFixtureNode) { this.children.push(node); return node; }
+  set innerHTML(_value: string) { throw new Error("Chart text must not be assigned as HTML"); }
+}
+
+function chartRendererFixtures(template: string): Record<string, boolean> {
+  const script = template.match(/<script>([\s\S]*?)<\/script>/i)?.[1] || "";
+  const start = script.indexOf("function chartElement(");
+  const end = script.indexOf("SLIDES.forEach", start);
+  if (start < 0 || end < 0) return { rendererExtracted: false };
+  const source = script.slice(start, end);
+  const document = {
+    createElement: (tag: string) => new ChartFixtureNode(tag),
+    createElementNS: (_namespace: string, tag: string) => new ChartFixtureNode(tag)
+  };
+  const body = new ChartFixtureNode("body");
+  const palette: Record<string, string> = { "--fg": "#E8E5DF", "--bg": "#18191C", "--hl": "#D7AF74" };
+  const getComputedStyle = (node: ChartFixtureNode) => {
+    if (node !== body) throw new Error("Fixture only provides the body palette");
+    return { getPropertyValue: (name: string) => ` ${palette[name] || ""} `, fontFamily: '"Fixture Mono", monospace' };
+  };
+  const render = (chart: unknown): ChartFixtureNode => runInNewContext(`${source}\nrenderChart(input);`, { document, body, getComputedStyle, input: chart }, { timeout: 1000 });
+  const all = (node: ChartFixtureNode): ChartFixtureNode[] => [node, ...node.children.flatMap(all)];
+  const byClass = (node: ChartFixtureNode, name: string) => all(node).filter((item) => item.className.split(/\s+/).includes(name));
+  const text = (node: ChartFixtureNode): string => node.textContent + node.children.map(text).join("");
+  try {
+    const bars = render({ kind: "bar", title: "收支", items: [{ label: "负", value: -2 }, { label: "零", value: 0 }, { label: "正", value: 3 }] });
+    const tracks = byClass(bars, "bar-track");
+    const zeroBars = render({ kind: "bar", title: "零", items: [{ label: "A", value: 0 }, { label: "B", value: 0 }] });
+    const line = render({ kind: "line", title: "变化", items: [{ label: "A", x: 1, value: -2 }, { label: "B", x: 2, value: 0 }, { label: "C", x: 5, value: 3, emphasis: true }] });
+    const points = byClass(line, "plot-point");
+    const xs = points.map((node) => Number(node.attributes.cx));
+    const mobile = byClass(line, "chart-data")[0];
+    const unsafeTitle = '<img src="missing.png"> & <script>';
+    const literalText = render({ kind: "compare", title: unsafeTitle, items: [{ label: "<svg>", text: "fetch('x')" }, { label: "B", text: "https://example.com" }] });
+    const compare = byClass(literalText, "relation-item");
+    return {
+      sharedBarZero: tracks.length === 3 && tracks.every((node) => node.properties["--zero"] === "40%"),
+      signedBarGeometry: tracks.map((node) => node.properties["--start"]).join() === "0%,40%,40%" && tracks.map((node) => node.properties["--length"]).join() === "40%,0%,60%",
+      allZeroBarsFinite: byClass(zeroBars, "bar-track").every((node) => Object.values(node.properties).every((value) => Number.isFinite(Number.parseFloat(value)))),
+      numericLineSpacing: xs.length === 3 && Math.abs((xs[1] - xs[0]) / (xs[2] - xs[0]) - .25) < 1e-9,
+      lineUsesOriginalPoints: byClass(line, "plot-line")[0]?.attributes.points.split(" ").length === 3 && points.length === 3,
+      svgLineHasExplicitPaint: byClass(line, "plot-line")[0]?.attributes.fill === "none" && byClass(line, "plot-line")[0]?.attributes.stroke === palette["--fg"] && byClass(line, "plot-axis")[0]?.attributes.stroke === palette["--fg"],
+      svgPointsHaveExplicitPaint: points.length === 3 && points.slice(0, 2).every((node) => node.attributes.fill === palette["--bg"] && node.attributes.stroke === palette["--fg"]) && points[2].attributes.fill === palette["--hl"] && points[2].attributes.stroke === palette["--hl"],
+      svgLabelsHaveExplicitPaint: all(line).filter((node) => node.tagName === "text").length === 6 && all(line).filter((node) => node.tagName === "text").every((node) => node.attributes.fill === palette["--fg"] && node.attributes["font-size"] === "32" && node.attributes["font-family"] === '"Fixture Mono", monospace'),
+      mobileDataKeepsOrder: mobile?.children.length === 3 && text(mobile.children[0]).includes("A") && text(mobile.children[1]).includes("B") && text(mobile.children[2]).includes("C"),
+      mobileDataKeepsCoordinates: mobile?.children.length === 3 && byClass(mobile, "chart-label").map((node) => node.textContent).join("|") === "A · 1|B · 2|C · 5",
+      literalChartText: byClass(literalText, "chart-title")[0]?.textContent === unsafeTitle && all(literalText).every((node) => !["img", "script", "svg"].includes(node.tagName)),
+      comparisonPreservesOrder: compare.length === 2 && text(compare[0]) === "<svg>fetch('x')" && text(compare[1]) === "Bhttps://example.com"
+    };
+  } catch { return { rendererExecutesSafely: false }; }
+}
+
 function validateHtml(original: string, options: Pick<Options, "theme" | "template">): Check[] {
   const html = options.template || original.includes("{{SLIDES_JSON}}")
     ? materializeTemplate(original, options.theme || "hacker")
     : original;
-  const style = html.match(/<style>([\s\S]*?)<\/style>/i)?.[1] ?? "";
+  const style = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((match) => match[1]).join("\n");
   const script = html.match(/<script>([\s\S]*?)<\/script>/i)?.[1] ?? "";
+  const runtimeScript = script.replace(/\bconst\s+RAW_SLIDES\s*=\s*[\s\S]*?;\s*(?:\n|$)/, "const RAW_SLIDES = [];\n");
+  const staticMarkup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
   const checks: Check[] = [];
   const add = (id: string, pass: boolean, detail: string) => checks.push({ id, pass, detail });
 
@@ -118,7 +333,7 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
   }
   if (syntaxPass) add("javascript-syntax", true, "script compiles");
 
-  add("template-version", html.includes('data-template-version="4.5.0"'), "template version is 4.5.0");
+  add("template-version", html.includes(`data-template-version="${VERSION}"`), `template version is ${VERSION}`);
   add("title-present", /<title>[^<]+<\/title>/i.test(html), "document title is non-empty");
   add("cover-normalization", script.includes("function normalizeSlides") && script.includes("cover: true") && script.includes("linesText(slides[0]) === title"), "title cover is synthesized or deduplicated");
   add("no-information-header", !/<header\b/i.test(html) && !/first-guide/i.test(html), "no header or top guide");
@@ -141,6 +356,7 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
     "function compositionFor(slide)",
     'if (slide?.cover) return "identity"',
     'if (slide?.emphasis || slide?.title) return "chapter"',
+    'if (slide?.chart) return "chart"',
     'if (slide?.table || slide?.pre != null) return "evidence"',
     'if (slide?.quote) return "quotation"',
     'slide?.semanticGroup === "list-run" || (lineCount >= 2 && lineCount <= 4)',
@@ -148,7 +364,7 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
     'return "statement"',
     "element.dataset.composition = compositionFor(slide)"
   ];
-  add("composition-grammar", compositionTokens.every((token) => script.includes(token)), "all six composition roles derive deterministically from source-semantic fields");
+  add("composition-grammar", compositionTokens.every((token) => script.includes(token)), "all seven composition roles derive deterministically from source-semantic fields");
   add("composition-audit-interface", script.includes("composition: slides[index]?.dataset.composition"), "runtime audit exposes each slide's composition role");
 
   const whitespaceBudget = ruleBodies(style, ".lines").some((body) =>
@@ -167,16 +383,26 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
   add("title-short-signal", titleSignal, "title page uses a short signal rule instead of a full-width border");
 
   const cssMotion = style.match(/\b(?:animation|transition|view-transition)(?:-[a-z-]+)?\s*:|@keyframes\b|scroll-behavior\s*:\s*smooth\b/gi) || [];
-  const jsMotion = script.match(/\.animate\s*\(|setInterval\s*\(/g) || [];
-  add("zero-motion", cssMotion.length === 0 && jsMotion.length === 0, `css=${cssMotion.length}, js=${jsMotion.length}`);
+  const jsMotion = runtimeScript.match(/\.animate\s*\(|set(?:Interval|Timeout)\s*\(/g) || [];
+  const svgMotion = [...(staticMarkup.match(/<(?:animate|animateMotion|animateTransform|set)\b/gi) || []), ...(runtimeScript.match(/createElementNS\([^\n]*["'](?:animate|animateMotion|animateTransform|set)["']/gi) || [])];
+  add("zero-motion", cssMotion.length === 0 && jsMotion.length === 0 && svgMotion.length === 0, `css=${cssMotion.length}, js=${jsMotion.length}, svg=${svgMotion.length}`);
 
-  const externalMarkup = html.match(/<(?:img|svg|link|iframe|video|audio|source)\b|https?:\/\//gi) || [];
-  const externalCss = style.match(/@import\b|\burl\s*\(|\bimage-set\s*\(/gi) || [];
-  add("offline", externalMarkup.length === 0 && externalCss.length === 0, `markup=${externalMarkup.length}, css=${externalCss.length}`);
+  const externalResources = offlineViolations(html, style, runtimeScript);
+  add("offline", externalResources.length === 0, externalResources.join("; ") || "inline SVG and embedded fonts/raster images allowed; no external resources");
 
   add("render-lines", script.includes("slide.lines?.length") && script.includes('lines.className = "lines fit-box"'), "lines renderer exists");
   add("render-table", script.includes("slide.table") && script.includes("slide.table.header === true") && script.includes('document.createElement("thead")') && script.includes('document.createElement("tbody")'), "table renderer respects explicit header flag and semantic sections");
   add("render-pre", script.includes("slide.pre != null") && script.includes('document.createElement("pre")'), "pre renderer exists");
+  const chartTokens = ["function renderChart(chart)", "document.createElementNS", "chart-wrap fit-box", "chart-title", "chart-body", "chart-note", "chart-svg", "dataset.chartKind"];
+  add("render-chart", chartTokens.every((token) => script.includes(token)), "chart renderer exposes kind, native SVG, title, body and note");
+  add("chart-audit-interface", ["chartKind: slides[index]?.dataset.chartKind", "derivedFrom: slides[index]?.dataset.derivedFrom", "element.dataset.derivedFrom"].every((token) => script.includes(token)), "runtime audit exposes chart kind and derived provenance");
+  add("chart-portrait-data", ruleBodies(style, ".chart-data").some((body) => /display\s*:\s*none/.test(body))
+    && ruleBodies(style, ".chart-data").some((body) => /display\s*:\s*grid/.test(body))
+    && ruleBodies(style, ".chart-svg").some((body) => /display\s*:\s*none/.test(body)), "line charts have a narrow-screen data reading view");
+  let chartErrors: string[];
+  try { chartErrors = chartDataErrors(rawSlidesFrom(script)); }
+  catch (error) { chartErrors = [String(error)]; }
+  add("chart-data-and-provenance", chartErrors.length === 0, chartErrors.join("; ") || "chart schemas and immediate source provenance are valid");
 
   const layoutTokens = ["lineCount", "maxWeight", "totalWeight", '"rows"', '"single"', "dataset.density"];
   add("density-layout", layoutTokens.every((token) => script.includes(token)), "line count and density route a stable rows/single layout");
@@ -219,41 +445,51 @@ function validateHtml(original: string, options: Pick<Options, "theme" | "templa
   add("audit-interface", script.includes("window.__DECK_AUDIT") && script.includes("currentLayout") && script.includes("footerState"), "runtime audit interface exists");
 
   const activeTheme = options.theme || html.match(/<body[^>]*data-theme="([^"]+)"/i)?.[1];
+  if (["hacker", "cyber", "hacker-dark"].includes(activeTheme || "")) {
+    const noTexture = !/(?:repeating-)?radial-gradient\s*\(|repeating-linear-gradient\s*\(|(?:-webkit-)?mask-image\s*:|(?:backdrop-)?filter\s*:|\b(?:text-shadow|box-shadow)\s*:/i.test(style);
+    const stageOrnament = [...style.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some((match) =>
+      splitSelectors(match[1]).some((selector) => /hacker|cyber/.test(selector)
+        && /\.slide(?:(?:\[[^\]]+\])|(?::is\([^)]*\)))*::(?:before|after)\s*$/.test(selector))
+      && !/\b(?:content\s*:\s*none|display\s*:\s*none)\b/.test(match[2])
+    );
+    add("hacker-flat-fields", noTexture && !stageOrnament, "Hacker uses flat fields without texture, glow, filters or page-wide pseudo-element rails");
+  }
   if (activeTheme === "hacker" || activeTheme === "cyber") {
     const hackerColors = [
-      /--hacker-void:\s*#07110D/i,
-      /--hacker-paper:\s*#EAF4EC/i,
-      /--hacker-signal:\s*#00C46A/i
+      /--hacker-void:\s*#18191C/i,
+      /--hacker-paper:\s*#F2F0EB/i,
+      /--hacker-signal:\s*#D7AF74/i,
+      /--hl:\s*#825B25/i
     ];
-    add("hacker-palette", hackerColors.every((pattern) => pattern.test(style)), "exact void, paper and signal colors exist");
-    add("hacker-reading-strategy", style.includes('body[data-theme="hacker"] .slide') && style.includes('slide[data-cover="true"]') && style.includes("var(--hacker-paper)") && style.includes("var(--hacker-void)"), "regular paper and dark cover/chapter rules exist");
+    add("hacker-palette", hackerColors.every((pattern) => pattern.test(style)), "graphite, warm paper and amber palette with readable light-theme highlight exists");
+    const genericFields = ruleBodies(style, ".slide").some((body) => /background\s*:\s*var\(--bg\)/.test(body))
+      && ruleBodies(style, '.slide[data-cover="true"]').some((body) => /background\s*:\s*var\(--acc-bg\)/.test(body));
+    const paperTheme = ruleBodies(style, 'body[data-theme="hacker"]').some((body) => body.includes("--bg: var(--hacker-paper)") && body.includes("--acc-bg: var(--hacker-void)"));
+    add("hacker-reading-strategy", genericFields && paperTheme, "regular paper and dark cover/chapter use inherited flat color fields");
     const hackerSlideBodies = ruleBodies(style, 'body[data-theme="hacker"] .slide');
-    const hackerRailBodies = ruleBodies(style, 'body[data-theme="hacker"] .slide::after');
-    const symmetricHacker = hackerSlideBodies.length > 0
-      && hackerSlideBodies.every((body) => !/padding-left\s*:/.test(body))
-      && style.includes("padding: clamp(28px, 6vmin, 96px) var(--stage-inline)")
-      && hackerRailBodies.some((body) => /left\s*:\s*50%/.test(body) && /translateX\(-50%\)/.test(body));
-    add("symmetric-hacker-stage", symmetricHacker, "Hacker ornament and stage padding share the centered axis");
+    const symmetricHacker = hackerSlideBodies.every((body) => !/padding-left\s*:/.test(body))
+      && style.includes("padding: clamp(28px, 6vmin, 96px) var(--stage-inline)");
+    add("symmetric-hacker-stage", symmetricHacker, "Hacker stage padding remains symmetric");
   }
   if (activeTheme === "hacker-dark") {
     const darkColors = [
-      /--hacker-dark-bg:\s*#06110D/i,
-      /--hacker-dark-deep:\s*#020806/i,
-      /--hacker-dark-panel:\s*#0A1A13/i,
-      /--hacker-dark-fg:\s*#CFE1D5/i,
-      /--hacker-dark-signal:\s*#25E981/i
+      /--hacker-dark-bg:\s*#18191C/i,
+      /--hacker-dark-deep:\s*#101113/i,
+      /--hacker-dark-panel:\s*#212226/i,
+      /--hacker-dark-fg:\s*#E8E5DF/i,
+      /--hacker-dark-muted:\s*#99958E/i,
+      /--hacker-dark-signal:\s*#D7AF74/i
     ];
-    add("hacker-dark-palette", darkColors.every((pattern) => pattern.test(style)), "exact low-glare dark Hacker palette exists");
-    add("hacker-dark-contrast", contrastRatio("CFE1D5", "06110D") >= 9, `contrast=${contrastRatio("CFE1D5", "06110D").toFixed(2)}:1`);
+    add("hacker-dark-palette", darkColors.every((pattern) => pattern.test(style)), "exact graphite, warm-white and amber Hacker palette exists");
+    add("hacker-dark-contrast", contrastRatio("E8E5DF", "18191C") >= 9, `contrast=${contrastRatio("E8E5DF", "18191C").toFixed(2)}:1`);
     const darkSlideBodies = ruleBodies(style, 'body[data-theme="hacker-dark"] .slide');
-    const darkRailBodies = ruleBodies(style, 'body[data-theme="hacker-dark"] .slide::after');
-    const darkCoverBodies = ruleBodies(style, 'body[data-theme="hacker-dark"] .slide[data-cover="true"]');
+    const darkCoverBodies = [...ruleBodies(style, 'body[data-theme="hacker-dark"] .slide[data-cover="true"]'), ...ruleBodies(style, 'body[data-theme="hacker-dark"] .slide:is([data-cover="true"], [data-emphasis="true"])')];
     add("hacker-dark-all-pages", darkSlideBodies.some((body) => body.includes("var(--hacker-dark-bg)")) && darkCoverBodies.some((body) => body.includes("var(--hacker-dark-deep)")), "regular and cover pages both use distinct dark fields");
-    add("hacker-dark-signal-scope", style.includes("--fg: var(--hacker-dark-fg)") && !/\.line\s*\{[^}]*color\s*:\s*var\(--hacker-dark-signal\)/s.test(style), "signal green is not the body-text color");
+    add("hacker-dark-signal-scope", style.includes("--fg: var(--hacker-dark-fg)") && !/\.line\s*\{[^}]*color\s*:\s*var\(--hacker-dark-signal\)/s.test(style), "signal amber is not the body-text color");
     add("hacker-dark-no-effects", !/\b(?:text-shadow|box-shadow)\s*:|drop-shadow\s*\(|@keyframes\b|\banimation(?:-[a-z-]+)?\s*:|\btransition(?:-[a-z-]+)?\s*:/i.test(style), "dark theme has no glow, shadow, animation, or transition effects");
     const symmetricDark = darkSlideBodies.length > 0
-      && darkRailBodies.some((body) => /left\s*:\s*50%/.test(body) && /translateX\(-50%\)/.test(body));
-    add("symmetric-hacker-dark-stage", symmetricDark, "dark Hacker ornament remains on the centered stage axis");
+      && darkSlideBodies.every((body) => !/padding-left\s*:/.test(body));
+    add("symmetric-hacker-dark-stage", symmetricDark, "dark Hacker stage padding remains symmetric");
   }
 
   if (options.template) {
@@ -301,6 +537,13 @@ async function selfTest() {
     return validateHtml(bad, { theme: "hacker", template: true })
       .some((check) => check.id === "zero-motion" && !check.pass);
   });
+  const svgMotionFixturesRejected = [
+    '<svg xmlns="http://www.w3.org/2000/svg"><animate attributeName="x" /></svg>',
+    '<svg><animateMotion path="M 0 0 L 1 1" /></svg>',
+    '<svg><animateTransform attributeName="transform" /></svg>',
+    '<svg><set attributeName="visibility" to="hidden" /></svg>'
+  ].every((fixture) => validateHtml(template.replace("</main>", `${fixture}</main>`), { theme: "hacker", template: true })
+    .some((check) => check.id === "zero-motion" && !check.pass));
 
   const resourceFixtures = [
     ".bad{background-image:url(external.png)}",
@@ -312,6 +555,63 @@ async function selfTest() {
     return validateHtml(bad, { theme: "hacker", template: true })
       .some((check) => check.id === "offline" && !check.pass);
   });
+  const dataUri = (mime: string, bytes: Buffer) => `data:${mime};base64,${bytes.toString("base64")}`;
+  const pngUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=";
+  const jpegUri = dataUri("image/jpeg", Buffer.from([255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 255, 217]));
+  const webpUri = dataUri("image/webp", Buffer.concat([Buffer.from("RIFF"), Buffer.from([4, 0, 0, 0]), Buffer.from("WEBP")]));
+  const fontUris = [
+    dataUri("font/ttf", Buffer.from([0, 1, 0, 0, 0, 0, 0, 0])),
+    dataUri("font/otf", Buffer.from("OTTOfixture")),
+    dataUri("font/woff", Buffer.from("wOFFfixture")),
+    dataUri("font/woff2", Buffer.from("wOF2fixture"))
+  ];
+  const embeddedAssetFixtures = [
+    ...[pngUri, jpegUri, webpUri].map((uri) => template.replace("</main>", `<img src="${uri}" alt="embedded" /></main>`)),
+    template.replace("</main>", `<svg><image href="${pngUri}" /></svg></main>`),
+    template.replace("</main>", `<svg><image xlink:href="${pngUri}" /></svg></main>`),
+    ...fontUris.map((uri) => template.replace("</head>", `<style data-embedded-font>@font-face{font-family:"Fixture";src:url("${uri}")}</style></head>`)),
+    template.replace("</style>", `@font-face{font-family:"Fixture";src:url("${fontUris[0]}"), url("${fontUris[1]}")}</style>`)
+  ];
+  const embeddedAssetsAccepted = embeddedAssetFixtures.every((fixture) => validateHtml(fixture, { theme: "hacker", template: true }).find((check) => check.id === "offline")?.pass === true);
+  const unsupportedDataAssets = [
+    dataUri("image/gif", Buffer.from("GIF89afixture")),
+    dataUri("image/svg+xml", Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'></svg>")),
+    dataUri("image/png", Buffer.from("GIF89afixture")),
+    "data:image/png;base64,%%%",
+    "data:image/png;base64,AAAA",
+    fontUris[0]
+  ];
+  const invalidEmbeddedAssetsRejected = [
+    ...unsupportedDataAssets.map((uri) => template.replace("</main>", `<img src="${uri}" /></main>`)),
+    template.replace("</main>", '<img src="relative.png" /></main>'),
+    template.replace("</main>", '<img src="https://example.com/image.png" /></main>'),
+    template.replace("</main>", '<img /></main>'),
+    template.replace("</main>", `<img src="${pngUri}" srcset="relative.png 2x" /></main>`),
+    template.replace("</main>", '<svg><image href="#local" /></svg></main>'),
+    template.replace("</main>", `<svg><use href="${pngUri}" /></svg></main>`),
+    template.replace("</style>", `@font-face{font-family:"Bad";src:url("${pngUri}")}</style>`),
+    template.replace("</style>", `@font-face{font-family:"Bad";src:url("${dataUri("font/ttf", Buffer.from("<svg>"))}")}</style>`),
+    template.replace("</style>", `.bad{background:url("${pngUri}")}</style>`),
+    template.replace("</style>", `.bad{background:url("${fontUris[0]}")}</style>`),
+    template.replace("</style>", ".bad{fill:url(#local)}</style>"),
+    template.replace("</head>", '<style data-font>@font-face{font-family:"Bad";src:url(relative.ttf)}</style></head>')
+  ].every((fixture) => validateHtml(fixture, { theme: "hacker", template: true }).some((check) => check.id === "offline" && !check.pass));
+  const markupResourceFixturesRejected = [
+    '<script src="local.js"></script>',
+    '<script>fetch("https://example.com")</script>',
+    '<svg><image href="external.png" /></svg>',
+    '<svg><use href="symbols.svg#chart" /></svg>',
+    '<svg><use xlink:href="https://example.com/chart.svg#chart" /></svg>',
+    '<svg><foreignObject><div>embedded HTML</div></foreignObject></svg>',
+    '<svg style="fill: url(external.svg#shape)"></svg>'
+  ].every((fixture) => validateHtml(template.replace("</main>", `${fixture}</main>`), { theme: "hacker", template: true })
+    .some((check) => check.id === "offline" && !check.pass));
+  const inlineSvgAccepted = validateHtml(template.replace("</main>", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path id="local" d="M 0 0 L 100 100"/><use href="#local"/></svg></main>'), { theme: "hacker", template: true })
+    .find((check) => check.id === "offline")?.pass === true;
+  const literalSource = [{ chart: { kind: "compare", title: "<svg> <script> https://example.com", items: [{ label: "<animate>", text: "fetch('data')" }, { label: "B", text: "document.createElement('img')" }] }, sourceIds: ["SRC-LITERAL"] }];
+  const literalDeck = materializeTemplate(template).replace(/\bconst\s+RAW_SLIDES\s*=\s*[\s\S]*?;\s*(?:\n|$)/, () => `const RAW_SLIDES = ${JSON.stringify(literalSource)};\n`);
+  const literalSourceAccepted = validateHtml(literalDeck, { theme: "hacker", template: false })
+    .filter((check) => ["javascript-syntax", "offline", "zero-motion", "chart-data-and-provenance"].includes(check.id)).every((check) => check.pass);
 
   const spatialFixtures = [
     {
@@ -342,7 +642,15 @@ async function selfTest() {
     },
     {
       id: "symmetric-hacker-stage",
-      html: template.replace("left: 50%;\n    top: clamp(22px, 5vh, 66px);", "left: 12%;\n    top: clamp(22px, 5vh, 66px);")
+      html: template.replace("</style>", 'body[data-theme="hacker"] .slide { padding-left: 12vw; }</style>')
+    },
+    {
+      id: "hacker-flat-fields",
+      html: template.replace("</style>", '.bad { background: repeating-linear-gradient(0deg, transparent 0 5px, green 6px); }</style>')
+    },
+    {
+      id: "hacker-flat-fields",
+      html: template.replace("</style>", 'body[data-theme="hacker-dark"] .slide::after { content: ""; width: 80vw; }</style>')
     },
     {
       id: "composition-grammar",
@@ -396,19 +704,71 @@ async function selfTest() {
     && mathSegments("$20/month $200/month $???/month").length === 0;
   const dollarSafeMaterialization = materializeTemplate(template).includes('"$$C(Q)=C_1 \\\\cdot Q^{-b}$$"');
 
-  const pass = goodPass && darkPass && motionFixturesRejected && resourceFixturesRejected && spatialFixturesRejected && semanticFixturesRejected && layoutPass && mathPass && dollarSafeMaterialization;
+  const nativeChart = (chart: unknown) => ({ chart, sourceIds: ["SRC-CHART"] });
+  const bar = { kind: "bar", title: "收支", items: [{ label: "负", value: -2 }, { label: "零", value: 0 }, { label: "正", value: 3, emphasis: true }] };
+  const line = { kind: "line", title: "增长", items: [{ label: "A", x: 1, value: 2 }, { label: "B", x: 4, value: 2 }] };
+  const validChartFixtures = [
+    [nativeChart(bar)],
+    [nativeChart(line)],
+    [nativeChart({ kind: "flow", title: "过程", items: [{ label: "输入" }, { label: "输出", text: "结果" }] })],
+    [nativeChart({ kind: "compare", title: "取舍", items: [{ label: "A", text: "简洁" }, { label: "B", text: "完整" }] })],
+    [{ lines: [{ chunks: [{ t: "原文保留" }] }], sourceIds: ["SRC-ORIGINAL"] }, { chart: bar, derivedFrom: ["SRC-ORIGINAL"] }]
+  ];
+  const invalidChartFixtures = [
+    [nativeChart({ ...bar, kind: "pie" })],
+    [nativeChart({ ...bar, xLabel: "unused" })],
+    [nativeChart({ ...bar, title: " " })],
+    [nativeChart({ ...bar, items: [{ label: "唯一", value: 1 }] })],
+    [nativeChart({ ...bar, items: Array.from({ length: 7 }, (_, i) => ({ label: `条${i}`, value: i })) })],
+    [nativeChart({ ...bar, items: [{ label: "A", value: Number.NaN }, { label: "B", value: 1 }] })],
+    [nativeChart({ ...bar, items: [{ label: "A", value: Infinity }, { label: "B", value: 1 }] })],
+    [nativeChart({ ...bar, items: [{ label: "A", value: "1" }, { label: "B", value: 1 }] })],
+    [nativeChart({ ...bar, items: [{ label: "A", value: 1, emphasis: true }, { label: "B", value: 2, emphasis: true }] })],
+    [nativeChart({ ...line, items: [{ label: "A", x: 1, value: 0 }, { label: "B", x: 1, value: 2 }] })],
+    [nativeChart({ ...line, items: [{ label: "A", x: 2, value: 0 }, { label: "B", x: 1, value: 2 }] })],
+    [nativeChart({ ...line, items: [{ label: "A", x: 1, value: 0 }, { label: "B", x: Infinity, value: 2 }] })],
+    [nativeChart({ kind: "flow", title: "过程", items: Array.from({ length: 5 }, (_, i) => ({ label: String(i) })) })],
+    [nativeChart({ kind: "flow", title: "过程", unit: "unused", items: [{ label: "A" }, { label: "B" }] })],
+    [nativeChart({ kind: "compare", title: "比较", items: [{ label: "A", text: "A" }, { label: "B" }] })],
+    [{ chart: bar }],
+    [{ chart: bar, sourceIds: [] }],
+    [{ chart: bar, sourceIds: ["SRC-A"], derivedFrom: ["SRC-A"] }],
+    [{ ...nativeChart(bar), lines: [] }],
+    [{ ...nativeChart(bar), sourceParts: [] }],
+    [{ chart: bar, derivedFrom: ["SRC-MISSING"] }],
+    [{ sourceIds: ["SRC-A"] }, { sourceIds: ["SRC-B"] }, { chart: bar, derivedFrom: ["SRC-A"] }]
+  ];
+  const validChartsAccepted = validChartFixtures.every((slides) => chartDataErrors(slides).length === 0);
+  const invalidChartsRejected = invalidChartFixtures.every((slides) => chartDataErrors(slides).length > 0);
+  const materializedChartMutationRejected = validateHtml(materializeTemplate(template).replace('"kind":"bar"', '"kind":"pie"'), { theme: "hacker", template: false })
+    .some((check) => check.id === "chart-data-and-provenance" && !check.pass);
+  const chartRendererBehavior = chartRendererFixtures(template);
+  const chartRendererPass = Object.values(chartRendererBehavior).every(Boolean);
+
+  const pass = goodPass && darkPass && motionFixturesRejected && svgMotionFixturesRejected && resourceFixturesRejected && embeddedAssetsAccepted && invalidEmbeddedAssetsRejected && markupResourceFixturesRejected && inlineSvgAccepted && literalSourceAccepted && spatialFixturesRejected && semanticFixturesRejected && layoutPass && mathPass && dollarSafeMaterialization && validChartsAccepted && invalidChartsRejected && materializedChartMutationRejected && chartRendererPass;
   console.log(JSON.stringify({
     status: pass ? "PASS" : "FAIL",
     goodTemplateChecks: `${goodChecks.filter((check) => check.pass).length}/${goodChecks.length}`,
     darkTemplateChecks: `${darkChecks.filter((check) => check.pass).length}/${darkChecks.length}`,
     motionFixturesRejected,
+    svgMotionFixturesRejected,
     resourceFixturesRejected,
+    embeddedAssetsAccepted,
+    invalidEmbeddedAssetsRejected,
+    markupResourceFixturesRejected,
+    inlineSvgAccepted,
+    literalSourceAccepted,
     spatialFixturesRejected,
     semanticFixturesRejected,
     layouts,
     stableRowsLayout: layoutPass,
     mathAndPriceFixtures: mathPass,
-    dollarSafeMaterialization
+    dollarSafeMaterialization,
+    validChartsAccepted,
+    invalidChartsRejected,
+    materializedChartMutationRejected,
+    chartRendererBehavior,
+    failedTemplateChecks: [...goodChecks, ...darkChecks].filter((check) => !check.pass)
   }, null, 2));
   if (!pass) process.exit(1);
 }

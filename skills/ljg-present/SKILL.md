@@ -1,204 +1,113 @@
 ---
 name: ljg-present
-description: "极简演讲铸造器（Outline-Faithful）。把 orgmode/markdown outline 1:1 铸成单文件离线 HTML；以一页一语义动作、六种固定构图角色、留白预算和投影大字门槛控制密度，支持 black/red/yellow、hacker、hacker-dark、表格、ASCII、LaTeX、自适应与翻页笔。USE WHEN 用户要求讲这个、present、做成演讲、slides、标语流、宣言体、slogan、manifesto、按 outline 美化。NOT FOR 内容提炼、改写或企业 PPT。"
+description: "Unix 气质的极简演讲铸造器。把 Org/Markdown outline 保真铸成单文件离线 HTML，以大字、留白与原生 Chart 清楚呈现判断和关系。默认 hacker-dark，保留 hacker、black/red/yellow；支持表格、Unicode 字符图、公式、自适应和翻页笔。USE WHEN 用户要求 present、做成演讲、slides、文加图表、Hacker/Unix 风格演示、按 outline 美化。NOT FOR 内容提炼、擅自改写或企业 PPT。"
 user_invocable: true
-version: "4.5.0"
+version: "4.7.1"
 ---
 
 # ljg-present：演讲铸造器
 
-把 outline 铸成舞台。内容由作者决定，skill 只决定它如何被看见。
+把 outline 铸成舞台。文字给出判断，Chart 让关系可见。内容由作者决定，skill 决定它如何被看见。
 
 ## 核心契约
 
 **Outline 是真理，Skill 是渲染器。**
 
-- 标题、段落、列表项、引用不改字。
-- 表格不改结构，example/代码块不改空格与换行。
-- 所有源元素按原顺序出现；不抽提、不浓缩、不重排。
-- 唯一允许改变的是物理分页与视觉构图。
-- `#+title:` 是文档标题，必须先生成独立 cover；第一个 outline 节点仍在下一页。若两者文字完全相同，可合并为 cover，不能重复。
+- 标题、段落、列表项和引用不改字；表格不改结构；代码和 example 不改空格与换行。
+- 全部源元素按原顺序出现，不抽提、不浓缩、不重排。允许在源句界、行界和结构边界物理分页。
+- 文档 title 先生成独立 cover，第一个 outline 节点保留；仅当两者文字完全相同时合并。
+- 图表使用源中的数值、标签、关系。原生 chart 块直接渲染；从正文推导的补充图紧跟来源，以 `derivedFrom` 追踪，保留原文页。
+- 没有数据就不画数值曲线，没有明确方向就不加因果箭头。普通文字也可以独立完成一页，不设图表配额。
 
 ## Workflow Routing
 
 | Workflow | Trigger | File |
 |---|---|---|
-| **Generate** | 讲这个、present、做成演讲、slides、按 outline 美化、生成 HTML 演示 | `Workflows/Generate.md` |
+| **Generate** | 讲这个、present、slides、文 + Chart、按 outline 美化 | [Workflows/Generate.md](Workflows/Generate.md) |
 
-生成时先读 `RenderingSpec.md`，再使用根目录 `SloganTemplate.html`。不要根据记忆重造模板。
+生成前读取 [DesignSystem.md](DesignSystem.md)、[RenderingSpec.md](RenderingSpec.md)，并使用 [SloganTemplate.html](SloganTemplate.html)。涉及图表时再读 [ChartSpec.md](ChartSpec.md)。不要从记忆重造模板。
 
-## Quick Reference
+## 设计立场
 
-### 输入与输出
+**像一份可以投影的 Unix 手册：直接、精确、安静。**
 
-- 输入：Orgmode、Markdown 或纯文本。
-- 输出：`~/Downloads/{title}.html`，单文件、离线、无外链资源。
-- 首屏：文档标题 cover。
-- 空间节奏：所有文字页共享稳定中轴；cover 与章节页靠深浅色场、字号和居中短信号线区分。
-- Header：不承载任何信息。
-- Footer：首页显示页码与 subtitle/meta；其他页只显示页码。
+- 深色平面、暖白文字、稀疏信号色。层级来自字号、字重、距离和对齐。
+- 中文优先思源黑体；英文、代码与数值使用内嵌 IBM Plex Mono。数字等宽对齐，标注靠近对象。
+- 巨句与章节保留稳定中轴；表格、代码和 Chart 按自身逻辑左对齐。只有比较和流程需要局部分栏。
+- 每页一个语义动作、一个视觉焦点。少字放大，关系画清，留白保留。
+- 新生成的字符图默认使用 Unicode 细线框与箭头（`─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ → ↓`），保持轻而连续的线条；原生 SVG/HTML Chart 仍按关系类型使用。
+- 硬边、细分隔线、平直折线、直接标注构成视觉语言。线条必须表示边界、方向、刻度或分隔。
+- 不使用屏幕噪声、扫描线、发光、渐变氛围、伪命令提示符、窗口红黄绿按钮或无意义英文标签。
 
-### Theme
+设计关系、字号尺度、配色 token、强调预算和整套节奏见 DesignSystem；具体字段和保真规则见 RenderingSpec / ChartSpec。
 
-优先级：显式参数 > `#+filetags:` > 默认 `black`。
+## Theme
 
-| 参数 | theme | 调性 |
+优先级：显式参数 > `#+filetags:` > 默认 `hacker-dark`。
+
+| 参数 / 意图 | theme | 阅读场景 |
 |---|---|---|
-| `-b` / `--theme=black` | black | 沉思、论证 |
+| 默认、Unix、terminal、暗色 Hacker | hacker-dark | 石墨黑场、暖白文字、克制琥珀重点 |
+| `--hacker`、Hacker style、`--theme=hacker` | hacker | 浅色实验纸；cover/章节深场 |
+| `--cyber` | hacker | 兼容别名，沿用静态平面设计 |
+| `-b` / `--theme=black` | black | 黑底正文、红色章节 |
 | `-r` / `--theme=red` | red | 宣言、号召 |
 | `-y` / `--theme=yellow` | yellow | 反讽、警觉 |
-| `--hacker` | hacker | 逆向工程实验纸 |
-| `--cyber` | hacker | 兼容别名；不再生成 CRT/HUD |
-| `--theme=hacker-dark` | hacker-dark | 低眩光深色终端；全页暗场、柔和灰绿正文 |
 
-Hacker 有两个静态阅读变体。二者都拒绝荧光特效堆叠：
+旧参数继续可用；未指定主题的新演示采用 hacker-dark。
 
-```css
---hacker-void:   #07110D;
---hacker-paper:  #EAF4EC;
---hacker-signal: #00C46A;
+## 内容决定构图
 
---hacker-dark-bg:     #06110D;
---hacker-dark-deep:   #020806;
---hacker-dark-panel:  #0A1A13;
---hacker-dark-fg:     #CFE1D5;
---hacker-dark-signal: #25E981;
-```
-
-`hacker` 的普通页使用浅色实验纸；`hacker-dark` 的所有页面使用深色场，cover 与一级章节再压深一档。暗色正文不是纯白，而是柔和灰绿；信号绿只承担居中信号轨、重点和表格标签。不要矩阵雨、发光描边、伪 HUD 或闪烁光标。
-
-### Outline 映射
-
-| Source | Page |
-|---|---|
-| `* 一级标题` | 独占 emphasis 章节页 |
-| `**` 及更深标题 | 独占 title 页；深度越高字号越低 |
-| 段落 | theme 文本页；仅在必要时物理拆页 |
-| 列表 | 同层级连续 3–4 项优先整组同页；更长列表切成 3–4 项一页且避免单项尾页 |
-| 表格 | table 页；超过 6 行分页并重复表头 |
-| 引用 | quote 页；超过 2 个原始行时续页并记录 sourceParts |
-| `#+begin_example` / fenced code | pre 页，逐字符保留 |
-| `*强调*` / `~code~` / `=verbatim=` | `hl: true`；emphasis 页忽略 inline hl |
-
-### 多行不是统一降字号
-
-多行页同时看「行数」和「文本密度」，但始终使用单列 `rows`：
-
-- 2、3、4 行全部沿页面中轴纵向排列，不在翻页时切换左右阅读路径。
-- 字号由「行数 + light/medium/dense」复合规则决定；先拆页、再放大，最后才由 fit guard 微调。
-- 单行、非列表、非整行公式且去空白后 `≤16` 个字形的内容先判为「语义原子」：即使 CJK 权重落入 long，也整句单行并进入高桥流。
-- 连续同层级列表先保语义块：3–4 项整组同页；超过 4 项时切成 3–4 项，并避免把最后一项单独遗留。
-- 网格项必须 `min-width: 0`，正文自然换行；不要把 `.line` 设成 flex/grid，以免拆散高亮与公式。
-- 单行 single/short/medium 使用「高桥流」：少字就是主视觉，横屏有效字号以 `≥90px` 为目标。
-
-阈值和 DOM 字段以 `RenderingSpec.md` 为准。
-
-### 一页一意与有限构图
-
-「一页一意」指一页只完成一个语义动作，不等于一句一页，更不允许改写原文。比较、递进或同层级列表可以作为一个完整动作同页；一个 source 含多个动作时，只能在原有句界、行界或结构边界处分成续页，并用 `sourceParts` 逐字重建。
-
-模板只允许六种构图角色，由源结构确定，不能随机挑模板：
-
-| Role | 来源 | 唯一主动作 |
+| Role | 来源 | 视觉动作 |
 |---|---|---|
-| `identity` | cover | 标题尺度 |
-| `chapter` | emphasis / title | 色场切换或短信号线 |
-| `statement` | 单一判断或长段 | 字号与留白 |
-| `sequence` | 2–4 行或 list-run | 单轴纵向节奏 |
-| `quotation` | quote | 上下边界 |
+| `identity` | cover | 标题尺度与留白 |
+| `chapter` | emphasis / title | 色场或局部短信号线 |
+| `statement` | 一个判断 | 大字、单一焦点 |
+| `sequence` | 2–4 行 / 同层列表 | 单列递进、细线分隔 |
+| `quotation` | quote | 留白与轻边界 |
 | `evidence` | table / pre | 内容自身结构 |
+| `chart` | chart / 有依据的补充图 | 一种关系、直接标注 |
 
-- 每页只使用一个主视觉动作；theme 的全局背景语法不授权再叠配图、图标、侧栏或装饰框。
-- 普通文字主块不超过 `82vw`，左右留白对称；cover 可到 `84vw`。空间不够时先拆页，不扩大内容区，也不降低既有字号门槛。
-- 以 25% 缩略图看整套页面：仍应立刻辨认唯一焦点与页面角色；若出现两个争夺注意力的区域，回到分页或构图角色修正。
-- 角色写入最终 DOM 的 `data-composition`，供浏览器验收；它是审计字段，不是作者可选的皮肤参数。
+角色由源字段确定，写入 `data-composition`。不为换花样随机换构图。文字页宽度不超过 `82vw`，cover `84vw`，Chart 主块 `82vw`；左右净空对称。Chart 内部可左对齐或分栏，外部仍共享舞台边界。
 
-### 公式、ASCII 与尺寸
+## 可读性与保真
 
-- 只把闭合的 `$...$` / `$$...$$` 当作公式；`$20/month` 这类价格不是公式。
-- 离线渲染常用符号、上下标，不依赖 MathJax/CDN。
-- ASCII/pre 按物理行数分级：`≤16` 行从 22px、`17–24` 行从 18px、`25–28` 行从 15.5px 起；面板居中、字符内部左对齐。
-- 普通长文本/引用目标有效字号 `≥42px`，2–4 行文本 `≥40px`，表格 `≥30px`；达不到时优先分页。
-- 每页都测量真实可用宽高；监听 resize、fullscreen、字体就绪和 ResizeObserver。
-- `data-fits=true` 只证明没有越界；普通非 table/pre 文本页若 `fitScale < 0.80`，必须重新拆页。语义原子为了保持完整单行，以最终有效字号 `≥56px` 为门槛，不再用原始字号比例误判。
+- 单行短句去空白后 `≤16` 个字形，先按「语义原子」处理，保持整句单行。
+- 同层列表 3–4 项优先同页，较长列表按 3–4 项切页并避免单项尾页。引用每页最多两个原始行。
+- 横屏基准 `1098×648`：普通长文/引用 `≥42px`，多行 `≥40px`，表格 `≥30px`，Chart 标签/数值 `≥26px`；标题和短句有更高门槛，见 RenderingSpec。
+- 空间不足先拆页，fit guard 只做最后微调。`fits=true` 只证明不越界；普通文本 `fitScale <0.80` 必须返工，语义原子单独验收最终字号 `≥56px`。
+- Unicode 字符图按物理行数和实际字形宽度验收。源文已有的 ASCII、Unicode 图和代码逐字符保留；只在用户明确要求转换旧图时改画，并保持标签、连接和方向。公式必须闭合 delimiter，价格不能误解析。
+- 图表不能靠缩到小字通过。竖屏流程/比较纵排；趋势图改为同一数据的可读列表，横屏保留趋势形状。
+- 从最终 HTML 反解析 `RAW_SLIDES` 再审计 source manifest、续页和原文。占位符使用函数式 replacer，避免 `$$` 等被替换语法改坏。
 
-## 通用交互
+## 交付与验收
 
-- `→` `↓` `Space` `Enter` `j` `PageDown`：下一页。
-- `←` `↑` `k` `PageUp`：上一页。
-- `Home` / `End`：首末页。
-- `f` / `F`：全屏。
-- 触屏左右滑、点击左右半屏：翻页。
+输出 `~/Downloads/{title}.html`，只交付一个可直接分享与演示的文件，不交付 ZIP 或依赖 assets 文件夹。图表是内联 SVG/HTML；生成图片使用内嵌 PNG/JPEG/WebP data URI；等宽字体随 HTML 内嵌。离线、零动效，无 CDN、远程图或外链字体。
 
-上下键与 PageUp/PageDown 同时保留，因为不同蓝牙翻页笔发送的键值不同。
-
-## 验收门槛
-
-写出 HTML 后运行：
+组装模板后先运行 `bun Tools/EmbedAssets.ts <deck.html>`，内嵌随技能提供的字体和 HTML 中引用的本地图片，再做最终保真与静态验收。
 
 ```bash
 bun Tools/ValidateDeck.ts ~/Downloads/<deck>.html --theme <theme>
 ```
 
-Validator 负责静态契约：模板版本、JS 语法、标题 cover、header/footer、零动效、公式保护、多行布局、fit guard、页面类型、翻页键和外链资源。
+静态 validator 检查模板、数据和资源契约；保真仍需与完整源文比对。视觉使用 **Interceptor 隔离测试 context** 检查真实页面，覆盖典型页、最密页、每种 Chart、横竖屏与 25% 总览。静态 PASS 不代表审美或可读性通过。
 
-视觉判断必须用 Interceptor 在隔离浏览器中复验典型页与高密度页。若隔离 context 不可用，报告「静态验证通过，尚未浏览器视觉复验」；不能改用主浏览器或其他截图工具，也不能宣称视觉已验证。
+隔离 context 不可用时保留产物并报告「静态验证通过，尚未浏览器视觉复验」；不改用主浏览器或其他截图工具冒充验收。
 
-## Gotchas
-
-- **视觉居中不等于只写 `text-align:center`。** 文字对齐、左右 padding、装饰轨道和 transform origin 必须共同使用同一中轴，否则翻页仍会漂移。
-- **Cover、emphasis、title 是同轴的三种空间角色。** 它们用字号、深浅色场和短信号线形成节奏，不再更换左右锚点。
-- **缩放原点也是构图。** 文字页统一用 `center center`；否则 fit 后会把原本居中的内容重新拉偏。
-- **Theme 不是配色别名。** 纯黑配纯白会让长演示疲劳；暗色 Hacker 使用深绿黑、柔和灰绿文字与两档暗场，信息层级来自结构线和明度差，不来自荧光特效数量。
-- **「放得下」不是「后排看得清」。** 多行页不能只按最长字符降字号；列表优先保持 3–4 项语义块，引用最多两行，低于投影字号门槛再续页。
-- **语法长度不等于语义长度。** 「AI 为火药，人为点火者。」这类短句即使 CJK 加权后进入 long，也必须先按完整语义原子处理，不能让通用换行规则把尾字甩到下一行。
-- **分页单位不是固定两项。** 同标题、同层级、连续 3–4 项往往构成一个比较或推演；先整组同页，再以真实有效字号和溢出决定是否需要人工拆分。
-- **一页一意不等于一句一页。** 判断、比较、递进、引用和证据都是不同的完整语义动作；为了制造「精炼感」而把一个比较拆碎，和为了省页而把两个无关动作塞在一起，同样破坏表达。
-- **有限构图不是模板轮盘。** `data-composition` 由源结构单向推导；不得为了「变化」给同类页面随机换轴、加图标或引入第二栏。
-- **缩略图检查不是审美投票。** 25% 视图只问主次是否仍清楚；若 footer、装饰或第二内容区与主内容等重，说明结构失败，不靠微调颜色补救。
-- **中文句尾要防孤字。** 允许换行的长句用不改变 `textContent` 的尾段 span 保住最后三个汉字及标点；不要插隐藏字符污染复制结果。
-- **`vmin` 不是响应式。** 固定字号只能估算；真实边界必须由 `scrollWidth/scrollHeight` 与可用宽高共同计算。
-- **`fits` 不等于可读。** 极端缩小仍可能得到 `fits=true`；普通文本页 `fitScale < 0.80` 或低于投影字号门槛都应重新分页。语义原子单独验收最终有效字号，因为它的目标就是整句等比缩放成一行。
-- **ASCII 的上限由行数决定。** 28 行字符图在 648px 高的屏幕上不可能同时达到 22px；必须使用按密度分级的物理下限，必要时人工拆图。
-- **公式识别必须要求闭合 delimiter。** 否则价格、货币或路径中的 `$` 会被误判。
-- **多行网格要设 `min-width: 0`。** 缺少它时，长词或公式会把列撑出 viewport。
-- **`.line` 保持行内容器。** 将其设成 flex/grid 会拆开 chunks、inline math 与高亮；布局应作用于 `.lines`。
-- **Header 与 footer 是不同契约。** Header 不放信息；meta 只在 cover footer，pager 每页都有。
-- **禁止所有视觉动效。** 不只检查 shorthand，还要覆盖 `animation-*`、`transition-*`、`view-transition-*`、smooth scroll、`.animate()` 与定时器。
-- **离线不能只扫 `<img>` 和 `https://`。** CSS 相对 `url(...)`、`@import`、`image-set(...)` 同样会让单文件在别的机器上缺资源。
-- **真实浏览器证据不可替代。** 静态 validator 能阻止结构回归，但不能证明字体、换行和视觉节奏在真实 Chrome 中成立。
-- **占位符注入必须使用函数式 replacer。** `String.replace(pattern, replacementString)` 会解释 `$$`、`$&`、``$` ``、`$'` 等替换模式，可能静默改坏 LaTeX 或正文；四个模板占位符都用 `() => value` 注入。
-- **保真审计必须覆盖最终 HTML。** 只审计序列化前的内存 slides 会漏掉注入层漂移；写出前先从完整 HTML 反解析 `RAW_SLIDES`，再对 source manifest、可见文本、continuation 与 example 重新跑同一套审计。
+翻页：`→ ↓ Space Enter j PageDown` / `← ↑ k PageUp`；`Home End` 首末页；`F` 全屏；触屏左右滑或点击左右半屏。保留上下键与 PageUp/PageDown 以兼容发送这些键值的蓝牙/USB 翻页笔。网页需获得焦点；浏览器按键测试不能代替具体硬件实测。
 
 ## Examples
 
-### Example 1：常规 outline 演示
+### 保真默认演示
 
-```text
-User: 用 ljg-present 讲这个 ~/Documents/notes/talk.org
-→ 读取 Generate workflow、RenderingSpec 与 SloganTemplate
-→ 保留全部 outline，生成标题 cover 与 black/red/yellow 主题页面
-→ 运行 ValidateDeck，再输出 ~/Downloads/<title>.html
-```
+`把 talk.org 做成演讲` → 深色 Unix 舞台；原稿顺序不变，标题 cover、大字判断、分组列表和证据页形成节奏；不为每页补图。
 
-### Example 2：静态 Hacker 演示
+### 文字与关系图
 
-```text
-User: 把这篇 org 做成 Hacker style，不要动效
-→ 选择 --hacker，普通页浅底、章节页深底
-→ 所有文字页保持中轴；短句走高桥流，多行统一 rows 并先拆页
-→ 验证零动效、公式、footer、自适应与翻页笔
-```
+`Hacker style，文 + Chart 讲清流程和数据` → 浅纸 Hacker；原文中明示的流程可生成追踪来源的补充图，数值比较用零基线条形图，时间趋势用真实间距折线；没有依据的关系保留为文字。
 
-### Example 3：静态暗色 Hacker 演示
+### 指定旧主题
 
-```text
-User: 整体改成暗色 Hacker style，不要任何动效
-→ 选择 --theme=hacker-dark，全页使用深绿黑场与柔和灰绿正文
-→ cover/emphasis 再压深一档，信号绿仅用于结构线、重点和标签
-→ 验证正文对比度 ≥9:1、零阴影/动效、双尺寸零越界
-```
+`--theme=red，按 outline 美化` → 保留红色主题；仍执行相同保真、分页、无动效和真实浏览器验收契约。
 
-## 中文默认
-
-默认输出中文；原文是英文且用户要求保留时，不翻译。
+默认中文；源文语言保持原样，翻译需要用户另行授权。
