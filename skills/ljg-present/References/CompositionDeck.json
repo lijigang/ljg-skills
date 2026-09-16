@@ -1,0 +1,360 @@
+{
+  "title": "先核验，再使用",
+  "subtitle": "构图参考 · N 查看讲稿",
+  "mode": "faithful",
+  "tags": [
+    "share"
+  ],
+  "sources": [
+    {
+      "id": "SRC-001",
+      "content": {
+        "kicker": "01",
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "什么才算完成？"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-002",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "生成结果，"
+              }
+            ]
+          },
+          {
+            "chunks": [
+              {
+                "t": "工作仍未结束。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-003",
+      "content": {
+        "chart": {
+          "kind": "compare",
+          "title": "两件不同的工作",
+          "items": [
+            {
+              "label": "生成",
+              "text": "给出候选结果"
+            },
+            {
+              "label": "验证",
+              "text": "让结果遇到现实"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-004",
+      "content": {
+        "headline": "让反馈改变下一轮",
+        "diagram": {
+          "columns": 31,
+          "rows": 7,
+          "nodes": [
+            {
+              "id": "input",
+              "label": "输入",
+              "caption": "x",
+              "col": 3,
+              "row": 1
+            },
+            {
+              "id": "process",
+              "label": "处理",
+              "caption": "f",
+              "col": 11,
+              "row": 1
+            },
+            {
+              "id": "output",
+              "label": "结果",
+              "caption": "f(x)",
+              "col": 19,
+              "row": 1
+            },
+            {
+              "id": "evaluate",
+              "label": "评价",
+              "caption": "E",
+              "col": 27,
+              "row": 1
+            }
+          ],
+          "edges": [
+            {
+              "from": "input",
+              "to": "process"
+            },
+            {
+              "from": "process",
+              "to": "output"
+            },
+            {
+              "from": "output",
+              "to": "evaluate"
+            },
+            {
+              "from": "evaluate",
+              "to": "input",
+              "via": [
+                [
+                  27,
+                  5
+                ],
+                [
+                  3,
+                  5
+                ]
+              ],
+              "label": "反馈",
+              "at": [
+                18,
+                5
+              ]
+            },
+            {
+              "from": "evaluate",
+              "to": "process",
+              "via": [
+                [
+                  27,
+                  5
+                ],
+                [
+                  11,
+                  5
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-005",
+      "content": {
+        "headline": "每个判断，对应一类证据",
+        "table": {
+          "header": true,
+          "rows": [
+            [
+              "看到的现象",
+              "支持的判断"
+            ],
+            [
+              "文件已保存",
+              "产物已经存在"
+            ],
+            [
+              "内容经过核对",
+              "所查内容符合依据"
+            ],
+            [
+              "实际使用有效",
+              "当前用途得到支持"
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "slides": [
+    {
+      "role": "chapter",
+      "kicker": "01",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "什么才算完成？"
+            }
+          ]
+        }
+      ],
+      "notes": "章节停顿。先让问题独立成立，再进入生成与验证的区别。",
+      "sourceIds": [
+        "SRC-001"
+      ]
+    },
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "生成结果，"
+            }
+          ]
+        },
+        {
+          "chunks": [
+            {
+              "t": "工作仍未结束。"
+            }
+          ]
+        }
+      ],
+      "notes": "两行共同构成一个判断，明确选择 statement；不由行数推成列表。",
+      "sourceIds": [
+        "SRC-002"
+      ]
+    },
+    {
+      "role": "chart",
+      "chart": {
+        "kind": "compare",
+        "title": "两件不同的工作",
+        "items": [
+          {
+            "label": "生成",
+            "text": "给出候选结果"
+          },
+          {
+            "label": "验证",
+            "text": "让结果遇到现实"
+          }
+        ]
+      },
+      "notes": "比较共享一条问题轴。没有第三层总结句，避免重复主张。",
+      "sourceIds": [
+        "SRC-003"
+      ]
+    },
+    {
+      "role": "chart",
+      "headline": "让反馈改变下一轮",
+      "diagram": {
+        "columns": 31,
+        "rows": 7,
+        "nodes": [
+          {
+            "id": "input",
+            "label": "输入",
+            "caption": "x",
+            "col": 3,
+            "row": 1
+          },
+          {
+            "id": "process",
+            "label": "处理",
+            "caption": "f",
+            "col": 11,
+            "row": 1
+          },
+          {
+            "id": "output",
+            "label": "结果",
+            "caption": "f(x)",
+            "col": 19,
+            "row": 1
+          },
+          {
+            "id": "evaluate",
+            "label": "评价",
+            "caption": "E",
+            "col": 27,
+            "row": 1
+          }
+        ],
+        "edges": [
+          {
+            "from": "input",
+            "to": "process"
+          },
+          {
+            "from": "process",
+            "to": "output"
+          },
+          {
+            "from": "output",
+            "to": "evaluate"
+          },
+          {
+            "from": "evaluate",
+            "to": "input",
+            "via": [
+              [
+                27,
+                5
+              ],
+              [
+                3,
+                5
+              ]
+            ],
+            "label": "反馈",
+            "at": [
+              18,
+              5
+            ]
+          },
+          {
+            "from": "evaluate",
+            "to": "process",
+            "via": [
+              [
+                27,
+                5
+              ],
+              [
+                11,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "notes": "连接线由 Unicode 绘制。中文节点使用自然字距，释义就近依附节点。回路返回输入与处理。",
+      "sourceIds": [
+        "SRC-004"
+      ]
+    },
+    {
+      "role": "evidence",
+      "headline": "每个判断，对应一类证据",
+      "table": {
+        "header": true,
+        "rows": [
+          [
+            "看到的现象",
+            "支持的判断"
+          ],
+          [
+            "文件已保存",
+            "产物已经存在"
+          ],
+          [
+            "内容经过核对",
+            "所查内容符合依据"
+          ],
+          [
+            "实际使用有效",
+            "当前用途得到支持"
+          ]
+        ]
+      },
+      "notes": "构造的定性示例，不含现实业务数据。表格自己承担结构，不加外框、标签和重复结论。",
+      "sourceIds": [
+        "SRC-005"
+      ]
+    }
+  ]
+}

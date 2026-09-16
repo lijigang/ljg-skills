@@ -1,189 +1,7 @@
 #!/usr/bin/env bun
-
-import { resolve } from "node:path";
-import { runInNewContext } from "node:vm";
-
-const VERSION = "4.7.1";
-
-const HELP = `ValidateDeck ${VERSION}
-
-Usage:
-  bun Tools/ValidateDeck.ts <deck.html> [--theme black|red|yellow|hacker|hacker-dark] [--template] [--json]
-  bun Tools/ValidateDeck.ts --self-test
-  bun Tools/ValidateDeck.ts --help
-
-Checks:
-  template version and JavaScript syntax
-  stable centered stage axis, finite composition grammar, whitespace budget, header/footer contract
-  semantic-atom Takahashi typography, CJK tail guard, grouped rows and measured fit guard
-  chart data, single-series numeric geometry and source provenance
-  offline math guards and presentation key map
-  zero motion; embedded raster images/fonts and zero external resources
-  flat Hacker theme grammar when --theme hacker or --theme hacker-dark
-`;
-
-type Check = { id: string; pass: boolean; detail: string };
-type Options = {
-  file?: string;
-  theme?: string;
-  template: boolean;
-  json: boolean;
-  selfTest: boolean;
-  help: boolean;
-};
-
-function parseArgs(args: string[]): Options {
-  const options: Options = { template: false, json: false, selfTest: false, help: false };
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (arg === "--help" || arg === "-h") options.help = true;
-    else if (arg === "--template") options.template = true;
-    else if (arg === "--json") options.json = true;
-    else if (arg === "--self-test") options.selfTest = true;
-    else if (arg === "--theme") options.theme = args[++index];
-    else if (arg.startsWith("--theme=")) options.theme = arg.slice("--theme=".length);
-    else if (arg.startsWith("-")) throw new Error(`Unknown option: ${arg}`);
-    else if (!options.file) options.file = arg;
-    else throw new Error(`Unexpected argument: ${arg}`);
-  }
-  return options;
-}
-
-function materializeTemplate(html: string, theme = "hacker") {
-  const fixtureSlides = [
-    { emphasis: true, lines: [{ indent: 0, chunks: [{ t: "章节" }] }], sourceIds: ["SRC-001"] },
-    { lines: [{ indent: 0, chunks: [{ t: "脑力：组织信息" }] }, { indent: 0, chunks: [{ t: "心力：组织自己" }] }], sourceIds: ["SRC-002", "SRC-003"] },
-    { lines: [{ indent: 0, chunks: [{ t: "一" }] }, { indent: 0, chunks: [{ t: "二" }] }, { indent: 0, chunks: [{ t: "三" }] }], sourceIds: ["SRC-004", "SRC-005", "SRC-006"] },
-    { lines: [{ indent: 0, chunks: [{ t: "A" }] }, { indent: 0, chunks: [{ t: "B" }] }, { indent: 0, chunks: [{ t: "C" }] }, { indent: 0, chunks: [{ t: "D" }] }], sourceIds: ["SRC-007", "SRC-008", "SRC-009", "SRC-010"] },
-    { lines: [{ indent: 0, chunks: [{ t: "$$C(Q)=C_1 \\cdot Q^{-b}$$" }] }], sourceIds: ["SRC-011"] },
-    { lines: [{ indent: 0, chunks: [{ t: "定价: $20/month" }] }], sourceIds: ["SRC-012"] },
-    { lines: [{ indent: 0, chunks: [{ t: "AI 为火药，人为点火者。" }] }], sourceIds: ["SRC-013"] },
-    { quote: true, lines: [{ indent: 0, chunks: [{ t: "人 → 人 + Agents" }] }], sourceIds: ["SRC-014"] },
-    { semanticGroup: "list-run", lines: [{ indent: 0, chunks: [{ t: "System 0: 本能" }] }, { indent: 0, chunks: [{ t: "System 1: 快思考" }] }, { indent: 0, chunks: [{ t: "System 2: 慢思考" }] }], sourceIds: ["SRC-015", "SRC-016", "SRC-017"] },
-    { table: { caption: "无表头", header: false, rows: [["能量", "太阳能"], ["组织", "国家"]] }, sourceIds: ["SRC-018"] },
-    { pre: "+---+\n|AI |\n+---+", sourceIds: ["SRC-019"] },
-    { chart: { kind: "bar", title: "收支", unit: "元", items: [{ label: "支出", value: -2 }, { label: "结余", value: 0 }, { label: "收入", value: 3, emphasis: true }] }, sourceIds: ["SRC-020"] },
-    { chart: { kind: "line", title: "增长", xLabel: "时间", items: [{ label: "首日", x: 1, value: 3 }, { label: "末日", x: 5, value: 6 }] }, sourceIds: ["SRC-021"] },
-    { chart: { kind: "flow", title: "处理", items: [{ label: "输入" }, { label: "输出", text: "完成" }] }, sourceIds: ["SRC-022"] },
-    { chart: { kind: "compare", title: "选择", items: [{ label: "A", text: "简单" }, { label: "B", text: "完整" }] }, sourceIds: ["SRC-023"] }
-  ];
-  return html
-    .replaceAll("{{TITLE}}", () => "Fixture Deck")
-    .replaceAll("{{SUBTITLE}}", () => "Fixture Meta")
-    .replaceAll("{{THEME}}", () => theme)
-    .replaceAll("{{SLIDES_JSON}}", () => JSON.stringify(fixtureSlides));
-}
-
-function mathSegments(text: string) {
-  return [...text.matchAll(/\$\$([\s\S]+?)\$\$|\$(?![\d?])([^$\n]+?)\$/g)].map((match) => match[0]);
-}
-
-function chooseLayout(weights: number[]) {
-  const lineCount = weights.length;
-  if (lineCount >= 2 && lineCount <= 4) return "rows";
-  return "single";
-}
-
-function splitSelectors(selectors: string): string[] {
-  const parts: string[] = [];
-  let depth = 0, start = 0;
-  for (let i = 0; i < selectors.length; i += 1) {
-    if (selectors[i] === "(" || selectors[i] === "[") depth += 1;
-    else if (selectors[i] === ")" || selectors[i] === "]") depth -= 1;
-    else if (selectors[i] === "," && depth === 0) { parts.push(selectors.slice(start, i).trim()); start = i + 1; }
-  }
-  parts.push(selectors.slice(start).trim());
-  return parts;
-}
-
-function ruleBodies(style: string, exactSelector: string) {
-  const bodies: string[] = [];
-  for (const match of style.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selectors = splitSelectors(match[1]);
-    if (selectors.includes(exactSelector)) bodies.push(match[2]);
-  }
-  return bodies;
-}
-
-function relativeLuminance(hex: string) {
-  const channels = hex.match(/[0-9a-f]{2}/gi)?.map((value) => parseInt(value, 16) / 255) || [];
-  if (channels.length !== 3) return Number.NaN;
-  const linear = channels.map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
-  return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
-}
-
-function contrastRatio(foreground: string, background: string) {
-  const fg = relativeLuminance(foreground);
-  const bg = relativeLuminance(background);
-  return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function sourceIds(value: unknown): value is string[] {
-  return Array.isArray(value) && value.length > 0
-    && value.every((id) => typeof id === "string" && id.trim().length > 0)
-    && new Set(value).size === value.length;
-}
-
-function chartDataErrors(raw: unknown): string[] {
-  if (!Array.isArray(raw)) return ["RAW_SLIDES must be an array"];
-  const errors: string[] = [];
-  for (const [index, value] of raw.entries()) {
-    if (!isRecord(value) || !("chart" in value)) continue;
-    const fail = (message: string) => errors.push(`slide ${index + 1}: ${message}`);
-    const chart = value.chart;
-    if (!isRecord(chart)) { fail("chart must be an object"); continue; }
-    const kind = chart.kind;
-    if (!["bar", "line", "flow", "compare"].includes(String(kind))) fail("unsupported chart kind");
-    if (typeof chart.title !== "string" || !chart.title.trim()) fail("chart title is required");
-    for (const key of ["unit", "xLabel", "yLabel", "note"]) {
-      if (key in chart && typeof chart[key] !== "string") fail(`${key} must be a string`);
-    }
-    if (kind !== "line" && ("xLabel" in chart || "yLabel" in chart)) fail("xLabel and yLabel are only valid for line charts");
-    if (kind !== "bar" && kind !== "line" && "unit" in chart) fail("unit is only valid for bar and line charts");
-    const chartKeys = new Set(["kind", "title", "items", "unit", "xLabel", "yLabel", "note"]);
-    if (Object.keys(chart).some((key) => !chartKeys.has(key))) fail("chart contains an unsupported field");
-    const conflicts = ["pre", "preTitle", "table", "lines", "cover", "title", "emphasis", "quote", "sourceParts"];
-    if (conflicts.some((key) => key in value)) fail("chart cannot share a slide with another content type or continuation");
-    const native = "sourceIds" in value;
-    const derived = "derivedFrom" in value;
-    if (native === derived || !sourceIds(value[native ? "sourceIds" : "derivedFrom"])) {
-      fail("exactly one non-empty sourceIds or derivedFrom array is required");
-    } else if (derived) {
-      const previous = raw[index - 1];
-      const previousIds = isRecord(previous) && !previous.chart && Array.isArray(previous.sourceIds) ? previous.sourceIds : [];
-      if (!(value.derivedFrom as string[]).every((id) => previousIds.includes(id))) {
-        fail("derived chart must immediately follow the source slide named by derivedFrom");
-      }
-    }
-    if (!Array.isArray(chart.items)) { fail("chart items must be an array"); continue; }
-    const maxItems = kind === "flow" ? 4 : kind === "compare" ? 2 : 6;
-    if (chart.items.length < 2 || chart.items.length > maxItems) fail(`chart requires 2..${maxItems} items`);
-    if (chart.items.filter((item) => isRecord(item) && item.emphasis === true).length > 1) fail("only one item may be emphasized");
-    let previousX = -Infinity;
-    for (const [itemIndex, item] of chart.items.entries()) {
-      if (!isRecord(item)) { fail(`item ${itemIndex + 1} must be an object`); continue; }
-      if (typeof item.label !== "string" || !item.label.trim()) fail(`item ${itemIndex + 1} needs a non-empty label`);
-      if ("emphasis" in item && typeof item.emphasis !== "boolean") fail(`item ${itemIndex + 1} emphasis must be boolean`);
-      const itemKeys = new Set(["label", "emphasis", ...(kind === "bar" ? ["value"] : kind === "line" ? ["x", "value"] : ["text"])]);
-      if (Object.keys(item).some((key) => !itemKeys.has(key))) fail(`item ${itemIndex + 1} contains an unsupported field`);
-      if (kind === "bar" || kind === "line") {
-        if (typeof item.value !== "number" || !Number.isFinite(item.value)) fail(`item ${itemIndex + 1} value must be finite`);
-      }
-      if (kind === "line") {
-        if (typeof item.x !== "number" || !Number.isFinite(item.x) || item.x <= previousX) fail(`item ${itemIndex + 1} x must be finite and strictly increasing`);
-        if (typeof item.x === "number") previousX = item.x;
-      }
-      if (kind === "compare" && (typeof item.text !== "string" || !item.text.trim())) fail(`item ${itemIndex + 1} comparison text is required`);
-      if (kind === "flow" && "text" in item && typeof item.text !== "string") fail(`item ${itemIndex + 1} flow text must be a string`);
-    }
-  }
-  return errors;
-}
-
+import {resolve} from 'node:path';
+import {runInNewContext} from 'node:vm';
+import {VERSION,dataErrors,normalizedTemplate,parseDeck,prepareDeck,materialize,hash,safeJson} from './DeckData';
 function isEmbeddedAsset(uri: string, family: "font" | "image"): boolean {
   const match = uri.match(/^data:([^;,]+);base64,([A-Za-z0-9+/]+={0,2})$/);
   if (!match || match[2].length % 4 !== 0) return false;
@@ -241,11 +59,6 @@ function offlineViolations(html: string, style: string, script: string): string[
   return violations;
 }
 
-function rawSlidesFrom(script: string): unknown {
-  const match = script.match(/\bconst\s+RAW_SLIDES\s*=\s*([\s\S]*?);\s*(?:\n|$)/);
-  if (!match) throw new Error("RAW_SLIDES JSON assignment not found");
-  return JSON.parse(match[1]);
-}
 
 // A deliberately small DOM fixture tests geometry and text safety, not browser layout.
 class ChartFixtureNode {
@@ -268,7 +81,7 @@ class ChartFixtureNode {
 function chartRendererFixtures(template: string): Record<string, boolean> {
   const script = template.match(/<script>([\s\S]*?)<\/script>/i)?.[1] || "";
   const start = script.indexOf("function chartElement(");
-  const end = script.indexOf("SLIDES.forEach", start);
+  const end = script.indexOf("// END CHART RENDERER", start);
   if (start < 0 || end < 0) return { rendererExtracted: false };
   const source = script.slice(start, end);
   const document = {
@@ -313,485 +126,57 @@ function chartRendererFixtures(template: string): Record<string, boolean> {
   } catch { return { rendererExecutesSafely: false }; }
 }
 
-function validateHtml(original: string, options: Pick<Options, "theme" | "template">): Check[] {
-  const html = options.template || original.includes("{{SLIDES_JSON}}")
-    ? materializeTemplate(original, options.theme || "hacker")
-    : original;
-  const style = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((match) => match[1]).join("\n");
-  const script = html.match(/<script>([\s\S]*?)<\/script>/i)?.[1] ?? "";
-  const runtimeScript = script.replace(/\bconst\s+RAW_SLIDES\s*=\s*[\s\S]*?;\s*(?:\n|$)/, "const RAW_SLIDES = [];\n");
-  const staticMarkup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
-  const checks: Check[] = [];
-  const add = (id: string, pass: boolean, detail: string) => checks.push({ id, pass, detail });
 
-  let syntaxPass = false;
-  try {
-    new Function(script);
-    syntaxPass = true;
-  } catch (error) {
-    add("javascript-syntax", false, String(error));
-  }
-  if (syntaxPass) add("javascript-syntax", true, "script compiles");
-
-  add("template-version", html.includes(`data-template-version="${VERSION}"`), `template version is ${VERSION}`);
-  add("title-present", /<title>[^<]+<\/title>/i.test(html), "document title is non-empty");
-  add("cover-normalization", script.includes("function normalizeSlides") && script.includes("cover: true") && script.includes("linesText(slides[0]) === title"), "title cover is synthesized or deduplicated");
-  add("no-information-header", !/<header\b/i.test(html) && !/first-guide/i.test(html), "no header or top guide");
-  add("footer-cover-only", script.includes("metaFooter.hidden = index !== 0") && html.includes('id="pager"') && html.includes('id="metaFooter"'), "meta footer is cover-only; pager persists");
-
-  const centeredStageAxis = ruleBodies(style, '.slide[data-cover="true"]').some((body) =>
-    /flex-direction\s*:\s*column/.test(body)
-    && /align-items\s*:\s*center/.test(body)
-    && /justify-content\s*:\s*center/.test(body)
-  ) && style.includes('transform-origin: center center');
-  add("centered-stage-axis", centeredStageAxis, "cover explicitly uses a centered column axis and centered fit origin");
-
-  const centeredText = ruleBodies(style, ".lines").some((body) =>
-    /align-items\s*:\s*center/.test(body) && /text-align\s*:\s*center/.test(body)
-  ) && ruleBodies(style, ".line").some((body) => /text-align\s*:\s*center/.test(body))
-    && !script.includes("node.style.textAlign");
-  add("centered-text-contract", centeredText, "all line-based pages inherit centered text without inline alignment overrides");
-
-  const compositionTokens = [
-    "function compositionFor(slide)",
-    'if (slide?.cover) return "identity"',
-    'if (slide?.emphasis || slide?.title) return "chapter"',
-    'if (slide?.chart) return "chart"',
-    'if (slide?.table || slide?.pre != null) return "evidence"',
-    'if (slide?.quote) return "quotation"',
-    'slide?.semanticGroup === "list-run" || (lineCount >= 2 && lineCount <= 4)',
-    'return "sequence"',
-    'return "statement"',
-    "element.dataset.composition = compositionFor(slide)"
-  ];
-  add("composition-grammar", compositionTokens.every((token) => script.includes(token)), "all seven composition roles derive deterministically from source-semantic fields");
-  add("composition-audit-interface", script.includes("composition: slides[index]?.dataset.composition"), "runtime audit exposes each slide's composition role");
-
-  const whitespaceBudget = ruleBodies(style, ".lines").some((body) =>
-    /width\s*:\s*min\(82vw,\s*1480px\)/.test(body)
-  ) && ruleBodies(style, ".slide").some((body) =>
-    /padding\s*:[^;]*var\(--stage-inline\)[^;]*;/.test(body)
-  );
-  add("whitespace-budget", whitespaceBudget, "regular text stays within 82vw on symmetric stage padding");
-
-  const titleSignal = ruleBodies(style, '.slide[data-title="true"] .lines').some((body) =>
-    /border-top\s*:\s*0/.test(body)
-    && body.includes("var(--title-signal-w)")
-    && /center\s+top/.test(body)
-    && /linear-gradient\(var\(--hl\),\s*var\(--hl\)\)/.test(body)
-  );
-  add("title-short-signal", titleSignal, "title page uses a short signal rule instead of a full-width border");
-
-  const cssMotion = style.match(/\b(?:animation|transition|view-transition)(?:-[a-z-]+)?\s*:|@keyframes\b|scroll-behavior\s*:\s*smooth\b/gi) || [];
-  const jsMotion = runtimeScript.match(/\.animate\s*\(|set(?:Interval|Timeout)\s*\(/g) || [];
-  const svgMotion = [...(staticMarkup.match(/<(?:animate|animateMotion|animateTransform|set)\b/gi) || []), ...(runtimeScript.match(/createElementNS\([^\n]*["'](?:animate|animateMotion|animateTransform|set)["']/gi) || [])];
-  add("zero-motion", cssMotion.length === 0 && jsMotion.length === 0 && svgMotion.length === 0, `css=${cssMotion.length}, js=${jsMotion.length}, svg=${svgMotion.length}`);
-
-  const externalResources = offlineViolations(html, style, runtimeScript);
-  add("offline", externalResources.length === 0, externalResources.join("; ") || "inline SVG and embedded fonts/raster images allowed; no external resources");
-
-  add("render-lines", script.includes("slide.lines?.length") && script.includes('lines.className = "lines fit-box"'), "lines renderer exists");
-  add("render-table", script.includes("slide.table") && script.includes("slide.table.header === true") && script.includes('document.createElement("thead")') && script.includes('document.createElement("tbody")'), "table renderer respects explicit header flag and semantic sections");
-  add("render-pre", script.includes("slide.pre != null") && script.includes('document.createElement("pre")'), "pre renderer exists");
-  const chartTokens = ["function renderChart(chart)", "document.createElementNS", "chart-wrap fit-box", "chart-title", "chart-body", "chart-note", "chart-svg", "dataset.chartKind"];
-  add("render-chart", chartTokens.every((token) => script.includes(token)), "chart renderer exposes kind, native SVG, title, body and note");
-  add("chart-audit-interface", ["chartKind: slides[index]?.dataset.chartKind", "derivedFrom: slides[index]?.dataset.derivedFrom", "element.dataset.derivedFrom"].every((token) => script.includes(token)), "runtime audit exposes chart kind and derived provenance");
-  add("chart-portrait-data", ruleBodies(style, ".chart-data").some((body) => /display\s*:\s*none/.test(body))
-    && ruleBodies(style, ".chart-data").some((body) => /display\s*:\s*grid/.test(body))
-    && ruleBodies(style, ".chart-svg").some((body) => /display\s*:\s*none/.test(body)), "line charts have a narrow-screen data reading view");
-  let chartErrors: string[];
-  try { chartErrors = chartDataErrors(rawSlidesFrom(script)); }
-  catch (error) { chartErrors = [String(error)]; }
-  add("chart-data-and-provenance", chartErrors.length === 0, chartErrors.join("; ") || "chart schemas and immediate source provenance are valid");
-
-  const layoutTokens = ["lineCount", "maxWeight", "totalWeight", '"rows"', '"single"', "dataset.density"];
-  add("density-layout", layoutTokens.every((token) => script.includes(token)), "line count and density route a stable rows/single layout");
-  add("rows-only-layout", script.includes('lineCount >= 2 && lineCount <= 4 ? "rows" : "single"') && !/["'](?:duo|triptych|matrix)["']/.test(script), "two-to-four line pages always use one centered column");
-  add("projection-size-tokens", ["9.2vmin", "8.2vmin", "7.4vmin", "7.2vmin", "6.8vmin", "6.4vmin"].every((token) => style.includes(token)), "density-specific projection sizes exist");
-  add("portrait-centered-stage", style.includes("@media (max-aspect-ratio: 1/1)") && style.includes('--stage-inline: clamp(34px, 8vw, 78px)'), "portrait keeps symmetric centered stage padding");
-  add("grid-safety", style.includes("min-width: 0") && style.includes("overflow-wrap: break-word") && style.includes("word-break: normal"), "grid items can shrink and wrap naturally");
-  add("length-tier-boundary", script.includes('if (max <= 10) return "medium";'), "medium tier ends at weighted length 10");
-  add("takahashi-tier", script.includes('element.dataset.takahashi = "true"') && style.includes('data-len="single"') && style.includes('data-len="short"') && style.includes('data-len="medium"'), "short single-line pages expose Takahashi sizing");
-  const semanticAtomLineBodies = ruleBodies(style, 'body[data-theme] .slide[data-semantic-atom="true"] .line');
-  const semanticAtomContainerBodies = ruleBodies(style, 'body[data-theme] .slide[data-semantic-atom="true"] .lines');
-  const semanticAtomTokens = ["Intl.Segmenter", "function glyphCount", "semanticAtom", 'element.dataset.semanticAtom = "true"'].every((token) => html.includes(token))
-    && semanticAtomLineBodies.some((body) => /white-space\s*:\s*nowrap/.test(body) && /overflow-wrap\s*:\s*normal/.test(body) && /word-break\s*:\s*normal/.test(body) && /text-wrap\s*:\s*nowrap/.test(body))
-    && semanticAtomContainerBodies.some((body) => /width\s*:\s*max-content/.test(body) && /max-width\s*:\s*none/.test(body))
-    && style.includes('body[data-theme] .slide[data-semantic-atom="true"][data-len="xlong"] .lines')
-    && style.includes("font-size: clamp(64px, 12vmin, 190px)");
-  add("semantic-atom-nowrap", semanticAtomTokens, "short non-list semantic atoms stay on one line and enter Takahashi mode");
-  const cjkTailTokens = ["function renderPlainAware", 'class="keep-cjk-tail"'].every((token) => html.includes(token))
-    && ruleBodies(style, ".keep-cjk-tail").some((body) => /white-space\s*:\s*nowrap/.test(body));
-  add("cjk-tail-protection", cjkTailTokens, "wrapped CJK text keeps a meaningful tail instead of one orphan character");
-  add("semantic-group-runtime", script.includes("slide.semanticGroup") && script.includes("dataset.semanticGroup"), "semantic list groups remain queryable for browser verification");
-  add("xlong-start-size", /\.slide\[data-len="xlong"\] \.lines\s*\{[^}]*font-size:\s*clamp\(42px,\s*8\.4vmin,\s*136px\)/.test(style), "xlong wraps from a projection-readable 8.4vmin");
-
-  const fitTokens = ["function fitSlide", "availableWidth", "availableHeight", "scrollWidth", "scrollHeight", 'addEventListener("resize"', 'addEventListener("fullscreenchange"', "document.fonts?.ready", '"ResizeObserver" in window'];
-  add("measured-fit", fitTokens.every((token) => script.includes(token)), "fit uses both dimensions and four refit triggers");
-  add("fit-audit", script.includes("data.fitScale") || script.includes("dataset.fitScale"), "fit scale is exposed for readability audit");
-
-  const mathTokens = ["function latexBody", "function renderMathAware", "<sup>", "<sub>", "\\\\cdot", "\\\\propto", "\\\\alpha"];
-  add("offline-math", mathTokens.every((token) => script.includes(token)), "offline math subset and scripts exist");
-  add("price-protection", mathSegments("$20/month\n$200/month\n$???/month").length === 0, "unclosed price strings are plain text");
-  const preDensity = ["preRows", "preCols", 'preDensity = preRows >= 25 ? "x-dense" : preRows >= 17 ? "dense" : "normal"'].every((token) => script.includes(token));
-  add("ascii-density-size", preDensity && ["clamp(22px, 3.8vmin, 70px)", "clamp(18px, 3vmin, 52px)", "clamp(15.5px, 2.5vmin, 42px)"].every((token) => style.includes(token)), "pre sizing follows physical row-density floors");
-  add("table-projection-size", style.includes("font-size: clamp(30px, 5.2vmin, 82px)"), "tables start at a projection-readable size");
-  add("source-continuation-runtime", script.includes("slide.sourceParts?.length") && script.includes("dataset.sourceParts"), "continuation provenance is exposed at runtime");
-
-  const nextKeys = ["ArrowRight", "ArrowDown", "PageDown"].every((key) => script.includes(`"${key}"`));
-  const prevKeys = ["ArrowLeft", "ArrowUp", "PageUp"].every((key) => script.includes(`"${key}"`));
-  const inputGuard = script.includes("function isEditableTarget") && script.includes("contenteditable") && script.includes("if (isEditableTarget(event.target)) return");
-  add("presenter-keys", nextKeys && prevKeys && inputGuard, "horizontal, vertical and page keys exist with editable-target guard");
-  add("audit-interface", script.includes("window.__DECK_AUDIT") && script.includes("currentLayout") && script.includes("footerState"), "runtime audit interface exists");
-
-  const activeTheme = options.theme || html.match(/<body[^>]*data-theme="([^"]+)"/i)?.[1];
-  if (["hacker", "cyber", "hacker-dark"].includes(activeTheme || "")) {
-    const noTexture = !/(?:repeating-)?radial-gradient\s*\(|repeating-linear-gradient\s*\(|(?:-webkit-)?mask-image\s*:|(?:backdrop-)?filter\s*:|\b(?:text-shadow|box-shadow)\s*:/i.test(style);
-    const stageOrnament = [...style.matchAll(/([^{}]+)\{([^{}]*)\}/g)].some((match) =>
-      splitSelectors(match[1]).some((selector) => /hacker|cyber/.test(selector)
-        && /\.slide(?:(?:\[[^\]]+\])|(?::is\([^)]*\)))*::(?:before|after)\s*$/.test(selector))
-      && !/\b(?:content\s*:\s*none|display\s*:\s*none)\b/.test(match[2])
-    );
-    add("hacker-flat-fields", noTexture && !stageOrnament, "Hacker uses flat fields without texture, glow, filters or page-wide pseudo-element rails");
-  }
-  if (activeTheme === "hacker" || activeTheme === "cyber") {
-    const hackerColors = [
-      /--hacker-void:\s*#18191C/i,
-      /--hacker-paper:\s*#F2F0EB/i,
-      /--hacker-signal:\s*#D7AF74/i,
-      /--hl:\s*#825B25/i
-    ];
-    add("hacker-palette", hackerColors.every((pattern) => pattern.test(style)), "graphite, warm paper and amber palette with readable light-theme highlight exists");
-    const genericFields = ruleBodies(style, ".slide").some((body) => /background\s*:\s*var\(--bg\)/.test(body))
-      && ruleBodies(style, '.slide[data-cover="true"]').some((body) => /background\s*:\s*var\(--acc-bg\)/.test(body));
-    const paperTheme = ruleBodies(style, 'body[data-theme="hacker"]').some((body) => body.includes("--bg: var(--hacker-paper)") && body.includes("--acc-bg: var(--hacker-void)"));
-    add("hacker-reading-strategy", genericFields && paperTheme, "regular paper and dark cover/chapter use inherited flat color fields");
-    const hackerSlideBodies = ruleBodies(style, 'body[data-theme="hacker"] .slide');
-    const symmetricHacker = hackerSlideBodies.every((body) => !/padding-left\s*:/.test(body))
-      && style.includes("padding: clamp(28px, 6vmin, 96px) var(--stage-inline)");
-    add("symmetric-hacker-stage", symmetricHacker, "Hacker stage padding remains symmetric");
-  }
-  if (activeTheme === "hacker-dark") {
-    const darkColors = [
-      /--hacker-dark-bg:\s*#18191C/i,
-      /--hacker-dark-deep:\s*#101113/i,
-      /--hacker-dark-panel:\s*#212226/i,
-      /--hacker-dark-fg:\s*#E8E5DF/i,
-      /--hacker-dark-muted:\s*#99958E/i,
-      /--hacker-dark-signal:\s*#D7AF74/i
-    ];
-    add("hacker-dark-palette", darkColors.every((pattern) => pattern.test(style)), "exact graphite, warm-white and amber Hacker palette exists");
-    add("hacker-dark-contrast", contrastRatio("E8E5DF", "18191C") >= 9, `contrast=${contrastRatio("E8E5DF", "18191C").toFixed(2)}:1`);
-    const darkSlideBodies = ruleBodies(style, 'body[data-theme="hacker-dark"] .slide');
-    const darkCoverBodies = [...ruleBodies(style, 'body[data-theme="hacker-dark"] .slide[data-cover="true"]'), ...ruleBodies(style, 'body[data-theme="hacker-dark"] .slide:is([data-cover="true"], [data-emphasis="true"])')];
-    add("hacker-dark-all-pages", darkSlideBodies.some((body) => body.includes("var(--hacker-dark-bg)")) && darkCoverBodies.some((body) => body.includes("var(--hacker-dark-deep)")), "regular and cover pages both use distinct dark fields");
-    add("hacker-dark-signal-scope", style.includes("--fg: var(--hacker-dark-fg)") && !/\.line\s*\{[^}]*color\s*:\s*var\(--hacker-dark-signal\)/s.test(style), "signal amber is not the body-text color");
-    add("hacker-dark-no-effects", !/\b(?:text-shadow|box-shadow)\s*:|drop-shadow\s*\(|@keyframes\b|\banimation(?:-[a-z-]+)?\s*:|\btransition(?:-[a-z-]+)?\s*:/i.test(style), "dark theme has no glow, shadow, animation, or transition effects");
-    const symmetricDark = darkSlideBodies.length > 0
-      && darkSlideBodies.every((body) => !/padding-left\s*:/.test(body));
-    add("symmetric-hacker-dark-stage", symmetricDark, "dark Hacker stage padding remains symmetric");
-  }
-
-  if (options.template) {
-    const placeholders = ["{{TITLE}}", "{{SUBTITLE}}", "{{THEME}}", "{{SLIDES_JSON}}"];
-    add("template-placeholders", placeholders.every((placeholder) => original.includes(placeholder)), "four template placeholders remain");
-  }
-
-  return checks;
+export async function validateHtml(html:string,theme?:string,browser?:any){
+ const checks:{id:string;pass:boolean;detail:string}[]=[];const add=(id:string,pass:boolean,detail:string)=>checks.push({id,pass,detail});
+ const canonical=await Bun.file(resolve(import.meta.dir,'../SloganTemplate.html')).text();
+ add('canonical-template',normalizedTemplate(html)===normalizedTemplate(canonical),'Only data and embedded fonts may differ from the current template; old token presence cannot certify an alternate renderer.');
+ add('template-version',html.includes('data-template-version="'+VERSION+'"'),'Template '+VERSION);
+ let data:any;try{data=parseDeck(html);const errs=dataErrors({...data.meta,slides:data.slides});add('data-and-source-contract',!errs.length,errs.join('; ')||'Explicit roles, source coverage and content contracts hold.');const {buildId,...meta}=data.meta;add('payload-integrity',buildId===hash(safeJson({slides:data.slides,meta}))&&meta.templateId===hash(normalizedTemplate(canonical)),'Content, metadata and renderer match the build fingerprint.');if(theme)add('requested-theme',theme===data.meta.theme,'Requested theme matches compiled metadata.');}catch(e){add('data-and-source-contract',false,String(e));}
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1]??'',style=[...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(x=>x[1]).join('\n');
+ try{new Function(script);add('javascript-syntax',true,'Runtime compiles.');}catch(e){add('javascript-syntax',false,String(e));}
+ const engine=script.replace(/const (RAW_SLIDES|DECK_META) = [\s\S]*?;\n/g,'');
+ const fonts=html.match(/\/\* BEGIN DECK FONTS \*\/([\s\S]*?)\/\* END DECK FONTS \*\//)?.[1]??'';
+ const fontRemainder=fonts.replace(/@font-face\s*\{[^}]*\}/gi,'').replace(/\/\*[\s\S]*?\*\//g,'').trim();
+ const license=html.match(/<template id="deck-font-license">([\s\S]*?)<\/template>/)?.[1];
+ const knownLicense=(await Bun.file(resolve(import.meta.dir,'../Fonts/IBMPlexMono-OFL.txt')).text()).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+ add('asset-slot-boundary',!fontRemainder&&(license===undefined||license===knownLicense),'Font slot contains only font faces and the bundled license.');
+ const offline=offlineViolations(html,style,engine);add('offline',!offline.length,offline.join('; ')||'One runtime, inline resources, no network dependencies.');
+ const motion=/\b(?:animation|transition|view-transition)(?:-[a-z-]+)?\s*:|@keyframes\b|scroll-behavior\s*:\s*smooth/i.test(style)||/\.animate\s*\(|set(?:Interval|Timeout)\s*\(/.test(engine)||/<(?:animate|animateMotion|animateTransform|set)\b/i.test(html.replace(/<script>[\s\S]*?<\/script>/g,''));add('zero-motion',!motion,'Hard cuts only; animation-frame callbacks are for measurement.');
+ if(browser&&data){
+  const report=browser.value??browser;add('browser-build',report.buildId===data.meta.buildId,'Live probe belongs to this payload.');
+  add('browser-coverage',report.count===data.slides.length&&report.pages?.length===data.slides.length,'Every slide was inspected.');
+  add('browser-rendered-content',report.pages?.every((p:any)=>p.pass)&&report.pass===true,'Rendered roles, primary objects, text, geometry and fonts passed for the recorded viewport.');
+ }
+ return checks;
 }
-
-function printResult(label: string, checks: Check[], json: boolean) {
-  const failed = checks.filter((check) => !check.pass);
-  const result = {
-    status: failed.length === 0 ? "PASS" : "FAIL",
-    label,
-    passed: checks.length - failed.length,
-    total: checks.length,
-    failed
-  };
-  if (json) console.log(JSON.stringify(result, null, 2));
-  else {
-    console.log(`${result.status} ${label} — ${result.passed}/${result.total}`);
-    for (const failure of failed) console.error(`  ${failure.id}: ${failure.detail}`);
-  }
-  return failed.length === 0;
+async function selfTest(){
+ const template=await Bun.file(resolve(import.meta.dir,'../SloganTemplate.html')).text();const fixture=await Bun.file(resolve(import.meta.dir,'../References/CompositionDeck.json')).json();
+ const prepared=prepareDeck(fixture),html=materialize(template,prepared);const checks=await validateHtml(html);const result:Record<string,boolean>={templatePass:checks.every(c=>c.pass)};
+ const mutations={bypass:html.replace('SLIDES.forEach((s,i)=>{','SLIDES.forEach((s,i)=>{ return;'),cssOverride:html.replace('</style>','.claim{font-size:8px}</style>'),extraScript:html.replace('</body>','<script>console.log(1)</script></body>'),externalResource:html.replace('</head>','<link rel="stylesheet" href="https://example.com/x.css"></head>'),fakeFont:html.replace('/* BEGIN DECK FONTS */','/* BEGIN DECK FONTS */\n@font-face{font-family:X;src:url(data:font/ttf;base64,AAAA)}'),fontSlotStyle:html.replace('/* BEGIN DECK FONTS */','/* BEGIN DECK FONTS */\n.claim{display:none}')};
+ for(const [name,bad] of Object.entries(mutations))result['reject_'+name]=(await validateHtml(bad)).some(c=>!c.pass);
+ const variants=[structuredClone(fixture),structuredClone(fixture),structuredClone(fixture),structuredClone(fixture)];variants[0].slides[1].lines[0].chunks[0].t='changed';variants[1].slides[3].diagram.edges[0].to='missing';delete variants[2].slides[1].role;variants[3].mode='editorial';result.dataMutationsRejected=variants.every(v=>dataErrors(v).length>0);
+ result.shareStaysDark=prepareDeck({...fixture,tags:['share','talk']}).meta.theme==='hacker-dark';
+ result.explicitThemeWins=prepareDeck({...fixture,theme:'hacker',tags:['share']}).meta.theme==='hacker';
+ result.twoLineStatement=prepared.slides.some(s=>s.role==='statement'&&s.lines.length===2);
+ const dollar=structuredClone(fixture);dollar.title='$$x$$ $& $`';const d=prepareDeck(dollar);result.dollarSafeInjection=parseDeck(materialize(template,d)).meta.title===dollar.title;
+ const token=structuredClone(fixture);token.title='{{DECK_META_JSON}}';const tp=prepareDeck(token);result.placeholderLiteralsPreserved=parseDeck(materialize(template,tp)).meta.title===token.title;
+ const incomplete=structuredClone(fixture);incomplete.slides[1].sourceParts=[{id:incomplete.slides[1].sourceIds[0],index:1,total:2,joinBefore:''}];result.incompleteContinuationRejected=dataErrors(incomplete).length>0;
+ result.staleBrowserRejected=(await validateHtml(html,undefined,{buildId:'old',count:prepared.slides.length,pages:prepared.slides.map(()=>({pass:true})),pass:true})).some(c=>c.id==='browser-build'&&!c.pass);
+ for(const [k,v] of Object.entries(chartRendererFixtures(template)))result['chart_'+k]=v;
+ const mathCode=template.slice(template.indexOf('  function escapeHtml('),template.indexOf('// BEGIN CHART RENDERER'));const renderMath=(text:string)=>runInNewContext(mathCode+'\nrenderMathAware(input)',{input:text},{timeout:1000});
+ result.priceProtection=!String(renderMath('$20/month 与 $200/month')).includes('class="math"');result.mathClosedDelimiters=String(renderMath('$$x^2 \\cdot y$$')).includes('<sup>2</sup>');
+ const validFonts=['data:font/ttf;base64,AAEAAA==','data:font/otf;base64,T1RUTw=='];result.fontSignatures=validFonts.every(x=>isEmbeddedAsset(x,'font'))&&!isEmbeddedAsset('data:font/ttf;base64,VEVYVA==','font');
+ const ok=Object.values(result).every(Boolean);console.log(JSON.stringify({status:ok?'PASS':'FAIL',...result,failedChecks:checks.filter(c=>!c.pass)},null,2));return ok;
 }
-
-async function selfTest() {
-  const templatePath = resolve(import.meta.dir, "..", "SloganTemplate.html");
-  const template = await Bun.file(templatePath).text();
-  const goodChecks = validateHtml(template, { theme: "hacker", template: true });
-  const goodPass = goodChecks.every((check) => check.pass);
-  const darkChecks = validateHtml(template, { theme: "hacker-dark", template: true });
-  const darkPass = darkChecks.every((check) => check.pass);
-
-  const motionFixtures = [
-    ".bad{transition:opacity 1s}",
-    ".bad{transition-property:opacity;transition-duration:1s}",
-    ".bad{animation-name:pulse}",
-    ".bad{scroll-behavior:smooth}",
-    ".bad{view-transition-name:card}"
-  ];
-  const motionFixturesRejected = motionFixtures.every((fixture) => {
-    const bad = template.replace("</style>", `${fixture}</style>`);
-    return validateHtml(bad, { theme: "hacker", template: true })
-      .some((check) => check.id === "zero-motion" && !check.pass);
-  });
-  const svgMotionFixturesRejected = [
-    '<svg xmlns="http://www.w3.org/2000/svg"><animate attributeName="x" /></svg>',
-    '<svg><animateMotion path="M 0 0 L 1 1" /></svg>',
-    '<svg><animateTransform attributeName="transform" /></svg>',
-    '<svg><set attributeName="visibility" to="hidden" /></svg>'
-  ].every((fixture) => validateHtml(template.replace("</main>", `${fixture}</main>`), { theme: "hacker", template: true })
-    .some((check) => check.id === "zero-motion" && !check.pass));
-
-  const resourceFixtures = [
-    ".bad{background-image:url(external.png)}",
-    '@import "theme.css";',
-    '.bad{background-image:image-set("one.png" 1x)}'
-  ];
-  const resourceFixturesRejected = resourceFixtures.every((fixture) => {
-    const bad = template.replace("</style>", `${fixture}</style>`);
-    return validateHtml(bad, { theme: "hacker", template: true })
-      .some((check) => check.id === "offline" && !check.pass);
-  });
-  const dataUri = (mime: string, bytes: Buffer) => `data:${mime};base64,${bytes.toString("base64")}`;
-  const pngUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=";
-  const jpegUri = dataUri("image/jpeg", Buffer.from([255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 255, 217]));
-  const webpUri = dataUri("image/webp", Buffer.concat([Buffer.from("RIFF"), Buffer.from([4, 0, 0, 0]), Buffer.from("WEBP")]));
-  const fontUris = [
-    dataUri("font/ttf", Buffer.from([0, 1, 0, 0, 0, 0, 0, 0])),
-    dataUri("font/otf", Buffer.from("OTTOfixture")),
-    dataUri("font/woff", Buffer.from("wOFFfixture")),
-    dataUri("font/woff2", Buffer.from("wOF2fixture"))
-  ];
-  const embeddedAssetFixtures = [
-    ...[pngUri, jpegUri, webpUri].map((uri) => template.replace("</main>", `<img src="${uri}" alt="embedded" /></main>`)),
-    template.replace("</main>", `<svg><image href="${pngUri}" /></svg></main>`),
-    template.replace("</main>", `<svg><image xlink:href="${pngUri}" /></svg></main>`),
-    ...fontUris.map((uri) => template.replace("</head>", `<style data-embedded-font>@font-face{font-family:"Fixture";src:url("${uri}")}</style></head>`)),
-    template.replace("</style>", `@font-face{font-family:"Fixture";src:url("${fontUris[0]}"), url("${fontUris[1]}")}</style>`)
-  ];
-  const embeddedAssetsAccepted = embeddedAssetFixtures.every((fixture) => validateHtml(fixture, { theme: "hacker", template: true }).find((check) => check.id === "offline")?.pass === true);
-  const unsupportedDataAssets = [
-    dataUri("image/gif", Buffer.from("GIF89afixture")),
-    dataUri("image/svg+xml", Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'></svg>")),
-    dataUri("image/png", Buffer.from("GIF89afixture")),
-    "data:image/png;base64,%%%",
-    "data:image/png;base64,AAAA",
-    fontUris[0]
-  ];
-  const invalidEmbeddedAssetsRejected = [
-    ...unsupportedDataAssets.map((uri) => template.replace("</main>", `<img src="${uri}" /></main>`)),
-    template.replace("</main>", '<img src="relative.png" /></main>'),
-    template.replace("</main>", '<img src="https://example.com/image.png" /></main>'),
-    template.replace("</main>", '<img /></main>'),
-    template.replace("</main>", `<img src="${pngUri}" srcset="relative.png 2x" /></main>`),
-    template.replace("</main>", '<svg><image href="#local" /></svg></main>'),
-    template.replace("</main>", `<svg><use href="${pngUri}" /></svg></main>`),
-    template.replace("</style>", `@font-face{font-family:"Bad";src:url("${pngUri}")}</style>`),
-    template.replace("</style>", `@font-face{font-family:"Bad";src:url("${dataUri("font/ttf", Buffer.from("<svg>"))}")}</style>`),
-    template.replace("</style>", `.bad{background:url("${pngUri}")}</style>`),
-    template.replace("</style>", `.bad{background:url("${fontUris[0]}")}</style>`),
-    template.replace("</style>", ".bad{fill:url(#local)}</style>"),
-    template.replace("</head>", '<style data-font>@font-face{font-family:"Bad";src:url(relative.ttf)}</style></head>')
-  ].every((fixture) => validateHtml(fixture, { theme: "hacker", template: true }).some((check) => check.id === "offline" && !check.pass));
-  const markupResourceFixturesRejected = [
-    '<script src="local.js"></script>',
-    '<script>fetch("https://example.com")</script>',
-    '<svg><image href="external.png" /></svg>',
-    '<svg><use href="symbols.svg#chart" /></svg>',
-    '<svg><use xlink:href="https://example.com/chart.svg#chart" /></svg>',
-    '<svg><foreignObject><div>embedded HTML</div></foreignObject></svg>',
-    '<svg style="fill: url(external.svg#shape)"></svg>'
-  ].every((fixture) => validateHtml(template.replace("</main>", `${fixture}</main>`), { theme: "hacker", template: true })
-    .some((check) => check.id === "offline" && !check.pass));
-  const inlineSvgAccepted = validateHtml(template.replace("</main>", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path id="local" d="M 0 0 L 100 100"/><use href="#local"/></svg></main>'), { theme: "hacker", template: true })
-    .find((check) => check.id === "offline")?.pass === true;
-  const literalSource = [{ chart: { kind: "compare", title: "<svg> <script> https://example.com", items: [{ label: "<animate>", text: "fetch('data')" }, { label: "B", text: "document.createElement('img')" }] }, sourceIds: ["SRC-LITERAL"] }];
-  const literalDeck = materializeTemplate(template).replace(/\bconst\s+RAW_SLIDES\s*=\s*[\s\S]*?;\s*(?:\n|$)/, () => `const RAW_SLIDES = ${JSON.stringify(literalSource)};\n`);
-  const literalSourceAccepted = validateHtml(literalDeck, { theme: "hacker", template: false })
-    .filter((check) => ["javascript-syntax", "offline", "zero-motion", "chart-data-and-provenance"].includes(check.id)).every((check) => check.pass);
-
-  const spatialFixtures = [
-    {
-      id: "centered-stage-axis",
-      html: template.replace(
-        '.slide[data-cover="true"] {\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;',
-        '.slide[data-cover="true"] {\n    flex-direction: column;\n    align-items: center;\n    justify-content: flex-end;'
-      )
-    },
-    {
-      id: "centered-text-contract",
-      html: template.replace("text-align: center;", "text-align: left;")
-    },
-    {
-      id: "title-short-signal",
-      html: template.replace(
-        "background: linear-gradient(var(--hl), var(--hl)) center top / var(--title-signal-w) clamp(4px, .55vmin, 8px) no-repeat;",
-        "background: none;"
-      )
-    },
-    {
-      id: "length-tier-boundary",
-      html: template.replace('if (max <= 10) return "medium";', 'if (max <= 14) return "medium";')
-    },
-    {
-      id: "xlong-start-size",
-      html: template.replace("font-size: clamp(42px, 8.4vmin, 136px);", "font-size: clamp(34px, 5.2vmin, 96px);")
-    },
-    {
-      id: "symmetric-hacker-stage",
-      html: template.replace("</style>", 'body[data-theme="hacker"] .slide { padding-left: 12vw; }</style>')
-    },
-    {
-      id: "hacker-flat-fields",
-      html: template.replace("</style>", '.bad { background: repeating-linear-gradient(0deg, transparent 0 5px, green 6px); }</style>')
-    },
-    {
-      id: "hacker-flat-fields",
-      html: template.replace("</style>", 'body[data-theme="hacker-dark"] .slide::after { content: ""; width: 80vw; }</style>')
-    },
-    {
-      id: "composition-grammar",
-      html: template.replace("element.dataset.composition = compositionFor(slide);", "")
-    },
-    {
-      id: "composition-audit-interface",
-      html: template.replace("composition: slides[index]?.dataset.composition,", "")
-    },
-    {
-      id: "whitespace-budget",
-      html: template.replace("width: min(82vw, 1480px);", "width: min(96vw, 1700px);")
-    }
-  ];
-  const spatialFixturesRejected = spatialFixtures.every((fixture) =>
-    validateHtml(fixture.html, { theme: "hacker", template: true })
-      .some((check) => check.id === fixture.id && !check.pass)
-  );
-
-  const semanticFixtures = [
-    {
-      id: "semantic-atom-nowrap",
-      html: template.replace(
-        'body[data-theme] .slide[data-semantic-atom="true"] .line {\n    white-space: nowrap;',
-        'body[data-theme] .slide[data-semantic-atom="true"] .line {\n    white-space: normal;'
-      )
-    },
-    {
-      id: "cjk-tail-protection",
-      html: template.replace(".keep-cjk-tail { white-space: nowrap; }", ".keep-cjk-tail { white-space: normal; }")
-    },
-    {
-      id: "semantic-group-runtime",
-      html: template.replace('if (slide.semanticGroup) element.dataset.semanticGroup = slide.semanticGroup;', "")
-    }
-  ];
-  const semanticFixturesRejected = semanticFixtures.every((fixture) =>
-    validateHtml(fixture.html, { theme: "hacker", template: true })
-      .some((check) => check.id === fixture.id && !check.pass)
-  );
-
-  const layouts = [
-    chooseLayout([22, 24]),
-    chooseLayout([48, 45]),
-    chooseLayout([12, 13, 14]),
-    chooseLayout([30, 28, 24]),
-    chooseLayout([20, 21, 22, 23])
-  ];
-  const layoutPass = layouts.every((layout) => layout === "rows");
-  const mathPass = mathSegments("$$C(Q)=C_1\\cdot Q^{-b}$$ and $V\\propto n^2$").length === 2
-    && mathSegments("$20/month $200/month $???/month").length === 0;
-  const dollarSafeMaterialization = materializeTemplate(template).includes('"$$C(Q)=C_1 \\\\cdot Q^{-b}$$"');
-
-  const nativeChart = (chart: unknown) => ({ chart, sourceIds: ["SRC-CHART"] });
-  const bar = { kind: "bar", title: "收支", items: [{ label: "负", value: -2 }, { label: "零", value: 0 }, { label: "正", value: 3, emphasis: true }] };
-  const line = { kind: "line", title: "增长", items: [{ label: "A", x: 1, value: 2 }, { label: "B", x: 4, value: 2 }] };
-  const validChartFixtures = [
-    [nativeChart(bar)],
-    [nativeChart(line)],
-    [nativeChart({ kind: "flow", title: "过程", items: [{ label: "输入" }, { label: "输出", text: "结果" }] })],
-    [nativeChart({ kind: "compare", title: "取舍", items: [{ label: "A", text: "简洁" }, { label: "B", text: "完整" }] })],
-    [{ lines: [{ chunks: [{ t: "原文保留" }] }], sourceIds: ["SRC-ORIGINAL"] }, { chart: bar, derivedFrom: ["SRC-ORIGINAL"] }]
-  ];
-  const invalidChartFixtures = [
-    [nativeChart({ ...bar, kind: "pie" })],
-    [nativeChart({ ...bar, xLabel: "unused" })],
-    [nativeChart({ ...bar, title: " " })],
-    [nativeChart({ ...bar, items: [{ label: "唯一", value: 1 }] })],
-    [nativeChart({ ...bar, items: Array.from({ length: 7 }, (_, i) => ({ label: `条${i}`, value: i })) })],
-    [nativeChart({ ...bar, items: [{ label: "A", value: Number.NaN }, { label: "B", value: 1 }] })],
-    [nativeChart({ ...bar, items: [{ label: "A", value: Infinity }, { label: "B", value: 1 }] })],
-    [nativeChart({ ...bar, items: [{ label: "A", value: "1" }, { label: "B", value: 1 }] })],
-    [nativeChart({ ...bar, items: [{ label: "A", value: 1, emphasis: true }, { label: "B", value: 2, emphasis: true }] })],
-    [nativeChart({ ...line, items: [{ label: "A", x: 1, value: 0 }, { label: "B", x: 1, value: 2 }] })],
-    [nativeChart({ ...line, items: [{ label: "A", x: 2, value: 0 }, { label: "B", x: 1, value: 2 }] })],
-    [nativeChart({ ...line, items: [{ label: "A", x: 1, value: 0 }, { label: "B", x: Infinity, value: 2 }] })],
-    [nativeChart({ kind: "flow", title: "过程", items: Array.from({ length: 5 }, (_, i) => ({ label: String(i) })) })],
-    [nativeChart({ kind: "flow", title: "过程", unit: "unused", items: [{ label: "A" }, { label: "B" }] })],
-    [nativeChart({ kind: "compare", title: "比较", items: [{ label: "A", text: "A" }, { label: "B" }] })],
-    [{ chart: bar }],
-    [{ chart: bar, sourceIds: [] }],
-    [{ chart: bar, sourceIds: ["SRC-A"], derivedFrom: ["SRC-A"] }],
-    [{ ...nativeChart(bar), lines: [] }],
-    [{ ...nativeChart(bar), sourceParts: [] }],
-    [{ chart: bar, derivedFrom: ["SRC-MISSING"] }],
-    [{ sourceIds: ["SRC-A"] }, { sourceIds: ["SRC-B"] }, { chart: bar, derivedFrom: ["SRC-A"] }]
-  ];
-  const validChartsAccepted = validChartFixtures.every((slides) => chartDataErrors(slides).length === 0);
-  const invalidChartsRejected = invalidChartFixtures.every((slides) => chartDataErrors(slides).length > 0);
-  const materializedChartMutationRejected = validateHtml(materializeTemplate(template).replace('"kind":"bar"', '"kind":"pie"'), { theme: "hacker", template: false })
-    .some((check) => check.id === "chart-data-and-provenance" && !check.pass);
-  const chartRendererBehavior = chartRendererFixtures(template);
-  const chartRendererPass = Object.values(chartRendererBehavior).every(Boolean);
-
-  const pass = goodPass && darkPass && motionFixturesRejected && svgMotionFixturesRejected && resourceFixturesRejected && embeddedAssetsAccepted && invalidEmbeddedAssetsRejected && markupResourceFixturesRejected && inlineSvgAccepted && literalSourceAccepted && spatialFixturesRejected && semanticFixturesRejected && layoutPass && mathPass && dollarSafeMaterialization && validChartsAccepted && invalidChartsRejected && materializedChartMutationRejected && chartRendererPass;
-  console.log(JSON.stringify({
-    status: pass ? "PASS" : "FAIL",
-    goodTemplateChecks: `${goodChecks.filter((check) => check.pass).length}/${goodChecks.length}`,
-    darkTemplateChecks: `${darkChecks.filter((check) => check.pass).length}/${darkChecks.length}`,
-    motionFixturesRejected,
-    svgMotionFixturesRejected,
-    resourceFixturesRejected,
-    embeddedAssetsAccepted,
-    invalidEmbeddedAssetsRejected,
-    markupResourceFixturesRejected,
-    inlineSvgAccepted,
-    literalSourceAccepted,
-    spatialFixturesRejected,
-    semanticFixturesRejected,
-    layouts,
-    stableRowsLayout: layoutPass,
-    mathAndPriceFixtures: mathPass,
-    dollarSafeMaterialization,
-    validChartsAccepted,
-    invalidChartsRejected,
-    materializedChartMutationRejected,
-    chartRendererBehavior,
-    failedTemplateChecks: [...goodChecks, ...darkChecks].filter((check) => !check.pass)
-  }, null, 2));
-  if (!pass) process.exit(1);
+async function main(){
+ const args=process.argv.slice(2);if(args.includes('--help')||!args.length){console.log('ValidateDeck <deck.html> [--theme NAME] [--json] [--template] [--browser-report report.json]\nValidateDeck --self-test\nStatic validation checks a canonical renderer and data. Use ProbeDeck.js in the isolated browser for actual rendering.');return;}
+ if(args.includes('--self-test')){if(!await selfTest())process.exitCode=1;return;}
+ const path=args[0],theme=args.includes('--theme')?args[args.indexOf('--theme')+1]:undefined;let html=await Bun.file(path).text();
+ if(args.includes('--template')){const fixture=await Bun.file(resolve(import.meta.dir,'../References/CompositionDeck.json')).json();if(theme)fixture.theme=theme;html=materialize(html,prepareDeck(fixture));}
+ let report:any;if(args.includes('--browser-report')){report=await Bun.file(args[args.indexOf('--browser-report')+1]).json();if(report.results)report=report.results.at(-1).value;}
+ const checks=await validateHtml(html,theme,report),failed=checks.filter(c=>!c.pass);const result={status:failed.length?'FAIL':'PASS',file:path,passed:checks.length-failed.length,total:checks.length,failed,browser:report?'checked':'not supplied; visual verification remains separate'};
+ if(args.includes('--json'))console.log(JSON.stringify(result,null,2));else{console.log(result.status+' '+path+' — '+result.passed+'/'+result.total);failed.forEach(f=>console.error(f.id+': '+f.detail));}
+ if(failed.length)process.exitCode=1;
 }
-
-async function main() {
-  const options = parseArgs(Bun.argv.slice(2));
-  if (options.help) {
-    console.log(HELP);
-    return;
-  }
-  if (options.selfTest) {
-    await selfTest();
-    return;
-  }
-  if (!options.file) {
-    console.error(HELP);
-    process.exit(2);
-  }
-
-  const html = await Bun.file(options.file).text();
-  const checks = validateHtml(html, options);
-  const pass = printResult(options.file, checks, options.json);
-  if (!pass) process.exit(1);
-}
-
-await main();
+if(import.meta.main)await main();

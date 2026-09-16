@@ -1,0 +1,464 @@
+{
+  "title": "兼容性回归",
+  "mode": "faithful",
+  "sources": [
+    {
+      "id": "SRC-1",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "选择"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-2",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "价格 $20/month 与 $200/month"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-3",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "$$x^2 \\cdot y_1$$"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-4",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "读取材料"
+              }
+            ]
+          },
+          {
+            "chunks": [
+              {
+                "t": "比较解释"
+              }
+            ]
+          },
+          {
+            "chunks": [
+              {
+                "t": "返回证据"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-5",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "同一份记录，可以重新阅读。"
+              }
+            ]
+          },
+          {
+            "chunks": [
+              {
+                "t": "新的解释，仍需回到证据。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "SRC-6",
+      "content": {
+        "pre": "function add(a, b) {\n  return a + b;\n}\n\n+-----+\n|code |\n+-----+"
+      }
+    },
+    {
+      "id": "SRC-7",
+      "content": {
+        "table": {
+          "header": false,
+          "rows": [
+            [
+              "甲",
+              "独立记录"
+            ],
+            [
+              "乙",
+              "补充记录"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-8",
+      "content": {
+        "chart": {
+          "kind": "bar",
+          "title": "示意差额",
+          "unit": "单位",
+          "items": [
+            {
+              "label": "甲",
+              "value": -2
+            },
+            {
+              "label": "乙",
+              "value": 0
+            },
+            {
+              "label": "丙",
+              "value": 3,
+              "emphasis": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-9",
+      "content": {
+        "chart": {
+          "kind": "line",
+          "title": "示意变化",
+          "items": [
+            {
+              "label": "第一日",
+              "x": 1,
+              "value": 2
+            },
+            {
+              "label": "第二日",
+              "x": 2,
+              "value": 3
+            },
+            {
+              "label": "第五日",
+              "x": 5,
+              "value": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-10",
+      "content": {
+        "chart": {
+          "kind": "flow",
+          "title": "结果进入使用",
+          "items": [
+            {
+              "label": "生成"
+            },
+            {
+              "label": "核验"
+            },
+            {
+              "label": "使用"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SRC-11",
+      "content": {
+        "pre": "<script> & <svg>\nhttps://example.com\nfetch(\"literal text\")"
+      }
+    },
+    {
+      "id": "SRC-continuation",
+      "content": {
+        "lines": [
+          {
+            "chunks": [
+              {
+                "t": "第一句。第二句。"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "slides": [
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "选择"
+            }
+          ]
+        }
+      ],
+      "notes": "short semantic atom",
+      "sourceIds": [
+        "SRC-1"
+      ]
+    },
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "价格 $20/month 与 $200/month"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-2"
+      ]
+    },
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "$$x^2 \\cdot y_1$$"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-3"
+      ]
+    },
+    {
+      "role": "sequence",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "读取材料"
+            }
+          ]
+        },
+        {
+          "chunks": [
+            {
+              "t": "比较解释"
+            }
+          ]
+        },
+        {
+          "chunks": [
+            {
+              "t": "返回证据"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-4"
+      ]
+    },
+    {
+      "role": "quotation",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "同一份记录，可以重新阅读。"
+            }
+          ]
+        },
+        {
+          "chunks": [
+            {
+              "t": "新的解释，仍需回到证据。"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-5"
+      ]
+    },
+    {
+      "role": "evidence",
+      "pre": "function add(a, b) {\n  return a + b;\n}\n\n+-----+\n|code |\n+-----+",
+      "sourceIds": [
+        "SRC-6"
+      ]
+    },
+    {
+      "role": "evidence",
+      "table": {
+        "header": false,
+        "rows": [
+          [
+            "甲",
+            "独立记录"
+          ],
+          [
+            "乙",
+            "补充记录"
+          ]
+        ]
+      },
+      "sourceIds": [
+        "SRC-7"
+      ]
+    },
+    {
+      "role": "chart",
+      "chart": {
+        "kind": "bar",
+        "title": "示意差额",
+        "unit": "单位",
+        "items": [
+          {
+            "label": "甲",
+            "value": -2
+          },
+          {
+            "label": "乙",
+            "value": 0
+          },
+          {
+            "label": "丙",
+            "value": 3,
+            "emphasis": true
+          }
+        ]
+      },
+      "sourceIds": [
+        "SRC-8"
+      ]
+    },
+    {
+      "role": "chart",
+      "chart": {
+        "kind": "line",
+        "title": "示意变化",
+        "items": [
+          {
+            "label": "第一日",
+            "x": 1,
+            "value": 2
+          },
+          {
+            "label": "第二日",
+            "x": 2,
+            "value": 3
+          },
+          {
+            "label": "第五日",
+            "x": 5,
+            "value": 1
+          }
+        ]
+      },
+      "sourceIds": [
+        "SRC-9"
+      ]
+    },
+    {
+      "role": "chart",
+      "chart": {
+        "kind": "flow",
+        "title": "结果进入使用",
+        "items": [
+          {
+            "label": "生成"
+          },
+          {
+            "label": "核验"
+          },
+          {
+            "label": "使用"
+          }
+        ]
+      },
+      "sourceIds": [
+        "SRC-10"
+      ]
+    },
+    {
+      "role": "evidence",
+      "pre": "<script> & <svg>\nhttps://example.com\nfetch(\"literal text\")",
+      "sourceIds": [
+        "SRC-11"
+      ]
+    },
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "第一句。"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-continuation"
+      ],
+      "sourceParts": [
+        {
+          "id": "SRC-continuation",
+          "index": 1,
+          "total": 2,
+          "joinBefore": ""
+        }
+      ]
+    },
+    {
+      "role": "statement",
+      "lines": [
+        {
+          "chunks": [
+            {
+              "t": "第二句。"
+            }
+          ]
+        }
+      ],
+      "sourceIds": [
+        "SRC-continuation"
+      ],
+      "sourceParts": [
+        {
+          "id": "SRC-continuation",
+          "index": 2,
+          "total": 2,
+          "joinBefore": ""
+        }
+      ]
+    }
+  ]
+}
