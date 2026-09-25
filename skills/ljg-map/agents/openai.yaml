@@ -1,0 +1,4 @@
+interface:
+  display_name: "ljg-map · 形式化思考地图"
+  short_description: "以学习观洞察文稿的概念与联结，按内容本身画出易懂的知识地图"
+  default_prompt: "用 $ljg-map 把这份文稿画成通俗易懂的形式化思考地图，为每个节点给出定义、短公式和具体语义。"
