@@ -241,26 +241,6 @@
     color: var(--text-mid);
   }
 
-  .evidence-boundary {
-    margin: 40px 0;
-    padding: 30px 32px 26px;
-    border: 1px solid var(--rule);
-    background: var(--panel);
-  }
-
-  .evidence-boundary > strong:first-child {
-    display: block;
-    margin-bottom: 12px;
-    font: 650 22px/1.4 var(--font-display);
-    color: var(--accent);
-    letter-spacing: 0.08em;
-  }
-
-  .evidence-boundary p {
-    margin-bottom: 0;
-    color: var(--text-mid);
-  }
-
   .closing-judgment {
     margin: 48px 0 12px;
     padding-top: 30px;
@@ -269,6 +249,38 @@
     color: var(--text);
     letter-spacing: -0.025em;
   }
+
+  /* Optional learning material: the case and its criterion stay readable. */
+  .learning-material,
+  .transfer-check,
+  .transfer-feedback {
+    margin: 32px 0;
+    padding: 24px 0 24px 28px;
+    border-left: 3px solid var(--rule);
+    overflow-wrap: anywhere;
+  }
+
+  .content .learning-label {
+    display: block;
+    margin-bottom: 12px;
+    font: 600 28px/1.5 var(--font-display);
+    color: var(--accent);
+  }
+
+  .content .learning-material p,
+  .content .transfer-check p,
+  .content .transfer-feedback p {
+    font: 400 36px/1.72 var(--font-body);
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .content .learning-material p:last-child,
+  .content .transfer-check p:last-child,
+  .content .transfer-feedback p:last-child { margin-bottom: 0; }
+
+  .transfer-check { border-left-color: var(--accent); }
+  .transfer-feedback { margin-top: 72px; }
 
   /* ── Generated raster imagery ── */
   .generated-visual,

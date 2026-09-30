@@ -316,7 +316,6 @@ export function validateWhiteboardSnapshot(snapshot: WhiteboardValidationSnapsho
 
   if (ledger.steps[0]?.role !== "question") failures.push("Whiteboard reasoning spine must begin with a question step");
   if (!ledger.steps.some(step => step.role === "conclusion")) failures.push("Whiteboard reasoning spine requires a conclusion step");
-  if (ledger.steps.at(-1)?.role !== "boundary") failures.push("Whiteboard reasoning spine must end with a boundary step");
 
   const renderedStepIds = snapshot.steps.map(step => step.id);
   if (!unique(renderedStepIds)) failures.push("Rendered whiteboard step IDs must be unique");
@@ -572,7 +571,6 @@ async function main(): Promise<void> {
           ".transition-sentence",
           ".local-shape",
           ".branch-path",
-          ".whiteboard-boundary",
           ".colophon",
           ".info-source",
         ];

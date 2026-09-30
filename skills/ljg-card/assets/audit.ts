@@ -100,7 +100,6 @@ for (const term of [
   "非专属视觉属性",
   "无论参照对象身份",
   "不写创作者姓名",
-  ".evidence-boundary",
   ".closing-judgment",
 ]) {
   requireThat(longMode.includes(term), `long-mode contract missing: ${term}`);
@@ -157,7 +156,6 @@ for (const primitive of [
   ".whiteboard-header",
   ".whiteboard-title",
   ".whiteboard-question",
-  ".whiteboard-boundary",
   ".reasoning-spine",
   ".spine-rail",
   ".logic-step",
@@ -239,7 +237,6 @@ for (const contract of [
   "dataset.visibility",
   "relation-arrowhead",
   "transition-sentence",
-  "whiteboard-boundary",
   "Ledger/DOM step mismatch",
   "Relation endpoint not found",
   "must keep bridge empty",
@@ -323,7 +320,6 @@ for (const primitive of [
   ".beat-index",
   ".metric-row",
   ".metric",
-  ".evidence-boundary",
   ".closing-judgment",
 ]) {
   requireThat(longTemplate.includes(primitive), `long CSS surface missing: ${primitive}`);
@@ -396,7 +392,6 @@ for (const primitive of [
   'class="beat-index"',
   'class="metric-row"',
   'class="metric"',
-  'class="evidence-boundary"',
   'class="closing-judgment"',
 ]) {
   requireThat(fixtureBuilder.includes(primitive), `long fixture does not exercise: ${primitive}`);

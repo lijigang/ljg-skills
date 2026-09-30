@@ -205,13 +205,6 @@
     outline-color: var(--accent);
   }
 
-  .whiteboard-boundary {
-    padding: 28px 30px;
-    border: 3px solid var(--ink);
-  }
-
-  .whiteboard-boundary .step-role { margin-bottom: 10px; }
-
   .logic-relation {
     position: relative;
     z-index: 2;
@@ -278,6 +271,38 @@
 
   .logic-contrast { border-left-color: var(--accent); }
   .logic-quote { border-left-color: var(--green); font-family: var(--hand); }
+
+  /* Learning material belongs beside its rule, with primary reading weight. */
+  .learning-material,
+  .transfer-check,
+  .transfer-feedback {
+    margin: 26px 0;
+    padding: 22px 0 22px 24px;
+    border-left: 4px solid var(--blue);
+    overflow-wrap: anywhere;
+  }
+
+  .learning-label {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--accent);
+    font: 600 28px/1.5 var(--sans);
+  }
+
+  .learning-material p,
+  .transfer-check p,
+  .transfer-feedback p {
+    margin: 0 0 16px;
+    color: var(--ink);
+    font: 400 36px/1.72 var(--sans);
+  }
+
+  .learning-material p:last-child,
+  .transfer-check p:last-child,
+  .transfer-feedback p:last-child { margin-bottom: 0; }
+
+  .transfer-check { border-left-color: var(--accent); }
+  .transfer-feedback { margin-top: 72px; }
 
   .generated-art--whiteboard {
     max-width: 390px;

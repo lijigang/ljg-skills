@@ -120,6 +120,20 @@ describe("whiteboard reasoning-spine contract", () => {
     expect(validateWhiteboardSnapshot(validSnapshot())).toEqual([]);
   });
 
+  test("accepts a conclusion ending with source qualifications integrated into the argument", () => {
+    const snapshot = validSnapshot();
+    const edited = structuredClone(ledger);
+    const qualification = edited.steps.pop()!;
+    edited.steps[2].support += ` ${qualification.claim} ${qualification.support}`;
+    edited.relations.pop();
+    edited.source_sections[1].step_ids = ["step-03"];
+    snapshot.ledger = edited;
+    snapshot.steps.pop();
+    snapshot.steps[2].support = edited.steps[2].support;
+    snapshot.relations.pop();
+    expect(validateWhiteboardSnapshot(snapshot)).toEqual([]);
+  });
+
   test("accepts silent continuation without manufactured transition copy", () => {
     const snapshot = validSnapshot();
     const silentRelation = (snapshot.ledger as typeof ledger).relations[0];

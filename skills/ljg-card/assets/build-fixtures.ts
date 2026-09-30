@@ -345,7 +345,7 @@ await run([
 const logicStep = (step: FixtureStep, depth: string): string => [
   `<article class="logic-step" data-step-id="${step.id}" data-role="${step.role}" data-source-refs="${step.source_refs.join(" ")}">`,
   `<div class="step-marker" aria-hidden="true"><span class="step-depth">${depth}</span><span class="step-dot"></span></div>`,
-  `<div class="step-panel${step.role === "boundary" ? " whiteboard-boundary" : ""}">`,
+  '<div class="step-panel">',
   `<span class="step-role">${roleLabels[step.role]}</span>`,
   `<h2 class="step-claim">${step.claim}</h2>`,
   `<p class="step-support">${step.support}</p>`,
@@ -367,7 +367,7 @@ const sourceSectionsFor = (steps: FixtureStep[]) => whiteboardParagraphs.map((_,
   const stepIds = steps.filter(step => step.source_refs.includes(id)).map(step => step.id);
   return stepIds.length > 0
     ? { id, disposition: "rendered" as const, step_ids: stepIds }
-    : { id, disposition: "omitted" as const, omission_reason: "局部结构 fixture 只验证前五段的主干呈现。" };
+    : { id, disposition: "omitted" as const, omission_reason: "局部结构 fixture 只验证所列步骤，不展开其余分支路线。" };
 });
 
 const logicLedger = (steps: FixtureStep[], relations: FixtureRelation[]): string => JSON.stringify({
@@ -441,21 +441,18 @@ const buildLinearWhiteboard = (shape: "chain" | "timeline" | "matrix" | "radial"
     { id: "step-01", role: "question", source_refs: ["src-01"], claim: "这个变化从哪里开始？", support: "先找到原文试图解释的具体局面。", residue: "现状与目标之间还隔着一个没有解释的缺口。", must_render: true, presentation: "typography" },
     { id: "step-02", role: "premise", source_refs: ["src-02"], claim: "旧办法只解决了表面", support: "局部结果出现了，承重机制仍未改变。", residue: "", must_render: true, presentation: "text" },
     { id: "step-03", role: "inference", source_refs: ["src-03"], claim: "关键机制开始可见", support: "局部结构只解释这一层，不替代整条主干。", residue: "", must_render: true, presentation: shape },
-    { id: "step-04", role: "conclusion", source_refs: ["src-04"], claim: "读者能够复述推导", support: "标题与正文顺着未解压力自然向下，不需要逐层报幕。", residue: "", must_render: true, presentation: "typography" },
-    { id: "step-05", role: "boundary", source_refs: ["src-05"], claim: "结构清楚不自动证明判断为真", support: "白板保存原文推理，证据强度仍服从来源。", residue: "", must_render: true, presentation: "text" },
+    { id: "step-04", role: "conclusion", source_refs: ["src-08", "src-09"], claim: "经验要能在下一次任务中被调用", support: "写入载体之后，还要处理遗忘和新旧能力干扰。", residue: "", must_render: true, presentation: "typography" },
   ];
   const relations: FixtureRelation[] = [
     { id: "rel-01", from: "step-01", to: "step-02", kind: "deepen", visibility: "implicit", bridge: "" },
     { id: "rel-02", from: "step-02", to: "step-03", kind: "question", visibility: "visible", bridge: "表面结果已经出现，真正决定它能否持续的内部机制却还没有被看见。" },
     { id: "rel-03", from: "step-03", to: "step-04", kind: "continue", visibility: "implicit", bridge: "" },
-    { id: "rel-04", from: "step-04", to: "step-05", kind: "boundary", visibility: "visible", bridge: "能够复述一条推导，只能证明结构清楚，还不能替来源补足证据。" },
   ];
   const spine = [
     logicStep(steps[0], "00"), logicRelation(relations[0]),
     logicStep(steps[1], "25"), logicRelation(relations[1]),
     logicStep(steps[2], "50"), shapeHtml, logicRelation(relations[2]),
-    logicStep(steps[3], "75"), logicRelation(relations[3]),
-    logicStep(steps[4], "100"),
+    logicStep(steps[3], "100"),
   ].join("");
   return {
     html: whiteboardShell("逻辑沿主干不断下潜", "局部结构怎样服务整篇文章的推导？", "主干保持阅读方向，局部工具只在论证改变形状时出现。", spine),
@@ -474,7 +471,72 @@ const linearWhiteboards = {
   "whiteboard-radial": buildLinearWhiteboard("radial", radialShape),
 };
 
+// Authored teaching input shared by both molds. These are layout/content samples,
+// not evidence of reader learning and not production long cards with generated art.
+const learningParagraphs = [
+  "竖直旗杆顶端连着一条绷直的 13 米拉绳。地面水平，绳脚距杆脚 5 米。旗杆有多高？",
+  "旗杆与地面垂直，构成直角；绷直拉绳对应斜边 c=13，水平距离对应直角边 b=5。直角三角形满足 a²+b²=c²。",
+  "旗杆高度 a=√(13²−5²)=12 米。先认出直角与各条边，公式才有明确的输入。",
+  "换成一把靠在竖直墙面、置于水平地面的 10 米直梯，梯脚距墙 6 米。哪条是斜边，顶端离地多高？地面倾斜时还能直接套同一计算吗？",
+  "直梯对应斜边；墙与水平地面垂直，所以高度为 √(10²−6²)=8 米。地面倾斜时，墙与地面的夹角需要重新判断，不能直接沿用直角条件。",
+];
+const learningSourcePath = join(output, "learning-source.txt");
+const learningInventoryPath = join(output, "learning-source-inventory.json");
+const learningSource = `${learningParagraphs.join("\n\n")}\n`;
+await Bun.write(learningSourcePath, learningSource);
+await run(["bun", join(root, "assets", "prepare-whiteboard-source.ts"), learningSourcePath, learningInventoryPath]);
+
+const learningPanel = (body: string, label: string, className = "learning-material") =>
+  `<section class="${className}"><span class="learning-label">${label}</span><p>${body}</p></section>`;
+const transferHtml = learningPanel(learningParagraphs[3], "换个情形 · 先判断再下滑", "transfer-check") +
+  learningPanel(learningParagraphs[4], "核对依据", "transfer-feedback");
+const learningSteps: FixtureStep[] = [
+  { id: "step-01", role: "question", source_refs: ["src-01"], claim: "旗杆高度怎样算？", support: learningParagraphs[0], residue: "", must_render: true, presentation: "text" },
+  { id: "step-02", role: "premise", source_refs: ["src-02"], claim: "先认出直角和斜边", support: learningParagraphs[1], residue: "", must_render: true, presentation: "text" },
+  { id: "step-03", role: "conclusion", source_refs: ["src-03"], claim: "对应清楚后再计算", support: learningParagraphs[2], residue: "", must_render: true, presentation: "text" },
+  { id: "step-04", role: "conclusion", source_refs: ["src-04", "src-05"], claim: "换对象，重查条件", support: `换个情形 · 先判断再下滑 ${learningParagraphs[3]} 核对依据 ${learningParagraphs[4]}`, residue: "", must_render: true, presentation: "text" },
+];
+const learningRelations: FixtureRelation[] = learningSteps.slice(0, -1).map((step, index) => ({
+  id: `rel-0${index + 1}`, from: step.id, to: learningSteps[index + 1].id,
+  kind: "continue", visibility: "implicit", bridge: "",
+}));
+const learningSpine = learningSteps.map((step, index) => {
+  let html = logicStep(step, String(index + 1).padStart(2, "0"));
+  if (index === 1) {
+    html = html.replace(`<p class="step-support">${step.support}</p>`,
+      `<section class="learning-material"><span class="learning-label">凭什么归类</span><p class="step-support">${step.support}</p></section>`);
+  }
+  if (index === 3) {
+    // Keep one complete support surface for the existing ledger/DOM contract.
+    html = html.replace(`<p class="step-support">${step.support}</p>`,
+      `<div class="step-support">${transferHtml}</div>`);
+  }
+  return html + (learningRelations[index] ? logicRelation(learningRelations[index]) : "");
+}).join("");
+const learningLedger = JSON.stringify({
+  version: 2,
+  source_sha256: sha256(new TextEncoder().encode(learningSource)),
+  source_sections: learningParagraphs.map((_, index) => {
+    const id = `src-${String(index + 1).padStart(2, "0")}`;
+    return { id, disposition: "rendered", step_ids: learningSteps.filter(step => step.source_refs.includes(id)).map(step => step.id) };
+  }),
+  steps: learningSteps,
+  relations: learningRelations,
+}).replaceAll("<", "\\u003c");
+
 const fixtures: Record<string, Record<string, string>> = {
+  "long-learning": {
+    LOGO: logo, SOURCE_LINE: '<span class="info-source">自拟教学材料 · 排版检查</span>',
+    IMAGE_STATE: "empty", IMAGE_SRC: "", IMAGE_ALT: "",
+    BG_COLOR: "#FAF6EC", ACCENT_COLOR: "#B6533F",
+    TITLE_BLOCK: '<div class="title-area"><div class="eyebrow">知识讲解 · 判别与应用</div><h1>会背公式，还要认对对象</h1><p class="deck">同一条关系，怎样从旗杆走到梯子？</p></div>',
+    BODY_HTML: `<p>${learningParagraphs[0]}</p>${learningPanel(learningParagraphs[1], "凭什么归类")}<p>${learningParagraphs[2]}</p>${transferHtml}`,
+  },
+  "whiteboard-learning": {
+    LOGO: logo, SOURCE_LINE: '<span class="info-source">自拟教学材料 · 来源与排版检查</span>',
+    CUSTOM_CSS: "", LOGIC_LEDGER_JSON: learningLedger,
+    CONTENT_HTML: whiteboardShell("从场景，走进公式", "哪些具体条件让这道题可以使用勾股定理？", "从旗杆到梯子，先认出直角、斜边，再计算高度。", learningSpine),
+  },
   long: {
     ...common,
     IMAGE_SRC: fixtureImage,
@@ -482,7 +544,7 @@ const fixtures: Record<string, Record<string, string>> = {
     BG_COLOR: "#FAF6EC",
     ACCENT_COLOR: "#B6533F",
     TITLE_BLOCK: '<div class="title-area"><div class="eyebrow">论文解读 · 决策边界</div><h1>AI 不只是在省时间</h1><p class="deck">真正的生产率问题，是控制权如何在工作流里移动。</p></div>',
-    BODY_HTML: '<p class="dropcap">当一个人面对同一组任务：先全部手做，再让工具接管重复步骤。场景只画动作变化，结论仍由文字说准。</p><p class="highlight">关键变化不是“更快”，而是人的注意力从执行移向判断。</p><section class="narrative-beat"><span class="beat-index">01</span><div><h2>压力出现</h2><p>任务数量没有减少，重复操作先挤占了用于判断的时间。</p></div></section><section class="narrative-beat"><span class="beat-index">02</span><div><h2>控制权移动</h2><p>工具接走可描述的步骤，人保留目标、例外与验收。</p></div></section><div class="metric-row"><div class="metric"><strong>1 个</strong><span>稳定人物贯穿前后变化</span></div><div class="metric"><strong>2 拍</strong><span>足够表达一条因果链</span></div></div><div class="evidence-boundary"><strong>证据边界</strong><p>效率数字可以说明局部任务表现，不能自动推出组织总产出或长期福利。</p></div><div class="prompt"><strong>阅读问题：</strong>工具替你做了什么，又把哪一种判断还给了你？</div><div class="closing-judgment">把 AI 放进工作流时，先画清控制权，再讨论速度。</div>',
+    BODY_HTML: '<p class="dropcap">当一个人面对同一组任务：先全部手做，再让工具接管重复步骤。场景只画动作变化，结论仍由文字说准。</p><p class="highlight">关键变化不是“更快”，而是人的注意力从执行移向判断。</p><section class="narrative-beat"><span class="beat-index">01</span><div><h2>压力出现</h2><p>任务数量没有减少，重复操作先挤占了用于判断的时间。</p></div></section><section class="narrative-beat"><span class="beat-index">02</span><div><h2>控制权移动</h2><p>工具接走可描述的步骤，人保留目标、例外与验收。</p></div></section><div class="metric-row"><div class="metric"><strong>1 个</strong><span>稳定人物贯穿前后变化</span></div><div class="metric"><strong>2 拍</strong><span>足够表达一条因果链</span></div></div><p>效率数字可以说明局部任务表现，不能自动推出组织总产出或长期福利。</p><div class="prompt"><strong>阅读问题：</strong>工具替你做了什么，又把哪一种判断还给了你？</div><div class="closing-judgment">把 AI 放进工作流时，先画清控制权，再讨论速度。</div>',
   },
   full: {
     ...common,
@@ -511,7 +573,7 @@ const fixtures: Record<string, Record<string, string>> = {
 };
 
 for (const [name, values] of Object.entries(fixtures)) {
-  const templateName = name.startsWith("whiteboard") ? "whiteboard" : name;
+  const templateName = name.startsWith("whiteboard") ? "whiteboard" : name.startsWith("long") ? "long" : name;
   const template = await Bun.file(join(root, "assets", `${templateName}_template.html`)).text();
   const path = join(output, `${name}.html`);
   await Bun.write(path, fill(template, values));
@@ -724,7 +786,9 @@ for (const name of Object.keys(fixtures)) {
     "fullpage",
   ];
   if (name.startsWith("whiteboard")) {
-    captureCommand.push(whiteboardSourceInventoryPath, whiteboardSourcePath);
+    captureCommand.push(...(name === "whiteboard-learning"
+      ? [learningInventoryPath, learningSourcePath]
+      : [whiteboardSourceInventoryPath, whiteboardSourcePath]));
   }
   await run(captureCommand);
   const width = await readPngWidth(pngPath);
