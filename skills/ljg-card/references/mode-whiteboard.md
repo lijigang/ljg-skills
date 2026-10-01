@@ -34,6 +34,8 @@ bun assets/prepare-whiteboard-source.ts /tmp/<task>/source.txt /tmp/<task>/white
 
 学习材料优先放进所属步骤的 `support` 或局部 `.learning-material`，不为了保留一个例子强造推理转折；它的来源段落仍以 `rendered` 映射到该步骤。确实新增独立判断时才建立新步骤。最终账本中每个步骤的 `must_render` 仍为 `true`；`omission_reason` 要说明被删材料的功能为何不再需要，不能只写「只是例子」。不凑固定节点数。
 
+账本字段与引用齐全只证明材料已登记。节点的实际解释还应把对象、动作或状态、归类依据与结果接起来；正文中看不见的对应，读者无法从箭头或字段名中补出。用 `references/learning-design.md` 的同文对照审阅表达，不把结构门禁当成讲解效果。
+
 每个步骤登记：
 
 | 字段 | 含义 |
