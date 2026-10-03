@@ -15,14 +15,14 @@
 
 完整读取：
 
-1. `~/.agents/skills/ljg-plain/SKILL.md`
+1. `~/.agents/skills/ljg-explain/SKILL.md`
 2. `~/.agents/skills/ljg-writes/SKILL.md`
 3. `~/.agents/skills/ljg-writes/Workflows/WriteEssay.md`
 4. `References/AnnotationMethod.md`
 5. `References/LayoutGrammar.md`
 6. `References/InputSchema.md`
 
-借用前两个技能的语言与理解标准，不执行它们各自的 Org 落盘步骤。本工作流在 `/tmp` 生成 classic JSON、HTML、候选 PNG、manifest 与复验切片，最终只交付通过验收的 PNG。
+借用前两个技能的语言与理解标准，产物与组织方式服从本工作流，不执行独立讲解的自测或其他技能的 Org 落盘步骤。本工作流在 `/tmp` 生成 classic JSON、HTML、候选 PNG、manifest 与复验切片，最终只交付通过验收的 PNG。
 
 ## Step 2 — 锁定原文
 
@@ -51,7 +51,7 @@
 在什么条件下，谁通过什么动作改变了什么，最后产生什么结果。
 ```
 
-随后内部运行 `ljg-plain` 与 `ljg-writes` 的共同检查：
+随后内部借用 `ljg-explain` 与 `ljg-writes` 的共同检查：
 
 1. 用聪明的 12 岁孩子能复述的中文说清承重词。
 2. 从章内一个最小情境启动，让自然解释先运行，再指出它漏掉的那一步。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ljg-mechanism · 机制研究"
+  short_description: "从现象生成竞争解释，联网验证关键因果，交付有证据与边界的机制判断"
+  default_prompt: "使用 $ljg-mechanism 研究下面的现象，联网检验竞争解释，给出最有依据的机制及其边界。"
