@@ -40,7 +40,8 @@ version: "x.x.x"
 |-------|---------|----------------------|
 | `ljg-card` | Content → PNG visuals (long cards, infographs, posters) | Node.js + Playwright |
 | `ljg-paper` | Academic paper analysis pipeline | None |
-| `ljg-plain` | Plain language rewriter | None |
+| `ljg-explain` | Clear explanations of concepts, formulas, and principles | None |
+| `ljg-mechanism` | Evidence-grounded mechanism research | Web search and source retrieval |
 | `ljg-word` | English word deep-dive | None |
 | `ljg-writes` | Writing engine for thinking through ideas | None |
 
@@ -88,11 +89,15 @@ The most complex skill with multiple rendering modes:
 
 ### Shared Conventions
 
-**Org-mode output** (ljg-paper, ljg-plain, ljg-writes):
+**Org-mode output** (ljg-paper, ljg-writes):
 - Bold: `*text*` (single asterisk, not `**`)
 - Filenames: `{timestamp}--{title}__{type}.org`
 - Output directory: `~/Documents/notes/`
 - Timestamps: `date +%Y%m%dT%H%M%S`
+
+**Conversation-first output** (ljg-explain, ljg-mechanism):
+- Deliver explanations and mechanism research directly in the conversation using Markdown.
+- Save a file only when the user explicitly requests one, following the requested format.
 
 **ASCII Art**:
 - Allowed: `+ - | / \ > < v ^ * = ~ . : # [ ] ( ) _ , ; ! ' "`
