@@ -1,0 +1,4 @@
+interface:
+  display_name: "ljg-analogy · 结构类比"
+  short_description: "为场景与对象差异寻找精妙类比，保留关键关系、理解增量与迁移边界"
+  default_prompt: "用 $ljg-analogy 为我提供的场景或两者的区别找一个精妙类比，照亮关键关系。"
