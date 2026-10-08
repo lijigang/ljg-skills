@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>邻里咖啡订阅 · 商业模式画布</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:#e9e8e1;color:#222b32}body{font-family:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif}#canvas{width:1600px;padding:42px 42px 28px;background:#f6f5ef;--rule:#cbd0cd;--blue:#325f79;--green:#386958;--amber:#775619}a{color:inherit;text-decoration:none}header{display:grid;grid-template-columns:1fr auto;gap:16px;margin-bottom:22px}.eyebrow{font-size:13px;letter-spacing:2px;font-weight:700;color:#62706f;margin-bottom:12px}h1{font-size:46px;line-height:1.4;margin:0 0 10px;letter-spacing:-1.5px;overflow-wrap:anywhere}.scope{font-size:18px;color:#53605e;margin:0}.edition{font-size:14px;line-height:1.9;text-align:right;color:#596661;padding-top:3px}.edition strong{display:block;font-size:16px;color:#202a2a}.summary{font-size:23px;line-height:1.5;margin:0;padding:16px 20px;border-left:4px solid #d29d3d;background:#eeece2;overflow-wrap:anywhere}.legend{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:18px 0;font-size:13px;color:#61706a}.legend-left,.legend-right,.customers{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.customers{gap:14px}.customer{display:flex;gap:7px;align-items:center}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:#7a8a84;margin-right:5px}.dot.hypothesis{background:#b98728}.dot.missing{background:#aaa}.canvas-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-template-rows:minmax(280px,auto) minmax(280px,auto) auto;grid-template-areas:"partners partners activities activities value value relationships relationships segments segments" "partners partners resources resources value value channels channels segments segments" "cost cost cost cost cost revenue revenue revenue revenue revenue";border-left:1px solid var(--rule);border-top:1px solid var(--rule)}.block{padding:21px 18px 22px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-width:0;background:#fffefa}.block.supply{background:#f4f7f8}.block.value{background:#f5eacb}.block.market{background:#f1f6f1}.block.money{background:#fcfcf7}.block-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}.en{font-size:10px;letter-spacing:.8px;color:#6b7777;font-weight:600;line-height:1.4}h2{font-size:27px;line-height:1.25;letter-spacing:.6px;margin:5px 0 0;white-space:nowrap}.number{font-family:Georgia,serif;font-size:30px;line-height:1.1;color:#829ba9}.market .number{color:#7b9b89}.value .number{color:#b59a57}.money .number{color:#8f9994}.question{font-size:13px;line-height:1.5;color:#697571;margin:12px 0 20px;padding-bottom:13px;border-bottom:1px solid #d8dfd9}.value .question{border-color:#ddcca0}ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}.item{min-width:0;border-left:2px solid #a0b4bc;padding-left:10px}.market .item{border-color:#9bb6a4}.value .item{border-color:#c6a860}.item.inferred{border-color:#b88830;border-left-style:dashed}.item.unknown{border-color:#a3aaa5;border-left-style:dotted}.item-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:11px;line-height:1.5;letter-spacing:.2px;color:#677570}.ref{color:#89928e;font-size:10px;margin-left:auto}.item p{font-size:21px;line-height:1.55;margin:0;overflow-wrap:anywhere}.item.inferred .status{color:#91651c}.item.unknown p{color:#757f79}.segment{display:inline-block;font-size:11px;font-weight:700;line-height:18px;padding:0 5px;border-radius:3px;background:#dbe7ef;color:#33546e}.segment.s1{background:#ecdff1;color:#754686}.segment.s2{background:#f6dfd0;color:#93531d}.segment.s3{background:#dcedd7;color:#426d36}.money ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 22px}.money .item p{font-size:21px}.money .question{margin-bottom:17px}.bottom{display:flex;justify-content:space-between;gap:16px;margin-top:15px;font-size:12px;line-height:1.5;color:#69736e}.bottom .signal{font-weight:600;color:#715522}.sources{margin-top:13px;font-size:11px;line-height:1.7;color:#727d77;overflow-wrap:anywhere}.credit{display:flex;justify-content:space-between;gap:20px;margin-top:15px;padding-top:12px;border-top:1px solid #d6dbd4;font-size:10px;line-height:1.6;color:#788079}.credit strong{font-weight:600;color:#5c6861}@media print{body{background:white}#canvas{margin:0} @page{size:landscape;margin:0}}
+</style></head><body><main id="canvas">
+<header><div><div class="eyebrow">BUSINESS MODEL CANVAS ／ 商业模式画布</div><h1>邻里咖啡订阅</h1><p class="scope">虚构示例 · 社区门店的月度订阅业务</p></div><div class="edition"><strong>一张图，看清生意如何运转</strong>2026-10-08<br>示例 v1.0</div></header>
+<p class="summary">让附近居民按月订购日常咖啡，通过门店自提交付，以订阅费获得持续收入。</p>
+<div class="legend"><div class="legend-left"><span><i class="dot"></i>材料提供</span><span><i class="dot hypothesis"></i>推测</span><span><i class="dot missing"></i>待补充</span></div><div class="customers"><span class="customer"><span class="segment s0">C1</span>附近的日常咖啡饮用者</span></div><div class="legend-right">经营支撑 → 价值创造 → 客户市场</div></div>
+<div class="canvas-grid"><section class="block supply" data-block="key_partners" style="grid-area:partners">
+      <div class="block-heading"><div><div class="en">KEY PARTNERS</div><h2>重要合作</h2></div><span class="number">08</span></div>
+      <p class="question">谁与我们一起完成交付？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>烘焙商：稳定供应咖啡豆</p></li><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>支付服务商：完成收款与结算</p></li></ul></section><section class="block supply" data-block="key_activities" style="grid-area:activities">
+      <div class="block-heading"><div><div class="en">KEY ACTIVITIES</div><h2>关键业务</h2></div><span class="number">07</span></div>
+      <p class="question">必须持续做好哪些事？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>每日备料、制作与交付咖啡</p></li><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>维护预约系统，跟进会员反馈</p></li></ul></section><section class="block supply" data-block="key_resources" style="grid-area:resources">
+      <div class="block-heading"><div><div class="en">KEY RESOURCES</div><h2>核心资源</h2></div><span class="number">06</span></div>
+      <p class="question">依靠哪些关键资产与能力？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>临街门店、咖啡机与咖啡师</p></li><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>订阅与预约小程序</p></li></ul></section><section class="block value" data-block="value_propositions" style="grid-area:value">
+      <div class="block-heading"><div><div class="en">VALUE PROPOSITIONS</div><h2>价值主张</h2></div><span class="number">02</span></div>
+      <p class="question">给客户带来什么具体价值？</p><ul><li class="item given">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>按月订购日常咖啡，在附近门店自提</p></li><li class="item inferred" title="推测依据：预约功能可能帮助安排出杯；实际排队与等待改善未提供数据。">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">推测</span><span class="ref">S1</span></div>
+      <p>提前预约，可能减少早高峰等候</p></li></ul></section><section class="block market" data-block="customer_relationships" style="grid-area:relationships">
+      <div class="block-heading"><div><div class="en">CUSTOMER RELATIONSHIPS</div><h2>客户关系</h2></div><span class="number">04</span></div>
+      <p class="question">如何建立并维系客户关系？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>社群收集反馈，店员处理售后</p></li><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>小程序自助查看剩余杯数</p></li></ul></section><section class="block market" data-block="channels" style="grid-area:channels">
+      <div class="block-heading"><div><div class="en">CHANNELS</div><h2>渠道通路</h2></div><span class="number">03</span></div>
+      <p class="question">客户如何发现、购买与获得？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>店内试饮与居民推荐获客</p></li><li class="item given">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>小程序订阅、预约；门店自提</p></li></ul></section><section class="block market" data-block="customer_segments" style="grid-area:segments">
+      <div class="block-heading"><div><div class="en">CUSTOMER SEGMENTS</div><h2>客户细分</h2></div><span class="number">01</span></div>
+      <p class="question">为谁服务，谁来付费？</p><ul><li class="item given">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>步行十分钟内的社区居民</p></li><li class="item given">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>每周喝咖啡至少三次，使用者自行付款</p></li></ul></section><section class="block money" data-block="cost_structure" style="grid-area:cost">
+      <div class="block-heading"><div><div class="en">COST STRUCTURE</div><h2>成本结构</h2></div><span class="number">09</span></div>
+      <p class="question">主要的钱花在哪里？</p><ul><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>固定支出：房租、员工工资</p></li><li class="item given">
+      <div class="item-meta"><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>随出杯量增加：豆、奶、包装；另有支付手续费</p></li></ul></section><section class="block money" data-block="revenue_streams" style="grid-area:revenue">
+      <div class="block-heading"><div><div class="en">REVENUE STREAMS</div><h2>收入来源</h2></div><span class="number">05</span></div>
+      <p class="question">谁付钱，按什么方式收费？</p><ul><li class="item given">
+      <div class="item-meta"><span class="segment s0">C1</span><span class="status">材料提供</span><span class="ref">S1</span></div>
+      <p>居民预付 299 元／月，含 20 杯咖啡</p></li><li class="item unknown">
+      <div class="item-meta"><span class="status">待补充</span></div>
+      <p>未取杯数如何处理：待明确</p></li></ul></section></div>
+<div class="bottom"><span>基于当前材料整理 · 材料提供 ≠ 外部验证 · 画布不代表商业模式已获验证</span><span class="signal">1 项推测 · 1 项待补充</span></div>
+<div class="sources">材料：S1 虚构项目说明，仅用于演示</div>
+<footer class="credit"><span>基于《商业模式新生代》 · Alexander Osterwalder &amp; Yves Pigneur<br>中文翻译与视觉排版改编 · 业务材料权利归原权利人</span><span><strong>Business Model Canvas · <a href="https://www.strategyzer.com/">Strategyzer.com</a></strong><br>画布模板：<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> · 原设计：Strategyzer AG</span></footer>
+</main><script>
+window.businessModelAudit=function(){
+const root=document.querySelector('#canvas');const r=root.getBoundingClientRect();
+const overflow=[...root.querySelectorAll('section,h1,h2,.item,.item p,.summary,.legend,.edition,.sources')].filter(e=>{const b=e.getBoundingClientRect();return e.scrollWidth>e.clientWidth+2||e.scrollHeight>e.clientHeight+2||b.left<r.left-1||b.right>r.right+1}).map(e=>({element:e.tagName,block:e.closest('[data-block]')?.dataset.block||null,text:e.textContent.slice(0,90)}));
+return {ok:document.fonts.status==='loaded'&&document.querySelectorAll('[data-block]').length===9&&!overflow.length,blocks:document.querySelectorAll('[data-block]').length,items:document.querySelectorAll('.item').length,inferred:document.querySelectorAll('.item.inferred').length,unknown:document.querySelectorAll('.item.unknown').length,overflow,bounds:{width:r.width,height:r.height},fonts:document.fonts.status};};
+</script></body></html>

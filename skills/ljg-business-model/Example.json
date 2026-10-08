@@ -1,0 +1,47 @@
+{
+  "title": "邻里咖啡订阅",
+  "scope": "虚构示例 · 社区门店的月度订阅业务",
+  "date": "2026-10-08",
+  "version": "示例 v1.0",
+  "summary": "让附近居民按月订购日常咖啡，通过门店自提交付，以订阅费获得持续收入。",
+  "sources": [{ "id": "S1", "label": "虚构项目说明，仅用于演示", "detail": "虚构案例：社区咖啡店提供每月 299 元、20 杯的预付订阅。目标为门店步行十分钟内、每周喝咖啡至少三次的居民。小程序可订阅、预约与查看杯数，到店自提，未取规则尚未定。店内试饮和居民推荐获客，社群收集意见，店员售后。合作烘焙商供豆、支付服务商结算。店有临街店面、咖啡机、咖啡师和小程序。每日备料出杯、维护预约系统、跟踪会员反馈。成本包括房租工资、咖啡豆牛奶包装、支付手续费。没有提供续订或毛利数据。" }],
+  "segments": [{ "id": "C1", "label": "附近的日常咖啡饮用者" }],
+  "blocks": {
+    "customer_segments": [
+      { "text": "步行十分钟内的社区居民", "status": "given", "source_refs": ["S1"], "segment": "C1" },
+      { "text": "每周喝咖啡至少三次，使用者自行付款", "status": "given", "source_refs": ["S1"], "segment": "C1" }
+    ],
+    "value_propositions": [
+      { "text": "按月订购日常咖啡，在附近门店自提", "status": "given", "source_refs": ["S1"], "segment": "C1" },
+      { "text": "提前预约，可能减少早高峰等候", "status": "inferred", "source_refs": ["S1"], "segment": "C1", "reason": "预约功能可能帮助安排出杯；实际排队与等待改善未提供数据。" }
+    ],
+    "channels": [
+      { "text": "店内试饮与居民推荐获客", "status": "given", "source_refs": ["S1"] },
+      { "text": "小程序订阅、预约；门店自提", "status": "given", "source_refs": ["S1"], "segment": "C1" }
+    ],
+    "customer_relationships": [
+      { "text": "社群收集反馈，店员处理售后", "status": "given", "source_refs": ["S1"] },
+      { "text": "小程序自助查看剩余杯数", "status": "given", "source_refs": ["S1"] }
+    ],
+    "revenue_streams": [
+      { "text": "居民预付 299 元／月，含 20 杯咖啡", "status": "given", "source_refs": ["S1"], "segment": "C1" },
+      { "text": "未取杯数如何处理：待明确", "status": "unknown" }
+    ],
+    "key_resources": [
+      { "text": "临街门店、咖啡机与咖啡师", "status": "given", "source_refs": ["S1"] },
+      { "text": "订阅与预约小程序", "status": "given", "source_refs": ["S1"] }
+    ],
+    "key_activities": [
+      { "text": "每日备料、制作与交付咖啡", "status": "given", "source_refs": ["S1"] },
+      { "text": "维护预约系统，跟进会员反馈", "status": "given", "source_refs": ["S1"] }
+    ],
+    "key_partners": [
+      { "text": "烘焙商：稳定供应咖啡豆", "status": "given", "source_refs": ["S1"] },
+      { "text": "支付服务商：完成收款与结算", "status": "given", "source_refs": ["S1"] }
+    ],
+    "cost_structure": [
+      { "text": "固定支出：房租、员工工资", "status": "given", "source_refs": ["S1"] },
+      { "text": "随出杯量增加：豆、奶、包装；另有支付手续费", "status": "given", "source_refs": ["S1"] }
+    ]
+  }
+}
