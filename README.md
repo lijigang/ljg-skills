@@ -39,6 +39,9 @@ bunx skills add lijigang/ljg-skills -g -a codex --skill ljg-card -y
 # 安装单个技能（Markdown）
 bunx skills add lijigang/ljg-skills#md -g -a codex --skill ljg-card -y
 
+# 安装商业模式画布技能（两个分支均输出 PNG、HTML 和 JSON）
+bunx skills add lijigang/ljg-skills -g -a codex --skill ljg-business-model -y
+
 # 安装多个指定技能
 bunx skills add lijigang/ljg-skills -g -a codex --skill ljg-card --skill ljg-learn -y
 
@@ -88,6 +91,7 @@ rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.agents/skills/"
 |------|------|
 | **ljg-analogy** | 结构类比 — 为场景或两个对象的差异寻找精妙类比与关系隐喻，保留关键关系、解释增量与迁移边界 |
 | **ljg-blind** | 盲区扫描 — 读取指定日期的 AI 对话，找出结构性思维盲区，并用微信读书章节精准补上 |
+| **ljg-business-model** | 商业模式画布 — 基于《商业模式新生代》，把项目资料整理为经典九模块 PNG 卡片，区分材料、推测与缺项，保留可修改的 HTML 和 JSON |
 | **ljg-card** | 内容铸卡 — 将文本铸成长图 `-l`、原文保真全文卡 `-f`、漫画 `-c`、白板 `-w` 四种 PNG；`-f` 不生成新图，只呈现原稿自带图片，其余模式按各自图像合同生成位图 |
 | **ljg-classic** | 古文精读 — 将原文、逐字注解、句义、章节意旨图与全章解读排成一张可连续阅读的长 PNG |
 | **ljg-learn** | 概念解剖 — 从八个方向切开一个概念（历史、辩证、现象、语言、形式、存在、美感、元反思），压成一句顿悟 |
@@ -117,3 +121,5 @@ rsync -a "$HOME/code/ljg-skills-md/skills/" "$HOME/.agents/skills/"
 `ljg-explain` 与 `ljg-mechanism` 在两个分支中均默认直接在对话中交付，分别用于通俗讲解与机制研究；仅在用户明确要求时按指定格式保存文件。
 
 `ljg-analogy` 在两个分支中均默认直接在对话中给出类比或隐喻；比较两个对象时保留关键差异，仅在用户明确要求时保存文件。
+
+`ljg-business-model` 在两个分支中均交付 PNG 商业模式画布，并保留 HTML 和 JSON；运行需要 Bun，导出图片需要可用的真实浏览器截图能力。
