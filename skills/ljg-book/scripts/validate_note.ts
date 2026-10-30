@@ -15,7 +15,7 @@ export type Result = {
 };
 
 const validMaterialGrades = ["完整拆书", "初拆", "假设版"] as const;
-const essenceHeading = "读完后留下什么";
+const essenceHeading = "读完后应发生的变化";
 const legacyCoverageLoopFields = [
   "处境",
   "贯穿张力",

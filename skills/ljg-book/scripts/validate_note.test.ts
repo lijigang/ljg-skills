@@ -32,7 +32,7 @@ function note(options: {
     return `* ${heading}\n\n${body}\n`;
   }).join("\n");
   const essence = options.omitEssence ? "" : `
-* ${options.essenceHeading ?? "读完后留下什么"}
+* ${options.essenceHeading ?? "读完后应发生的变化"}
 
 ${options.essenceBody ?? "问题很严重，并不能直接推出处罚有效。这本书真正想留下的是：判断一项主张时，先找理由与结论之间缺少的那一步，再等能补上它的比较证据。"}
 `;
@@ -245,7 +245,7 @@ identifier: 20260812T120000
 
 他现在会先检查参照条件，再决定怎样行动。
 
-# 读完后留下什么
+# 读完后应发生的变化
 
 数字没变，判断却可能因为起点变了而翻转。这本书最后想留下的，是先看自己正从哪里比较，再决定眼前的选择是否真的不同。
 `;
