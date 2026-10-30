@@ -26,7 +26,7 @@ user_invocable: true
 
 | Workflow | Trigger | File |
 |---|---|---|
-| **UnderstandInUse** | 把「是什么」与「怎样运作」接成可辨认、可判断、可行动的 Markdown 解读 | `Workflows/TraceCreation.md` |
+| **UnderstandInUse** | 把「是什么」与「怎样运作」接成可辨认、可判断、可行动的 Org 解读 | `Workflows/TraceCreation.md` |
 
 ## 成品标准
 
@@ -47,7 +47,7 @@ user_invocable: true
 默认写入：
 
 ```text
-~/Context/{时间戳}--理解-{目标片段}__is.md
+~/Context/{时间戳}--理解-{目标片段}__is.org
 ```
 
 新成品使用 `ljg-is-v5` schema。正文使用两到四个随内容生出的标题和四到十个自然段，不把「是什么 / 怎样运作 / 认知改变 / 行动指导」直接用作四个栏目。

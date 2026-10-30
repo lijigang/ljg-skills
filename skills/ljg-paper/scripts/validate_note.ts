@@ -418,7 +418,7 @@ function main(): never {
   const file = positional[0];
 
   if (!file || (mapFlag >= 0 && !mapPath)) {
-    console.error("用法：bun scripts/validate_note.ts <note.md> --map <paper-map.md>");
+    console.error("用法：bun scripts/validate_note.ts <note.org> --map <paper-map.md>");
     console.error("或：  bun scripts/validate_note.ts --stdin <denote-filename> --map <paper-map.md>");
     process.exit(2);
   }

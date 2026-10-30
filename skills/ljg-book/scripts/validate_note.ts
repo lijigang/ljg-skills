@@ -743,7 +743,7 @@ export function validate(content: string, file: string, coverage?: string): Resu
 function main(): never {
   const args = process.argv.slice(2);
   const stdinMode = args[0] === "--stdin";
-  const file = stdinMode ? args[1] ?? "19700101T000000--stdin__book.md" : args[0];
+  const file = stdinMode ? args[1] ?? "19700101T000000--stdin__book.org" : args[0];
   const coverageFlag = args.indexOf("--coverage");
   const coveragePath = coverageFlag >= 0 ? args[coverageFlag + 1] : undefined;
 

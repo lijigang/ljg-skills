@@ -66,10 +66,10 @@
 
 ## Markdown 输出合同
 
-复制技能根目录的 `Template.md`，生成：
+复制技能根目录的 `Template.org`，生成：
 
 ```text
-~/Context/{时间戳}--理解-{目标片段}__is.md
+~/Context/{时间戳}--理解-{目标片段}__is.org
 ```
 
 - 时间戳使用 `date +%Y%m%dT%H%M%S`；可读时间使用 `date "+%Y-%m-%d %a %H:%M"`。

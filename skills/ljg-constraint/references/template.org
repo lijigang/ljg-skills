@@ -1,0 +1,4 @@
+#+title: {领域}的约束
+#+date: [{YYYY-MM-DD Day HH:MM}]
+#+filetags: :constraint:
+#+identifier: {YYYYMMDDTHHMMSS}

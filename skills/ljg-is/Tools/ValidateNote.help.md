@@ -12,7 +12,7 @@
 
 ```bash
 bun ~/.agents/skills/ljg-is/Tools/ValidateNote.ts \
-  ~/Context/20260823T010203--理解-目标函数__is.md
+  ~/Context/20260823T010203--理解-目标函数__is.org
 ```
 
 成功时向 stdout 输出 `{"status":"ok", ...}` 并退出 0；失败时向 stderr 输出错误数组并退出 1；缺少文件参数时退出 2。

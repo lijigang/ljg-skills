@@ -21,11 +21,11 @@ description: "Explain research papers to readers without a specialist background
 
 | 输入 | 必读材料 | 输出 |
 |---|---|---|
-| arXiv、PDF、论文链接、本地论文 | `ReadingGuide.md`、`references/template.md`、`references/paper-map.md` | 一份 Markdown 解读笔记和一份 paper-map 研究记录 |
-| 只有论文标题 | 找到可靠原文后，读同一组文件 | Markdown 笔记和 paper-map |
+| arXiv、PDF、论文链接、本地论文 | `ReadingGuide.md`、`references/template.org`、`references/paper-map.md` | 一份 Org 解读笔记和一份 paper-map 研究记录 |
+| 只有论文标题 | 找到可靠原文后，读同一组文件 | Org 笔记和 paper-map |
 | 明确只要口头解释 | `ReadingGuide.md` | 直接解释，不保存文件；仍满足下面三个目标 |
 
-Markdown 默认保存到 `~/Context/`。文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.md`；时间戳由 `date +%Y%m%dT%H%M%S` 生成。改写已有笔记时，保留原文件与 identifier，核对原文，不另建重复笔记。
+Org 默认保存到 `~/Context/`。文件名沿用 Denote：`{YYYYMMDDTHHMMSS}--paper-{方法名或论文关键词}__paper.org`；时间戳由 `date +%Y%m%dT%H%M%S` 生成。改写已有笔记时，保留原文件与 identifier，核对原文，不另建重复笔记。
 
 ## 解读要达到的三个目标
 
@@ -60,7 +60,7 @@ Markdown 默认保存到 `~/Context/`。文件名沿用 Denote：`{YYYYMMDDTHHMM
 写入后运行：
 
 ```sh
-bun {skill_dir}/scripts/validate_note.ts /absolute/path/to/note.md \
+bun {skill_dir}/scripts/validate_note.ts /absolute/path/to/note.org \
   --map /absolute/path/to/paper-map.md
 ```
 
